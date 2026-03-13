@@ -1,0 +1,100 @@
+/* Main app wrapper */
+.App {
+  min-height: 100vh;
+}
+
+/* Dashboard layout with sidebar */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  min-height: 100vh;
+}
+
+/* Sidebar styling */
+.sidebar {
+  background-color: #1f2937;
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+/* Sidebar menu */
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.sidebar ul li:hover {
+  color: #60a5fa;
+}
+
+/* Main content area */
+.main-content {
+  padding: 20px;
+  background-color: #f5f6fa;
+}
+
+/* Navbar / top bar */
+.navbar {
+  background: white;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+/* Dashboard cards container */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Responsive layout for tablets */
+@media (max-width: 1024px) {
+
+  .dashboard-layout {
+    grid-template-columns: 200px 1fr;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+/* Responsive layout for mobile */
+@media (max-width: 768px) {
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    text-align: center;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+
+  .navbar {
+    text-align: center;
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+
+}
