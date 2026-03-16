@@ -1,0 +1,295 @@
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:#f4f6fb;
+}
+
+.layout{
+display:flex;
+height:100vh;
+}
+
+/* Sidebar */
+
+.sidebar{
+width:230px;
+background:#1f2e55;
+color:white;
+padding:25px;
+}
+
+.logo{
+font-size:22px;
+font-weight:600;
+margin-bottom:40px;
+}
+
+.menuItem{
+padding:12px;
+border-radius:10px;
+cursor:pointer;
+margin-bottom:10px;
+}
+
+.menuItem:hover{
+background:#2f3e6d;
+}
+
+.active{
+background:white;
+color:#1f2e55;
+}
+
+/* Main */
+
+.main{
+flex:1;
+padding:25px;
+}
+
+/* Header */
+
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:25px;
+}
+
+.search input{
+padding:8px 15px;
+border-radius:20px;
+border:1px solid #ddd;
+width:250px;
+}
+
+.actions button{
+margin-right:10px;
+padding:8px 14px;
+border-radius:6px;
+border:none;
+cursor:pointer;
+}
+
+.export{
+background:rgb(90, 67, 201);
+border:1px solid #ccc;
+}
+
+.upload{
+background:#1f2e55;
+color:white;
+}
+
+.profile{
+width:35px;
+height:35px;
+background:#0ea5a4;
+border-radius:50%;
+}
+.actions{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+/* Title */
+
+.titleSection span{
+color:#777;
+font-size:13px;
+}
+
+/* Cards */
+
+.cards{
+display:grid;
+grid-template-columns:repeat(6,1fr);
+gap:15px;
+margin-top:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.05);
+}
+
+.card p{
+font-size:12px;
+color:#888;
+}
+
+.card h3{
+margin:5px 0;
+}
+
+.green{
+color:#16a34a;
+font-size:12px;
+}
+
+.red{
+color:#dc2626;
+font-size:12px;
+}
+
+/* Charts */
+
+.charts{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+margin-top:20px;
+}
+
+.chartBox{
+background:white;
+padding:15px;
+border-radius:10px;
+}
+
+.chartPlaceholder{
+height:120px;
+background:linear-gradient(90deg,#e5e7eb,#cbd5e1);
+border-radius:6px;
+}
+
+.circleChart{
+height:120px;
+width:120px;
+border-radius:50%;
+border:12px solid #1f2e55;
+margin:auto;
+}
+
+/* Bars */
+
+.bar{
+margin-top:10px;
+}
+
+.bar span{
+font-size:12px;
+}
+
+.barFill{
+height:8px;
+background:#1f2e55;
+border-radius:5px;
+margin-top:4px;
+}
+
+/* Funnel */
+
+.funnel{
+color:white;
+text-align:center;
+padding:10px;
+margin:8px auto;
+border-radius:6px;
+font-size:14px;
+font-weight:500;
+}
+
+/* widths to create funnel look */
+
+.f1{
+background:#1f2e55;
+width:100%;
+}
+
+.f2{
+background:#2f3e6d;
+width:80%;
+}
+
+.f3{
+background:#4a5fa3;
+width:60%;
+}
+
+.f4{
+background:#6c7fd1;
+width:40%;
+}
+
+.overview{
+background:white;
+padding:20px;
+margin-top:20px;
+border-radius:10px;
+}
+
+.overview p{
+color:#555;
+line-height:1.6;
+}
+.trendChart{
+height:120px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.trendChart svg{
+width:100%;
+height:100%;
+}
+.trendLabels{
+display:flex;
+justify-content:space-between;
+font-size:11px;
+color:#777;
+margin-top:6px;
+}
+
+.spendLegend{
+margin-top:10px;
+font-size:12px;
+}
+
+.legendItem{
+display:flex;
+justify-content:space-between;
+margin-top:5px;
+}
+
+.dot{
+width:10px;
+height:10px;
+border-radius:50%;
+display:inline-block;
+margin-right:6px;
+}
+
+.dark{
+background:#1f2e55;
+}
+
+.light{
+background:#cbd5e1;
+}
+
+.percent{
+margin-left:auto;
+}
+
+.barTop{
+display:flex;
+justify-content:space-between;
+font-size:12px;
+}
+
+.funnelStats{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+font-size:12px;
+}
+
+.funnelStats p{
+margin:0;
+font-weight:600;
+}

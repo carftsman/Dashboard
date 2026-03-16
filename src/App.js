@@ -19,7 +19,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard-selection" element={<DashboardSelection />} />
-        <Route path="/dashboard" element={<MainDashboard />} />
+        <Route path="/Maindashboard" element={<MainDashboard />} />
         <Route path="/upload-data" element={<UploadData />} />
         <Route path="/column-mapping" element={<ColumnMapping />} />
         <Route path="/data-validation" element={<DataValidation />} />
