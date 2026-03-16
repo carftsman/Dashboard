@@ -11,10 +11,9 @@ import DataValidation from "../pages/DataValidation";
 import VisualEditing from "../pages/VisualEditing";
 import Profile from "../pages/Profile";
 import Reports from "../pages/Reports";
-
-import AdminDashboard from "../admin/adminDashboard";
-import ManageUsers from "../admin/Manageusers";
-import DataSchema from "../admin/dataSchema";
+import AdminDashboard from "../pages/admin/adminDashboard";
+import ManageUsers from "../pages/admin/Manageusers";
+import DataSchema from "../pages/admin/dataSchema";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 
