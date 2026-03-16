@@ -1,11 +1,9 @@
 import React from 'react'
 
-const sample = () => {
+export default function UploadData() {
   return (
     <div>
       
     </div>
   )
 }
-
-export default sample
