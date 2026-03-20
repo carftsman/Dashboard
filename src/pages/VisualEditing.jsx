@@ -1,11 +1,9 @@
 import React from 'react'
 
-const sample = () => {
+export default function VisualEditing() {
   return (
     <div>
       
     </div>
   )
 }
-
-export default sample

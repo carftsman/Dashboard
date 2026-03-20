@@ -1,11 +1,9 @@
 import React from 'react'
 
-const sample = () => {
+export default function dataSchema() {
   return (
     <div>
       
     </div>
   )
 }
-
-export default sample

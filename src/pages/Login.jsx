@@ -1,11 +1,9 @@
 import React from 'react'
 
-const sample = () => {
+export default function Login() {
   return (
     <div>
       
     </div>
   )
 }
-
-export default sample
