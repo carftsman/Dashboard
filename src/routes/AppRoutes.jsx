@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-import Login from "../pages/Login";
+//import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import DashboardSelection from "../pages/DashboardSelection";
 import MainDashboard from "../pages/MainDashboard";
@@ -27,14 +27,14 @@ const AppRoutes = () => {
 
       {/* Protected Routes */}
 
-      <Route
+      {/* <Route
         path="/dashboard-selection"
         element={
           <ProtectedRoute>
             <DashboardSelection />
           </ProtectedRoute>
         }
-      />
+      /> */}
 
       <Route
         path="/dashboard"
