@@ -41,8 +41,10 @@
 }
 
 .actions {
+    
     display: flex;
-    gap: 10px
+    gap: 10px;
+    align-items: center;
 }
 
 .search {
@@ -72,12 +74,16 @@
 .btn {
     padding: 8px 14px;
     border-radius: 8px;
-    border: none
+    border: none;
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+align-items: center;  
+gap: 3px;  
 }
 
 .btn.primary {
         height: 30px;
-    
     background: #1f2e55;
     color: #fff
 }
@@ -211,4 +217,36 @@ th,
 td {
     padding: 10px;
     font-size: 13px
+}
+/* HEADER RIGHT SIDE */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* PROFILE IMAGE */
+.profile img {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* TOP BAR (DATE FILTER ROW) */
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 0 20px;
+}
+
+/* DATE DROPDOWN */
+.date-filter {
+  background: #f3f4f6;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
 }

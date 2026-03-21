@@ -42,20 +42,37 @@ const Sidebar = () => (
 const Header = () => (
   <div className="header">
     <h2>Marketing ROI</h2>
+
     <div className="actions">
       <div className="search">
         <FiSearch />
-        <div>
-         
         <input placeholder="Search data..." />
-         </div>
       </div>
-      <button className="btn light"><FiDownload /> Export Data</button>
-      <button className="btn primary"><FiUpload /> Upload Data</button>
+
+      <button className="btn light">
+        <FiDownload /> 
+        Export Data
+      </button>
+
+      <button className="btn primary">
+        <FiUpload /> Upload Data
+      </button>
+
+      {/* ✅ Profile Image */}
+      <div className="profile">
+        <img
+          src="https://i.pravatar.cc/40"
+          alt="profile"
+        />
+      </div>
     </div>
   </div>
 );
-
+<div className="top-bar">
+  <div className="date-filter">
+    Last 30 Days ▾
+  </div>
+</div>
 const KPISection = () => (
   <div className="kpi-grid">
     {kpis.map((k, i) => (
