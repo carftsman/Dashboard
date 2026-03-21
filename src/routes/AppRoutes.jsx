@@ -17,14 +17,16 @@ import DataSchema from "../pages/admin/dataSchema";
 import Sidebar from "../pages/Sidebar";
 
 import ProtectedRoute from "../components/ProtectedRoute";
+import LoginOtp from "../pages/LoginOtp";
 
 const AppRoutes = () => {
   return (
     <Routes>
 
       {/* Public Routes */}
-      <Route path="/" element={< Sidebar/>} />
+      <Route path="/" element={<Sidebar/>} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/loginOtp"  element={<LoginOtp/>} />
 
       {/* Protected Routes */}
 
@@ -85,9 +87,9 @@ const AppRoutes = () => {
       <Route
         path="/reports"
         element={
-          <ProtectedRoute>
+          //<ProtectedRoute>
             <Reports />
-          </ProtectedRoute>
+          //</ProtectedRoute>
         }
       />
 

@@ -1,0 +1,152 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 230px;
+  background-color: #1e335d;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  font-size: 20px;
+  margin-bottom: 30px;
+  color: #ffc107;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo span {
+  color: white;
+}
+
+.logo-icon {
+  background: white;
+  color: #1e335d;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Menu */
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar ul li.active {
+  background-color: #2e4a7d;
+}
+
+.menu-icon {
+  font-size: 14px;
+}
+
+/* Main */
+.main-content {
+  flex: 1;
+  background-color: #f5f6fa;
+  padding: 20px;
+}
+
+/* Header Row */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.header-text h2 {
+  font-size: 24px;
+}
+
+.header-text p {
+  color: gray;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* Search */
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-search input {
+  width: 260px;
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: none;
+  background-color: #eaeaea;
+}
+
+.header-search img {
+  border-radius: 50%;
+}
+
+/* Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.icon-box {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.card-image {
+  height: 80px;
+  background: linear-gradient(to top, #0f2027, #203a43, #2c5364);
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.card h4 {
+  margin-bottom: 10px;
+}
+
+.card button {
+  border: none;
+  background: none;
+  color: #1e335d;
+  cursor: pointer;
+  font-weight: 500;
+}
