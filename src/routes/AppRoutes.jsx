@@ -16,14 +16,16 @@ import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
 
 import ProtectedRoute from "../components/ProtectedRoute";
+import LoginOtp from "../pages/LoginOtp";
 
 const AppRoutes = () => {
   return (
     <Routes>
 
       {/* Public Routes */}
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Login/>} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/loginOtp"  element={<LoginOtp/>} />
 
       {/* Protected Routes */}
 
@@ -84,9 +86,9 @@ const AppRoutes = () => {
       <Route
         path="/reports"
         element={
-          <ProtectedRoute>
+          //<ProtectedRoute>
             <Reports />
-          </ProtectedRoute>
+          //</ProtectedRoute>
         }
       />
 
