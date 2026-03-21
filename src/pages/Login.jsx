@@ -101,7 +101,7 @@ const handleLogin = async () => {
         if (result.data.user.role === "ADMIN") {
           navigate("/admindashboard");
         } else {
-          navigate("/dashboardselection");
+          navigate("/dashboard-selection");
         }
       } else {
         // ❌ API error message

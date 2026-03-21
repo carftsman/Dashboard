@@ -23,7 +23,7 @@ const AppRoutes = () => {
     <Routes>
 
       {/* Public Routes */}
-      <Route path="/" element={<DashboardSelection/>} />
+      <Route path="/" element={<Login/>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/loginOtp"  element={<LoginOtp/>} />
 
