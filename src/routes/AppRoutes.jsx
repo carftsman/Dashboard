@@ -14,6 +14,7 @@ import Reports from "../pages/Reports";
 import AdminDashboard from "../pages/admin/adminDashboard";
 import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
+import Sidebar from "../pages/Sidebar";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 
@@ -22,7 +23,7 @@ const AppRoutes = () => {
     <Routes>
 
       {/* Public Routes */}
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={< Sidebar/>} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected Routes */}
