@@ -5,9 +5,10 @@ export const loginUser = async (data) => {
   try {
     const response = await api.post("/auth/login", data);
 
-    // Save token after login
-    if (response.data?.token) {
-      localStorage.setItem("token", response.data.token);
+    // ✅ Correct token path
+    if (response.data?.data?.token) {
+      localStorage.setItem("token", response.data.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.data.user));
     }
 
     return response.data;

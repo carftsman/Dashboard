@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/ZestBotHeader.png";
+import { useNavigate } from "react-router-dom";
 
 // ✅ FIXED PATH;
 import "../css/ResetPassword.css";
 // import ResetPassword from './ResetPassword';
 
 export default function ResetPassword() {
+  const navigate= useNavigate();
   return (
     <div className="Reset-page">
       <div className="right-panel full-center">
@@ -25,10 +27,12 @@ export default function ResetPassword() {
 
           <div className="input-group">
             <label>Email Address</label>
-            <input type="email" placeholder="name@company.com" />
+            <input type="email" placeholder="name@dhatvibs.com" />
           </div>
-
-          <button className="Reset-btn">
+<button
+            className="Reset-btn"
+            onClick={() => navigate("/loginOtp")}
+          >
             Send Reset Link →
           </button>
 

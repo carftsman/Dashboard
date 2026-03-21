@@ -16,6 +16,7 @@ import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
 
 import ProtectedRoute from "../components/ProtectedRoute";
+import LoginOtp from "../pages/LoginOtp";
 
 const AppRoutes = () => {
   return (
@@ -24,6 +25,7 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/loginOtp"  element={<LoginOtp/>} />
 
       {/* Protected Routes */}
 

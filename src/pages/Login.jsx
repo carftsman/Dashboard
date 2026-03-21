@@ -32,7 +32,8 @@ export default function Login() {
 
   // ✅ EMAIL VALIDATION
   const validateEmail = (value) => {
-    const regex = /^[a-zA-Z-0-9]+@dhatvibs\.com$/;
+    
+    const regex = /^[a-zA-Z0-9._%+-]+@(dhatvibs\.com|gmail\.com)$/;
     if (!regex.test(value)) {
       setEmailError("Invalid email! ");
     } else {
@@ -69,16 +70,49 @@ export default function Login() {
     }
   };
 
-  // ✅ HANDLE SUBMIT
- const handleLogin = () => {
+const handleLogin = async () => {
   validateEmail(email);
   validatePassword(password);
 
   if (!emailError && !passwordError && email && password) {
-    navigate("/dashboardselection"); // ✅ redirect instead of alert
+    try {
+      const response = await fetch(
+        "https://dashboard-backend-cyrd.onrender.com/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // ✅ Store token (optional but recommended)
+        localStorage.setItem("token", result.data.token);
+        localStorage.setItem("user", JSON.stringify(result.data.user));
+
+        // ✅ Role-based redirect (from API)
+        if (result.data.user.role === "ADMIN") {
+          navigate("/admindashboard");
+        } else {
+          navigate("/dashboardselection");
+        }
+      } else {
+        // ❌ API error message
+        setPasswordError(result.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setPasswordError("Something went wrong. Try again.");
+    }
   }
 };
-
   return (
     <div className="login-page">
       {/* LEFT SLIDER */}
