@@ -23,7 +23,7 @@ const AppRoutes = () => {
     <Routes>
 
       {/* Public Routes */}
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<DashboardSelection/>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/loginOtp"  element={<LoginOtp/>} />
 
@@ -86,9 +86,9 @@ const AppRoutes = () => {
       <Route
         path="/reports"
         element={
-          <ProtectedRoute>
+          //<ProtectedRoute>
             <Reports />
-          </ProtectedRoute>
+          //</ProtectedRoute>
         }
       />
 
