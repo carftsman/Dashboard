@@ -1,9 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import reportsData from "../mockdata/reportsData";
 import ReportTable from "../components/ReportTable";
 import Sidebar from "../common/Sidebar";
 
 export default function Reports() {
+  const navigate = useNavigate();
+
   const { type } = useParams();
   const reports = reportsData[type] || [];
 
@@ -36,10 +38,15 @@ export default function Reports() {
             />
           </div>
 
-          {/* Right */}
+          {/* Right  */}
           <div className="flex items-center justify-between lg:justify-end gap-4">
 
-            <button className="bg-[#2B3F8F] hover:bg-[#1f2f6b] text-white px-5 py-2 rounded-lg transition">
+            <button className="bg-[#2B3F8F] hover:bg-[#1f2f6b] text-white px-5 py-2 rounded-lg transition"
+            onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/upload-data");
+                }}
+            >
               Upload Data
             </button>
 
