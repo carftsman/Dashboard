@@ -23,15 +23,15 @@ const AppRoutes = () => {
     <Routes>
 
       {/* Public Routes */}
-     <Routes>
+     
   <Route path="/" element={<Login />} />
   <Route path="/reset-password" element={<ResetPassword />} />
   <Route path="/loginOtp" element={<LoginOtp/>} />
-</Routes>
+
 
       {/* Protected Routes */}
 
-      <Route
+       <Route
         path="/dashboard-selection"
         element={
           <ProtectedRoute>
@@ -104,16 +104,13 @@ const AppRoutes = () => {
       />
 
       {/* Admin Routes */}
-
-      <Route
-        path="/admin-dashboard"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
+      
+   <Route
+    path="/admin-dashboard/*" 
+    element={
+    <AdminDashboard />
+    } />
+      
       <Route
         path="/manage-users"
         element={

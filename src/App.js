@@ -1,18 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import ResetPassword from "./pages/ResetPassword";
-import LoginOtp from "./pages/LoginOtp";
-
+import React from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
+ 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/loginOtp" element={<LoginOtp />} />
-      </Routes>
-    </BrowserRouter>
+    <Router>
+      <AppRoutes />
+    </Router>
   );
 }
-
+ 
 export default App;
