@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-
+ 
 import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import DashboardSelection from "../pages/DashboardSelection";
@@ -14,19 +14,19 @@ import Reports from "../pages/Reports";
 import AdminDashboard from "../pages/admin/adminDashboard";
 import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
-
+ 
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
-
+ 
 const AppRoutes = () => {
   return (
     <Routes>
-
+ 
       {/* Public Routes */}
       <Route path="/" element={<Login/>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/loginOtp"  element={<LoginOtp/>} />
-
+ 
       {/* Protected Routes */}
 
        <Route
@@ -37,7 +37,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/dashboard"
         element={
@@ -46,7 +46,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/upload-data"
         element={
@@ -55,7 +55,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/column-mapping"
         element={
@@ -64,7 +64,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/data-validation"
         element={
@@ -73,7 +73,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/visual-editing"
         element={
@@ -82,7 +82,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/reports"
         element={
@@ -91,7 +91,7 @@ const AppRoutes = () => {
           //</ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/profile"
         element={
@@ -100,15 +100,15 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       {/* Admin Routes */}
-      
+     
    <Route
-    path="/admin-dashboard/*" 
+    path="/admin-dashboard/*"
     element={
     <AdminDashboard />
     } />
-      
+     
       <Route
         path="/manage-users"
         element={
@@ -117,7 +117,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
       <Route
         path="/data-schema"
         element={
@@ -126,9 +126,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+ 
     </Routes>
   );
 };
-
+ 
 export default AppRoutes;

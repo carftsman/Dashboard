@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import reportsData from "../mockdata/reportsData";
 import ReportTable from "../components/ReportTable";
-import Sidebar from "../common/Sidebar";
+import Sidebar from "../components/Sidebar";
 
 export default function Reports() {
   const { type } = useParams();
