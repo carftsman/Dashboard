@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "../assets/styles/DashboardSelection.css";
 import {
   FaChartLine,
   FaUsers,
@@ -11,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FiSearch } from "react-icons/fi";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -75,76 +75,121 @@ function Dashboard() {
   );
 
   return (
-    <div className="dashboard-container">
+    <div className="flex h-screen bg-gray-100 font-sans">
 
       {/* Sidebar */}
-      <div className="sidebar">
-        <h2 className="logo">
-          <span className="logo-icon">ZB</span> Zest<span>Bot</span>
+      <div className="w-56 bg-slate-900 text-white p-5">
+        <h2 className="text-lg font-semibold mb-8 flex items-center">
+          <span className="bg-indigo-600 px-2 py-1 rounded mr-2">ZB</span>
+          Zest<span className="text-indigo-400">Bot</span>
         </h2>
 
-        <ul>
-          <li className="active">
-            <FaThLarge className="menu-icon" /> Dashboards
+        <ul className="space-y-2">
+          <li className="flex items-center p-2 rounded bg-slate-800 cursor-pointer">
+            <FaThLarge className="mr-2" /> Dashboards
           </li>
-          <li>
-            <FaCog className="menu-icon" /> Settings
+          <li className="flex items-center p-2 rounded hover:bg-slate-800 cursor-pointer">
+            <FaCog className="mr-2" /> Settings
           </li>
         </ul>
       </div>
 
-      {/* Main */}
-      <div className="main-content">
+      {/* Main Content */}
+      <div className="flex-1 p-6 overflow-y-auto">
 
-        {/* Header */}
-        <div className="header-row">
-          <div className="header-text">
-            <h2>Select Dashboard</h2>
-            <p>
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-6">
+
+          {/* LEFT */}
+          <div>
+            <h2 className="text-xl font-semibold">Select Dashboard</h2>
+
+            <p className="text-sm text-gray-500 mt-2 ml-1">
               Choose a customized view to monitor your business metrics,
               track performance targets, or analyze deep insights.
             </p>
           </div>
 
-          <div className="header-search">
-            <input
-              type="text"
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+          {/* RIGHT */}
+          <div className="flex items-center gap-4">
+
+            {/* SEARCH (FIXED) */}
+            <div className="relative w-64">
+              <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+
+              <input
+                type="text"
+                placeholder="Search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-2 rounded-full bg-gray-100 shadow-sm outline-none text-sm"
+              />
+            </div>
+
+            {/* PROFILE */}
+            <img
+              src="https://i.pravatar.cc/40"
+              alt="profile"
+              className="w-10 h-10 rounded-full object-cover border"
             />
+
           </div>
         </div>
 
-        {/* Cards */}
-        <div className="cards">
-          {filteredCards.map((card) => (
-            <div className="card" key={card.dashboardId}>
+        {/* CARDS GRID */}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
 
+          {filteredCards.map((card) => (
+            <div
+              key={card.dashboardId}
+              className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden 
+                         transition duration-300 hover:-translate-y-1 hover:shadow-md"
+            >
+
+              {/* TOP COLOR */}
               <div
-                className="icon-box"
+                className="w-full h-32 flex items-center justify-center relative"
                 style={{ backgroundColor: getColor(card.category) }}
               >
-                {getIcon(card.category)}
+                <div className="text-3xl z-10">
+                  {getIcon(card.category)}
+                </div>
+
+                {/* DESCRIPTION */}
+                <div className="absolute bottom-4 left-1/2 w-[80%] 
+                                -translate-x-1/2
+                                bg-blue-100 text-gray-600 text-xs p-2 rounded-lg text-center
+                                opacity-0 group-hover:opacity-100 transition duration-300">
+                  {card.description}
+                </div>
               </div>
 
-              <h4>{card.dashboardName}</h4>
+              {/* CONTENT */}
+              <div className="p-4">
+                <h4 className="text-sm font-semibold mb-1">
+                  {card.dashboardName}
+                </h4>
 
-              <p>
-                {card.description}
-              </p>
+                <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
+                  
+                  <p
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/reports", { state: card });
+                    }}
+                    className="text-blue-700 text-sm font-medium cursor-pointer"
+                  >
+                    View Dashboard
+                  </p>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate("/reports", { state: card });
-                }}
-              >
-                View Dashboard
-              </button>
+                  <span className="text-blue-700 text-lg">→</span>
+
+                </div>
+              </div>
 
             </div>
           ))}
+
         </div>
 
       </div>

@@ -1,127 +1,143 @@
-/* Container */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ===== MAIN CONTAINER ===== */
 .dashboard-container {
-  @apply flex h-screen;
+  @apply flex h-screen bg-gray-100;
 }
 
-/* Sidebar */
+/* ===== SIDEBAR ===== */
 .sidebar {
-  @apply w-[230px] bg-[#1e335d] text-white p-5 flex flex-col;
+  @apply w-56 bg-slate-900 text-white p-5;
 }
 
 .logo {
-  @apply flex items-center text-[30px] mb-8 text-yellow-400;
-}
-
-.logo span {
-  @apply text-white;
+  @apply text-lg font-semibold mb-8;
 }
 
 .logo-icon {
-  @apply bg-white text-[#1e335d] px-2 py-1 rounded text-[12px];
+  @apply bg-indigo-600 px-2 py-1 rounded mr-2;
 }
 
-/* Menu */
 .sidebar ul {
-  @apply list-none;
+  @apply space-y-2;
 }
 
 .sidebar ul li {
-  @apply flex items-center gap-2 p-3 rounded-lg cursor-pointer;
+  @apply flex items-center p-2 rounded cursor-pointer;
 }
 
-.sidebar ul li.active {
-  @apply bg-[#2e4a7d];
-}
-
+.sidebar ul li.active,
 .sidebar ul li:hover {
-  @apply bg-[#2e4a7d];
+  @apply bg-slate-800;
 }
 
 .menu-icon {
-  @apply text-sm;
+  @apply mr-2;
 }
 
-/* Main */
+
+/* ===== MAIN CONTENT ===== */
 .main-content {
-  @apply flex-1 bg-[#f5f6fa] p-5;
+  @apply flex-1 p-6 overflow-y-auto;
 }
 
-/* Header */
+
+/* ===== HEADER ===== */
 .header-row {
   @apply flex justify-between items-center mb-6;
 }
 
 .header-text h2 {
-  @apply text-2xl;
+  @apply text-xl font-semibold;
 }
 
 .header-text p {
-  @apply text-gray-500 text-sm mt-1;
+  @apply text-sm text-gray-500 mt-2 ml-1;
 }
 
-/* Search */
+
+/* ===== RIGHT SECTION (SEARCH + PROFILE) ===== */
+.header-right {
+  @apply flex items-center gap-5;
+}
+
+
+/* ===== SEARCH (MATCH SCREENSHOT) ===== */
 .header-search {
-  @apply flex items-center gap-4;
+  @apply relative w-72 bg-gray-100 rounded-full px-5 py-2 flex items-center shadow-inner;
 }
 
 .header-search input {
-  @apply w-[260px] px-4 py-2 rounded-full bg-gray-200 outline-none;
+  @apply bg-transparent outline-none text-sm w-full pl-7 text-gray-600;
 }
 
-/* Cards */
+.search-icon {
+  @apply absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm;
+}
+
+
+/* ===== PROFILE ===== */
+.profile-img {
+  @apply w-10 h-10 rounded-full object-cover cursor-pointer border border-gray-200;
+}
+
+
+/* ===== CARDS GRID ===== */
 .cards {
-  @apply grid grid-cols-4 gap-5 max-lg:grid-cols-2 max-md:grid-cols-1;
+  @apply grid gap-5 mt-5;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
+
+/* ===== CARD ===== */
 .card {
-  @apply bg-white p-5 rounded-xl shadow-md;
+  @apply bg-white rounded-xl p-4 border border-gray-200 transition duration-300;
 }
 
-/* Icon */
+.card:hover {
+  @apply -translate-y-1 shadow-md;
+}
+
+
+/* ===== ICON ===== */
 .icon-box {
-  @apply w-[60px] h-[60px] rounded-lg flex items-center justify-center text-2xl mb-4;
-}
-.icon-box svg {
-  display: block;
-  margin: auto;
+  @apply w-11 h-11 rounded-lg flex items-center justify-center text-lg mb-3;
 }
 
 
-/* Title */
+/* ===== TEXT ===== */
 .card h4 {
-  @apply mb-2 font-semibold;
+  @apply text-sm font-semibold mb-2;
 }
-
 
 .card p {
-  display: none;
+  @apply text-indigo-600 text-sm font-medium cursor-pointer;
 }
 
 
-.card:hover p {
-  @apply text-xs text-gray-500 mb-3;
-  display: block;
-}
-/* View Dashboard button */
-.card button {
-  @apply text-blue-600 text-[13px] font-medium flex items-center gap-1;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+/* ===== HOVER DESCRIPTION (KEEP CENTER AS YOUR JSX) ===== */
+.card .group div > div:last-child {
+  @apply absolute top-1/2 left-1/2 w-[80%] 
+         -translate-x-1/2 -translate-y-1/2
+         bg-blue-100 text-gray-600 text-xs p-2 rounded-lg text-center
+         opacity-0 transition duration-300;
 }
 
-/*  Add arrow */
-.card button::after {
-  content: "→";
-  @apply text-sm transition-all duration-300;
+.group:hover div > div:last-child {
+  @apply opacity-100;
 }
 
-/* Hover effect */
-.card button:hover {
-  @apply text-blue-700;
-}
 
-.card button:hover::after {
-  transform: translateX(4px);
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    @apply hidden;
+  }
+
+  .cards {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
 }
