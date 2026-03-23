@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import React, { useState } from "react";   
 import "../assets/styles/DashboardSelection.css";
 import {
@@ -112,4 +110,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
->>>>>>> 34596e57532f44576df29517d2052758fdc52c4a
