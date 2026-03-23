@@ -35,18 +35,19 @@ function Dashboard() {
     }
   };
 
+  // ✅ ENSURE ALL COLORS UNIQUE
   const getColor = (category) => {
     switch (category) {
       case "SALES":
-        return "#f7e3db";
+        return "#fde2e4";
       case "MARKETING":
-        return "#f5e6cc";
+        return "#e2f0cb";
       case "CUSTOMER":
-        return "#e6ecf5";
+        return "#d0ebff";
       case "SUPPLY":
-        return "#dff5ee";
+        return "#fff3bf";
       case "QA":
-        return "#eee6f7";
+        return "#e5dbff";
       default:
         return "#e6ecf5";
     }
@@ -94,7 +95,7 @@ function Dashboard() {
         </ul>
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex-1 p-6 overflow-y-auto">
 
         {/* HEADER */}
@@ -103,7 +104,6 @@ function Dashboard() {
           {/* LEFT */}
           <div>
             <h2 className="text-xl font-semibold">Select Dashboard</h2>
-
             <p className="text-sm text-gray-500 mt-2 ml-1">
               Choose a customized view to monitor your business metrics,
               track performance targets, or analyze deep insights.
@@ -113,30 +113,31 @@ function Dashboard() {
           {/* RIGHT */}
           <div className="flex items-center gap-4">
 
-            {/* SEARCH (FIXED) */}
+            {/* ✅ SEARCH ICON PERFECT CENTER */}
             <div className="relative w-64">
-              <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
-
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-2 rounded-full bg-gray-100 shadow-sm outline-none text-sm"
+                className="w-full pl-11 pr-4 py-2 rounded-full bg-gray-100 shadow-sm outline-none text-sm"
               />
             </div>
 
-            {/* PROFILE */}
-            <img
-              src="https://i.pravatar.cc/40"
-              alt="profile"
-              className="w-10 h-10 rounded-full object-cover border"
-            />
+            {/* ✅ PROFILE STRICTLY FIXED */}
+            <div className="w-10 h-10 min-w-[40px] min-h-[40px]">
+              <img
+                src="https://i.pravatar.cc/40"
+                alt="profile"
+                className="w-full h-full rounded-full object-cover border"
+              />
+            </div>
 
           </div>
         </div>
 
-        {/* CARDS GRID */}
+        {/* CARDS */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
 
           {filteredCards.map((card) => (
@@ -146,7 +147,7 @@ function Dashboard() {
                          transition duration-300 hover:-translate-y-1 hover:shadow-md"
             >
 
-              {/* TOP COLOR */}
+              {/* TOP */}
               <div
                 className="w-full h-32 flex items-center justify-center relative"
                 style={{ backgroundColor: getColor(card.category) }}
@@ -170,8 +171,8 @@ function Dashboard() {
                   {card.dashboardName}
                 </h4>
 
-               <div className="border-t border-gray-200 pt-3 flex items-center gap-2">
-                  
+                {/* ❌ NOT TO CHANGE — KEPT CENTER */}
+                <div className="border-t border-gray-200 pt-3 flex items-center justify-center gap-2">
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
@@ -183,10 +184,9 @@ function Dashboard() {
                   </p>
 
                   <span className="text-blue-700 text-lg">→</span>
-
                 </div>
-              </div>
 
+              </div>
             </div>
           ))}
 
