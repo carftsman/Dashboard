@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
+import Sidebar from "../components/Sidebar";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -79,7 +80,8 @@ function Dashboard() {
     <div className="flex h-screen bg-gray-100 font-sans">
 
       {/* Sidebar */}
-      <div className="w-56 bg-slate-900 text-white p-5">
+      <Sidebar/>
+      {/* <div className="w-56 bg-slate-900 text-white p-5">
         <h2 className="text-lg font-semibold mb-8 flex items-center">
           <span className="bg-indigo-600 px-2 py-1 rounded mr-2">ZB</span>
           Zest<span className="text-indigo-400">Bot</span>
@@ -93,7 +95,7 @@ function Dashboard() {
             <FaCog className="mr-2" /> Settings
           </li>
         </ul>
-      </div>
+      </div> */}
 
       {/* Main */}
       <div className="flex-1 p-6 overflow-y-auto">

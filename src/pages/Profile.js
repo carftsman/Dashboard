@@ -5,6 +5,7 @@ import BioCard from "../components/profile/BioCard";
 import StatusCard from "../components/profile/StatusCard";
 import { UserContext } from "../context/UserContext";
 
+
 export default function Profile() {
 
 const { user } = useContext(UserContext);
@@ -17,6 +18,8 @@ return (
     <ProfileHeader user={user}/>
     <InfoSection user={user}/>
   </div>
+
+  
 
   <div className="flex gap-5 mb-6 max-w-5xl mx-auto">
     <BioCard bio={user.bio}/>

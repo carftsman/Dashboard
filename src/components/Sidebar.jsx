@@ -5,7 +5,7 @@ import {
   FaUserClock,
   FaSignOutAlt,
   FaChevronDown,
-  FaChartLine,      // ROI (already good)
+  FaChartLine,      
   FaUserTie,
   FaStore,
   FaUsers,
