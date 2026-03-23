@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 
+
 function Dashboard() {
   const navigate = useNavigate();
 
@@ -35,7 +36,7 @@ function Dashboard() {
     }
   };
 
-  // ✅ ENSURE ALL COLORS UNIQUE
+  
   const getColor = (category) => {
     switch (category) {
       case "SALES":
@@ -113,7 +114,7 @@ function Dashboard() {
           {/* RIGHT */}
           <div className="flex items-center gap-4">
 
-            {/* ✅ SEARCH ICON PERFECT CENTER */}
+           
             <div className="relative w-64">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -125,7 +126,6 @@ function Dashboard() {
               />
             </div>
 
-            {/* ✅ PROFILE STRICTLY FIXED */}
             <div className="w-10 h-10 min-w-[40px] min-h-[40px]">
               <img
                 src="https://i.pravatar.cc/40"
@@ -171,7 +171,7 @@ function Dashboard() {
                   {card.dashboardName}
                 </h4>
 
-                {/* ❌ NOT TO CHANGE — KEPT CENTER */}
+               
                 <div className="border-t border-gray-200 pt-3 flex items-center justify-center gap-2">
                   <p
                     onClick={(e) => {
