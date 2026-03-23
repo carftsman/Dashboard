@@ -1,15 +1,29 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../css/loginOtp.css";
-import logo from "../assets/images/Background.png.png"; // your image
-import { useNavigate } from "react-router-dom";
+import logo from "../assets/images/Background.png.png";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const OtpVerify = () => {
-    const navigate = useNavigate();
+const LoginOtp = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const email = location.state?.email;
+
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timeLeft, setTimeLeft] = useState(30); // ✅ timer state
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [otpStatus, setOtpStatus] = useState(null);
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const inputs = useRef([]);
 
-  // ✅ OTP input logic
+  useEffect(() => {
+    if (!email) {
+      navigate("/reset-password");
+    }
+  }, [email, navigate]);
+
   const handleChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) return;
 
@@ -28,7 +42,7 @@ const OtpVerify = () => {
     }
   };
 
-  // ✅ TIMER LOGIC
+  //  Timer
   useEffect(() => {
     if (timeLeft === 0) return;
 
@@ -39,32 +53,112 @@ const OtpVerify = () => {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // ✅ RESEND FUNCTION
+  //  Resend
   const handleResend = () => {
     setTimeLeft(30);
-    // 👉 here you can call API for resend OTP
+    setOtp(["", "", "", "", "", ""]);
+    setOtpStatus(null);
+    inputs.current[0]?.focus();
+
+    
+  };
+
+  //  Verify OTP locally 
+  const handleVerify = () => {
+    const enteredOtp = otp.join("");
+
+    if (enteredOtp.length === 6) {
+      setOtpStatus("valid");
+    } else {
+      setOtpStatus("invalid");
+    }
+  };
+
+  //  Auto verify when filled
+  // useEffect(() => {
+  //   if (otp.every((digit) => digit !== "")) {
+  //     handleVerify();
+  //   }
+  // }, [otp]);
+
+  // FINAL API CALL
+  const handleResetPassword = async () => {
+    const enteredOtp = otp.join("");
+
+    console.log("EMAIL:", email);
+    console.log("OTP:", enteredOtp);
+    console.log("PASSWORD:", password);
+
+    if (enteredOtp.length !== 6) {
+      setOtpStatus("invalid");
+      return;
+    }
+
+    if (!password || !confirmPassword) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://dashboard-backend-cyrd.onrender.com/api/auth/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+  email: email,
+  otp: enteredOtp,
+  newPassword: password,
+  confirmPassword: confirmPassword,
+})
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("STATUS:", response.status);
+    console.log("Data:", data)
+
+      if (response.ok) {
+        alert("Password reset successful ✅");
+        navigate("/");
+      } else {
+        alert(data.message || "Reset failed ❌");
+        setOtpStatus("invalid");
+      }
+    } catch (error) {
+      console.error("ERROR:", error);
+      alert("Something went wrong ❌");
+    }
   };
 
   return (
-    <div className="container">
-      <div className="card">
+    <div className="container-otp">
+      <div className="card-otp">
 
-        {/* ✅ LOGO */}
-        <div className="background">
+        {/* LOGO */}
+        <div className="background-otp">
           <img src={logo} alt="logo" />
         </div>
 
         <h2>Verify OTP</h2>
-        <p className="subtitle">
+        <p className="subtitle-otp">
           Enter the OTP sent to your registered email
         </p>
 
         {/* OTP INPUT */}
         <div className="otp-wrapper">
           {otp.map((digit, index) => (
-            <div key={index} className="otp-circle">
+            <div key={index} className={`otp-circle ${otpStatus}`}>
               <input
-                type="password"
+                type="text"
                 maxLength="1"
                 value={digit}
                 ref={(el) => (inputs.current[index] = el)}
@@ -75,17 +169,23 @@ const OtpVerify = () => {
           ))}
         </div>
 
-        {/* ✅ RESEND TIMER */}
-        <p className="resend">
+        {/* STATUS */}
+        {otpStatus === "valid" && (
+          <p className="otp-success">✔ OTP Verified</p>
+        )}
+
+        {otpStatus === "invalid" && (
+          <p className="otp-error">✖ Invalid OTP</p>
+        )}
+
+        {/* TIMER */}
+        <p className="resend-otp">
           {timeLeft > 0 ? (
             <span style={{ color: "#888" }}>
               Resend OTP (00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft})
             </span>
           ) : (
-            <span
-              onClick={handleResend}
-              style={{ color: "#4a6cf7", cursor: "pointer" }}
-            >
+            <span onClick={handleResend}>
               Resend OTP
             </span>
           )}
@@ -95,29 +195,41 @@ const OtpVerify = () => {
         <div className="input-group">
           <label>New Password</label>
           <div className="input-box">
-            <input type="password" placeholder="••••••••" />
-            <span className="eye">👁</span>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {/* <span className="eye">👁</span> */}
           </div>
         </div>
 
         <div className="input-group">
           <label>Confirm Password</label>
           <div className="input-box">
-            <input type="password" placeholder="••••••••" />
-            <span className="eye">👁</span>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            {/* <span className="eye">👁</span> */}
           </div>
         </div>
 
-        <button className="submit-btn">
+        {/* BUTTON */}
+        <button className="submit-btn" onClick={handleResetPassword}>
           Verify & Reset Password →
         </button>
 
-        <p className="back" onClick={() => navigate("/")}>
-  ← Back to Login
-</p>
+        {/* BACK */}
+        <p className="back" onClick={() => navigate("/reset-password")}>
+          ← Back to Reset Password
+        </p>
       </div>
     </div>
   );
 };
 
-export default OtpVerify;
+export default LoginOtp;
