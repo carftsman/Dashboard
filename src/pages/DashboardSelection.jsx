@@ -1,4 +1,4 @@
-import React, { useState } from "react";   
+import React, { useState, useEffect } from "react";
 import "../assets/styles/DashboardSelection.css";
 import {
   FaChartLine,
@@ -10,23 +10,68 @@ import {
   FaCog
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [search, setSearch] = useState("");   
+  const [search, setSearch] = useState("");
+  const [cards, setCards] = useState([]);
 
-  const cards = [
-    { title: "Marketing ROI", icon: <FaBullhorn />, color: "#f5e6cc" },
-    { title: "Customer Insights", icon: <FaUsers />, color: "#e6ecf5" },
-    { title: "Supply Chain", icon: <FaBox />, color: "#dff5ee" },
-    { title: "Sales Performance", icon: <FaChartLine />, color: "#f7e3db" },
-    { title: "Executive Summary", image: true },
-    { title: "QA & Stability", icon: <FaBug />, color: "#eee6f7" }
-  ];
+  const getIcon = (category) => {
+    switch (category) {
+      case "SALES":
+        return <FaChartLine />;
+      case "MARKETING":
+        return <FaBullhorn />;
+      case "CUSTOMER":
+        return <FaUsers />;
+      case "SUPPLY":
+        return <FaBox />;
+      case "QA":
+        return <FaBug />;
+      default:
+        return <FaChartLine />;
+    }
+  };
+
+  const getColor = (category) => {
+    switch (category) {
+      case "SALES":
+        return "#f7e3db";
+      case "MARKETING":
+        return "#f5e6cc";
+      case "CUSTOMER":
+        return "#e6ecf5";
+      case "SUPPLY":
+        return "#dff5ee";
+      case "QA":
+        return "#eee6f7";
+      default:
+        return "#e6ecf5";
+    }
+  };
+
+  useEffect(() => {
+    const fetchDashboards = async () => {
+      try {
+        const res = await axios.get(
+          "https://dashboard-backend-cyrd.onrender.com/api/admin/get_dashboards"
+        );
+
+        if (res.data.success) {
+          setCards(res.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboards:", error);
+      }
+    };
+
+    fetchDashboards();
+  }, []);
 
   const filteredCards = cards.filter((card) =>
-    card.title.toLowerCase().includes(search.toLowerCase())
+    card.dashboardName.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -61,43 +106,41 @@ function Dashboard() {
             </p>
           </div>
 
-         
           <div className="header-search">
             <input
               type="text"
               placeholder="Search"
-              value={search}                        
-              onChange={(e) => setSearch(e.target.value)}  
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
 
         {/* Cards */}
         <div className="cards">
-          {filteredCards.map((card, index) => (  
-            <div className="card" key={index}>
-              
-              {card.image ? (
-                <div className="card-image"></div>
-              ) : (
-                <div
-                  className="icon-box"
-                  style={{ backgroundColor: card.color }}
-                >
-                  {card.icon}
-                </div>
-              )}
+          {filteredCards.map((card) => (
+            <div className="card" key={card.dashboardId}>
 
-              <h4>{card.title}</h4>
+              <div
+                className="icon-box"
+                style={{ backgroundColor: getColor(card.category) }}
+              >
+                {getIcon(card.category)}
+              </div>
 
-              
+              <h4>{card.dashboardName}</h4>
+
+              <p>
+                {card.description}
+              </p>
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate("/reports");
+                  navigate("/reports", { state: card });
                 }}
               >
-                View Dashboard →
+                View Dashboard
               </button>
 
             </div>
