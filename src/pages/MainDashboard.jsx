@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { FiUpload, FiDownload, FiSearch } from "react-icons/fi";
 import  "../css/MainDashboard.css"
-
+ 
 // -------------------- DATA --------------------
 const kpis = [
   { title: "Impressions", value: "1.2M", change: "+12.5%", color: "green" },
@@ -23,9 +23,9 @@ const kpis = [
   { title: "ROAS", value: "5.9x", change: "+0.4x", color: "green" },
   { title: "Conv Rate", value: "2.1%", change: "avg", color: "gray" }
 ];
-
+ 
 const COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6"];
-
+ 
 // -------------------- COMPONENTS --------------------
 const Sidebar = () => (
   <div className="sidebar">
@@ -38,26 +38,26 @@ const Sidebar = () => (
     </ul>
   </div>
 );
-
+ 
 const Header = () => (
   <div className="header">
     <h2>Marketing ROI</h2>
-
+ 
     <div className="actions">
       <div className="search">
         <FiSearch />
         <input placeholder="Search data..." />
       </div>
-
+ 
       <button className="btn light">
-        <FiDownload /> 
+        <FiDownload />
         Export Data
       </button>
-
+ 
       <button className="btn primary">
         <FiUpload /> Upload Data
       </button>
-
+ 
       {/* ✅ Profile Image */}
       <div className="profile">
         <img
@@ -65,16 +65,16 @@ const Header = () => (
           alt="profile"
         />
       </div>
+ 
+   
     </div>
   </div>
 );
-<div className="top-bar">
-  <div className="date-filter">
-    Last 30 Days ▾
-  </div>
-</div>
+ 
 const KPISection = () => (
-  <div className="kpi-grid">
+  <div
+ 
+  className="kpi-grid">
     {kpis.map((k, i) => (
       <div key={i} className="kpi-card">
         <p>{k.title}</p>
@@ -84,10 +84,13 @@ const KPISection = () => (
     ))}
   </div>
 );
-
+ 
 // ---------------- FUNNEL ----------------
 const Funnel = () => (
-  <div className="card funnel">
+  <div
+  // className="funnel"
+ className="w-full h-full min-h-0 bg-white rounded shadow py-2 px-3 flex flex-col justify-between"
+  >
     <h4>Funnel</h4>
     <div className="funnel-bar imp">IMP <span>1.2M</span></div>
     <div className="funnel-bar clk">CLK <span>45K</span></div>
@@ -99,11 +102,16 @@ const Funnel = () => (
     </div>
   </div>
 );
-
+ 
 const BarChartCard = () => (
-  <div className="card">
+  <div
+  // className="card-main"
+  className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
+  >
     <h4>Revenue & Orders by Campaign</h4>
-    <ResponsiveContainer width="100%" height={250}>
+    <div className="flex-1 min-h-0">
+ 
+    <ResponsiveContainer width="100%" height={"100%"}>
       <BarChart data={[
         { name: "C1", revenue: 12000, orders: 200 },
         { name: "C2", revenue: 19000, orders: 300 },
@@ -120,32 +128,46 @@ const BarChartCard = () => (
         <Bar dataKey="orders" fill="#8b5cf6" />
       </BarChart>
     </ResponsiveContainer>
+    </div>
   </div>
 );
-
+ 
 const PieChartCard = () => (
-  <div className="card">
+  <div
+  className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
+   >
     <h4>Platform Contribution</h4>
-    <ResponsiveContainer width="100%" height={250}>
-      <PieChart>
+    <div className="flex-1 min-h-0">
+ 
+    <ResponsiveContainer width="100%" height={"100%"}>
+      <PieChart style={{
+        fontSize:12,
+       
+      }}>
         <Pie data={[
           { name: "Google Ads", value: 20 },
           { name: "Facebook", value: 15 },
           { name: "Instagram", value: 10 },
           { name: "LinkedIn", value: 15 }
-        ]} dataKey="value" innerRadius={60} outerRadius={90}>
-          {COLORS.map((c, i) => <Cell key={i} fill={c} />)}
+        ]} dataKey="value" innerRadius={15} outerRadius={30}>
+          {COLORS.map((c, i) => <Cell key={i} fill={c} height={20} width={20} />)}
         </Pie>
         <Legend />
       </PieChart>
     </ResponsiveContainer>
+    </div>
   </div>
 );
-
+ 
 const LineChartCard = () => (
-  <div className="card">
+  <div
+  // className="card-main"
+ className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
+  >
     <h4>Engagement Trends</h4>
-    <ResponsiveContainer width="100%" height={250}>
+    <div className="flex-1 min-h-0">
+ 
+    <ResponsiveContainer width="100%" height={"100%"}>
       <LineChart data={[
         { name: "Week 1", clicks: 12000, leads: 500, orders: 200 },
         { name: "Week 2", clicks: 15000, leads: 600, orders: 250 },
@@ -161,13 +183,19 @@ const LineChartCard = () => (
         <Line dataKey="orders" stroke="#f59e0b" />
       </LineChart>
     </ResponsiveContainer>
+    </div>
   </div>
 );
-
+ 
 const AreaChartCard = () => (
-  <div className="card">
+  <div
+  // className="h-[calc((68vh-12px)/2)] bg-white rounded-md p-5 shadow-md"
+  className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
+  >
     <h4>Daily Spend vs Revenue</h4>
-    <ResponsiveContainer width="100%" height={250}>
+    <div className="flex-1 min-h-0">
+ 
+    <ResponsiveContainer width="100%" height={"100%"}>
       <AreaChart data={[
         { name: "Oct 1", spend: 2000, revenue: 3000 },
         { name: "Oct 5", spend: 2500, revenue: 4000 },
@@ -185,13 +213,19 @@ const AreaChartCard = () => (
         <Area dataKey="revenue" stroke="#22c55e" fill="#bbf7d0" />
       </AreaChart>
     </ResponsiveContainer>
+    </div>
   </div>
 );
-
+ 
 const ScatterChartCard = () => (
-  <div className="card">
+  <div
+  // className="card-main"
+ className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
+  >
     <h4>Campaign Efficiency (Spend vs ROAS)</h4>
-    <ResponsiveContainer width="100%" height={250}>
+    <div className="flex-1 min-h-0">
+ 
+    <ResponsiveContainer width="100%" height={"100%"}>
       <ScatterChart>
         <CartesianGrid />
         <XAxis dataKey="x" />
@@ -200,13 +234,19 @@ const ScatterChartCard = () => (
         <Scatter data={[{ x: 1500, y: 8 }, { x: 2500, y: 5 }, { x: 3000, y: 7 }, { x: 4000, y: 4 }]} fill="#8b5cf6" />
       </ScatterChart>
     </ResponsiveContainer>
+    </div>
   </div>
 );
-
+ 
 const TableSection = () => (
-  <div className="card">
+  <div
+  // className="card-main"
+className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
+ >
     <h4>Detailed Campaign Performance</h4>
-    <table>
+    <div className="flex-1 min-h-0 overflow-auto">
+ 
+    <table className="w-full text-xs">
       <thead>
         <tr>
           <th>Campaign Name</th>
@@ -230,35 +270,71 @@ const TableSection = () => (
         </tr>
       </tbody>
     </table>
+    </div>
   </div>
 );
-
+ 
 // -------------------- MAIN --------------------
 export default function App() {
   return (
-    <div className="layout">
+    <div
+    // className="layout-main"
+    className="flex h-screen overflow-hidden bg-gray-100"
+    >
       <Sidebar />
-      <div className="main">
+      <div
+      // className="main"
+     className="flex flex-col flex-1 h-screen overflow-hidden p-3 gap-2"
+      >
+        <div className="h-[55px] shrink-0">
+ 
         <Header />
+        </div>
+        <div className="h-[70px] shrink-0 mb-2">
+ 
         <KPISection />
-
-        <div className="grid-3">
+        </div>
+ 
+        {/* <div className="grid-3">
           <BarChartCard />
           <PieChartCard />
           <Funnel />
         </div>
-
+ 
         <div className="grid-2">
           <LineChartCard />
           <AreaChartCard />
         </div>
-
+ 
         <div className="grid-2">
           <ScatterChartCard />
           <TableSection />
-        </div>
+        </div> */}
+ 
+ {/* GRID */}
+      <div className="flex-1 min-h-0 grid grid-cols-4 grid-rows-[1fr_1fr_1.2fr] gap-3">
+ 
+  <BarChartCard />
+  <PieChartCard />
+<div className="col-span-1">
+  <Funnel />
+</div>
+  <LineChartCard />
+ 
+  <AreaChartCard />
+  <ScatterChartCard />
+ 
+  {/* <div
+  className="col-span-2"
+  > */}
+    <TableSection />
+  {/* </div> */}
+ 
+</div>
       </div>
     </div>
   );
 }
-
+ 
+ 
+ 
