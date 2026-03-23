@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-//import Login from "../pages/Login";
+import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import DashboardSelection from "../pages/DashboardSelection";
 import MainDashboard from "../pages/MainDashboard";
@@ -16,25 +16,27 @@ import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
 
 import ProtectedRoute from "../components/ProtectedRoute";
+import LoginOtp from "../pages/LoginOtp";
 
 const AppRoutes = () => {
   return (
     <Routes>
 
       {/* Public Routes */}
-      <Route path="/" element={<DashboardSelection/>} />
+      <Route path="/" element={<Login/>} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/loginOtp"  element={<LoginOtp/>} />
 
       {/* Protected Routes */}
 
-      {/* <Route
+      <Route
         path="/dashboard-selection"
         element={
           <ProtectedRoute>
             <DashboardSelection />
           </ProtectedRoute>
         }
-      /> */}
+      />
 
       <Route
         path="/dashboard"
@@ -100,16 +102,13 @@ const AppRoutes = () => {
       />
 
       {/* Admin Routes */}
-
-      <Route
-        path="/admin-dashboard"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
+      
+   <Route
+    path="/admin-dashboard/*" 
+    element={
+    <AdminDashboard />
+    } />
+      
       <Route
         path="/manage-users"
         element={
