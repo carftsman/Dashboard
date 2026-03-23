@@ -99,7 +99,7 @@ const handleLogin = async () => {
 
         // ✅ Role-based redirect (from API)
         if (result.data.user.role === "ADMIN") {
-          navigate("/admindashboard");
+          navigate("/admin-dashboard");
         } else {
           navigate("/dashboard-selection");
         }

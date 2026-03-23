@@ -49,11 +49,11 @@ const Sidebar = () => {
   const getDashboardIcon = (category) => {
     switch (category) {
       case "SALES":
-        return <FaShoppingCart />;
+        return <FaShoppingCart/>;
         case "ROI":
-        return <FaMotorcycle />;
+        return <FaMotorcycle/>;
         case "Marketing":
-        return < FaBullhorn />;
+        return <FaBullhorn/>;
       case "FIELD_SALES":
         return <FaUserTie />;
       case "VENDOR":
