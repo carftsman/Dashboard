@@ -1,12 +1,17 @@
-import React from "react";
-import { BrowserRouter as Router } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
+import LoginOtp from "./pages/LoginOtp";
 
 function App() {
   return (
-    <Router>
-      <AppRoutes />
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/loginOtp" element={<LoginOtp />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
