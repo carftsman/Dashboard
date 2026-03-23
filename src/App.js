@@ -9,7 +9,7 @@ import UploadData from "./pages/UploadData";
 import ColumnMapping from "./pages/ColumnMapping";
 import DataValidation from "./pages/DataValidation";
 import VisualEditing from "./pages/VisualEditing";
-import Admin from "./pages/Admin";
+// import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import ChangePassword from "./pages/ChangePassword";
@@ -29,7 +29,7 @@ function App() {
         <Route path="/column-mapping" element={<ColumnMapping />} />
         <Route path="/data-validation" element={<DataValidation />} />
         <Route path="/visual-editing" element={<VisualEditing />} />
-        <Route path="/admin" element={<Admin />} />
+        {/* <Route path="/admin" element={<Admin />} /> */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/edit-profile" element={<EditProfile/>}/>
         <Route path="/change-password"  element={< ChangePassword/>}/>

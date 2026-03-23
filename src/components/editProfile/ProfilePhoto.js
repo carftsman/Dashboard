@@ -5,113 +5,90 @@ import { FaCamera } from "react-icons/fa";
 export default function ProfilePhoto({ image, onImageChange }) {
 
 const webcamRef = useRef(null);
-const fileInputRef=useRef(null);
-
+const fileInputRef = useRef(null);
 const [showCamera, setShowCamera] = useState(false);
 
-// open webcam
-const openCamera = () => {
-setShowCamera(true);
-};
-
-// open file picker
-const openFilePicker = () => {
-fileInputRef.current.click();
-};
-
-// capture photo
 const capturePhoto = () => {
 const screenshot = webcamRef.current.getScreenshot();
 onImageChange(screenshot);
 setShowCamera(false);
 };
 
-// handle file upload
-const handleFileChange = (e) => {
-const file = e.target.files[0];
-if(file){
-const imageUrl = URL.createObjectURL(file);
-onImageChange(imageUrl);
-}
-};
-
-
-// close camera
-const closeCamera = () => {
-setShowCamera(false);
-};
-
-
-
-
-
 return (
 
-<div className="profile-photo">
+<div className="flex items-center gap-5 pb-5 border-b">
 
-{/* AVATAR */}
-<div className="avatar-wrapper">
-<img src={image} alt="profile" />
+<div className="relative w-20 h-20">
+<img src={image} className="w-full h-full rounded-full object-cover"/>
 
-<div className="camera-icon" onClick={openCamera}>
-<FaCamera />
+<div 
+onClick={()=>setShowCamera(true)}
+className="absolute bottom-0 right-0 bg-black text-white w-6 h-6 rounded-full flex items-center justify-center text-xs cursor-pointer border-2 border-white"
+>
+<FaCamera/>
 </div>
 </div>
 
-<div className="photo-content">
+<div>
+<h3 className="font-semibold text-lg">Profile Photo</h3>
+<p className="text-sm text-gray-500 mb-2">
+Update your photo for your team to recognize you.
+</p>
 
-<h3>Profile Photo</h3>
-<p>Update your photo for your team to recognize you.</p>
-
-<button className="upload-btn" onClick={openFilePicker}>
+<button 
+onClick={()=>fileInputRef.current.click()}
+className="bg-gray-200 px-3 py-1 rounded-md text-sm mr-2"
+>
 Upload New
 </button>
 
-<button className="remove-btn" onClick={()=>onImageChange("")}>
+<button 
+onClick={()=>onImageChange("")}
+className="bg-gray-200 px-3 py-1 rounded-md text-sm"
+>
 Remove
 </button>
+
 <input
 type="file"
-accept="image/*"
 ref={fileInputRef}
-onChange={handleFileChange}
-style={{ display: "none" }}
+onChange={(e)=>onImageChange(URL.createObjectURL(e.target.files[0]))}
+className="hidden"
 />
-
 
 </div>
 
-{/* CAMERA MODAL */}
 {showCamera && (
-<div className="camera-modal">
-
-<div className="camera-box">
+<div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+<div className="bg-white p-5 rounded-xl shadow-lg text-center">
 
 <Webcam
 ref={webcamRef}
 screenshotFormat="image/jpeg"
-className="webcam"
+className="w-[400px] h-[300px] rounded-lg"
 />
 
-<div className="camera-actions">
-
-<button className="btn cancel" onClick={closeCamera}>
+<div className="flex justify-center gap-3 mt-4">
+<button 
+onClick={()=>setShowCamera(false)}
+className="bg-gray-200 px-4 py-2 rounded-md"
+>
 Cancel
 </button>
 
-<button className="btn primary" onClick={capturePhoto}>
+<button 
+onClick={capturePhoto}
+className="bg-[#1e2b44] text-white px-4 py-2 rounded-md"
+>
 Capture
 </button>
-
 </div>
 
 </div>
-
 </div>
 )}
 
 </div>
 
-);
-
+)
 }
