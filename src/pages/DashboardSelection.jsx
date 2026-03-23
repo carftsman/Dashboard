@@ -170,7 +170,7 @@ function Dashboard() {
                   {card.dashboardName}
                 </h4>
 
-                <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
+               <div className="border-t border-gray-200 pt-3 flex items-center gap-2">
                   
                   <p
                     onClick={(e) => {

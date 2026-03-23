@@ -1,14 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-/* ===== MAIN CONTAINER ===== */
+/* MAIN CONTAINER  */
 .dashboard-container {
   @apply flex h-screen bg-gray-100;
 }
 
-/* ===== SIDEBAR ===== */
+/*  SIDEBAR  */
 .sidebar {
   @apply w-56 bg-slate-900 text-white p-5;
 }
@@ -39,13 +34,13 @@
 }
 
 
-/* ===== MAIN CONTENT ===== */
+/*  MAIN CONTENT */
 .main-content {
   @apply flex-1 p-6 overflow-y-auto;
 }
 
 
-/* ===== HEADER ===== */
+/*  HEADER */
 .header-row {
   @apply flex justify-between items-center mb-6;
 }
@@ -59,13 +54,13 @@
 }
 
 
-/* ===== RIGHT SECTION (SEARCH + PROFILE) ===== */
+/* RIGHT SECTION */
 .header-right {
   @apply flex items-center gap-5;
 }
 
 
-/* ===== SEARCH (MATCH SCREENSHOT) ===== */
+/*  SEARCH  */
 .header-search {
   @apply relative w-72 bg-gray-100 rounded-full px-5 py-2 flex items-center shadow-inner;
 }
@@ -79,20 +74,20 @@
 }
 
 
-/* ===== PROFILE ===== */
+/*  PROFILE */
 .profile-img {
   @apply w-10 h-10 rounded-full object-cover cursor-pointer border border-gray-200;
 }
 
 
-/* ===== CARDS GRID ===== */
+/* CARDS GRID  */
 .cards {
   @apply grid gap-5 mt-5;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
 
-/* ===== CARD ===== */
+/*  CARD  */
 .card {
   @apply bg-white rounded-xl p-4 border border-gray-200 transition duration-300;
 }
@@ -102,13 +97,13 @@
 }
 
 
-/* ===== ICON ===== */
+/*ICON  */
 .icon-box {
   @apply w-11 h-11 rounded-lg flex items-center justify-center text-lg mb-3;
 }
 
 
-/* ===== TEXT ===== */
+/*  TEXT */
 .card h4 {
   @apply text-sm font-semibold mb-2;
 }
@@ -118,7 +113,7 @@
 }
 
 
-/* ===== HOVER DESCRIPTION (KEEP CENTER AS YOUR JSX) ===== */
+/*  HOVER DESCRIPTION  */
 .card .group div > div:last-child {
   @apply absolute top-1/2 left-1/2 w-[80%] 
          -translate-x-1/2 -translate-y-1/2
@@ -131,7 +126,7 @@
 }
 
 
-/* ===== RESPONSIVE ===== */
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .sidebar {
     @apply hidden;
