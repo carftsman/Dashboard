@@ -28,8 +28,8 @@ const AppRoutes = () => {
       <Route path="/loginOtp"  element={<LoginOtp/>} />
  
       {/* Protected Routes */}
- 
-      <Route
+
+       <Route
         path="/dashboard-selection"
         element={
           <ProtectedRoute>
