@@ -5,7 +5,7 @@
   font-family: Inter, Arial, sans-serif;
 }
 
-.container {
+.container-otp {
   height: 100vh;
   background: #f5f6fa;
   display: flex;
@@ -13,7 +13,7 @@
   justify-content: center;
 }
 
-.card {
+.card-otp {
   width: 360px;
   background: #fff;
   padding: 32px;
@@ -22,8 +22,8 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
-/* ✅ LOGO BOX */
-.background {
+/* LOGO */
+.background-otp {
   width: 50px;
   height: 50px;
   margin: 0 auto 16px;
@@ -35,7 +35,7 @@
   overflow: hidden;
 }
 
-.background img {
+.background img{
   width: 70%;
   height: 70%;
   object-fit: contain;
@@ -46,7 +46,7 @@ h2 {
   margin-bottom: 6px;
 }
 
-.subtitle {
+.subtitle-otp {
   font-size: 12px;
   color: #777;
   margin-bottom: 20px;
@@ -56,17 +56,30 @@ h2 {
 .otp-wrapper {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  align-items: center;
 }
 
 .otp-circle {
-  width: 42px;
-  height: 42px;
+  width: 37px;
+  height: 37px;
   border-radius: 50%;
   background: #eef0f4;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ✅ VALID STATE */
+.otp-circle.valid {
+  background: #d4edda;
+  border: 1px solid green;
+}
+
+/* ❌ INVALID STATE */
+.otp-circle.invalid {
+  background: #f8d7da;
+  border: 1px solid red;
 }
 
 .otp-circle input {
@@ -77,55 +90,68 @@ h2 {
   text-align: center;
   font-size: 18px;
   outline: none;
-  letter-spacing: 2px;
+  align-items: center;
+}
+
+/* STATUS */
+.otp-success {
+  color: green;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.otp-error {
+  color: red;
+  font-size: 12px;
+  margin-bottom: 10px;
 }
 
 /* Resend */
-.resend {
+.resend-otp{
   font-size: 11px;
-  color: #888;
   margin-bottom: 20px;
 }
 
-.resend span {
-  color: #4a6cf7;
-  cursor: pointer;
-}
-
-/* Inputs */
+/* INPUT GROUP */
 .input-group {
   text-align: left;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .input-group label {
   font-size: 10px;
   color: #666;
+  margin-bottom: 4px;
   display: block;
-  margin-bottom: 6px;
 }
 
 .input-box {
   display: flex;
   align-items: center;
-  background: #eef0f4;
-  border-radius: 20px;
-  padding: 10px 14px;
+  background: #fff;           
+  border-radius: 6px;
+  padding: 6px 10px;
+  border: 1px solid #ddd;       
+  height: 38px;
+  box-shadow: none;              
 }
 
 .input-box input {
   border: none;
-  background: transparent;
+  background: transparent;       
   flex: 1;
   outline: none;
+  font-size: 13px;
 }
 
 .eye {
-  font-size: 14px;
+  font-size: 16px;
   color: #777;
+  margin-left: 10px;
+  cursor: pointer;
 }
 
-/* Button */
+/* BUTTON */
 .submit-btn {
   width: 100%;
   background: #0d1b3d;
@@ -138,10 +164,10 @@ h2 {
   font-size: 14px;
 }
 
-/* Back */
+/* BACK */
 .back {
   font-size: 12px;
-  color: #666;
+  color: #1f2a44;
   margin-top: 14px;
   cursor: pointer;
 }
