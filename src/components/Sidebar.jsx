@@ -5,6 +5,14 @@ import {
   FaUserClock,
   FaSignOutAlt,
   FaChevronDown,
+  FaChartLine,      // ROI (already good)
+  FaUserTie,
+  FaStore,
+  FaUsers,
+  FaMotorcycle,
+  FaBullhorn,       // ✅ Marketing
+  FaShoppingCart,   // ✅ Sales
+  FaMoneyBillWave   // ✅ Optional (Revenue / Sales alt)
 } from "react-icons/fa";
 
 import { NavLink, useLocation } from "react-router-dom";
