@@ -4,14 +4,12 @@ import {
   FaUsers,
   FaBox,
   FaBullhorn,
-  FaBug,
-  FaThLarge,
-  FaCog
+  FaBug
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
-
+import Sidebar from "../components/Sidebar";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -36,7 +34,6 @@ function Dashboard() {
     }
   };
 
-  
   const getColor = (category) => {
     switch (category) {
       case "SALES":
@@ -78,26 +75,12 @@ function Dashboard() {
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
+      
+      {/*  Reusable Sidebar */}
+      <Sidebar />
 
-      {/* Sidebar */}
-      <div className="w-56 bg-slate-900 text-white p-5">
-        <h2 className="text-lg font-semibold mb-8 flex items-center">
-          <span className="bg-indigo-600 px-2 py-1 rounded mr-2">ZB</span>
-          Zest<span className="text-indigo-400">Bot</span>
-        </h2>
-
-        <ul className="space-y-2">
-          <li className="flex items-center p-2 rounded bg-slate-800 cursor-pointer">
-            <FaThLarge className="mr-2" /> Dashboards
-          </li>
-          <li className="flex items-center p-2 rounded hover:bg-slate-800 cursor-pointer">
-            <FaCog className="mr-2" /> Settings
-          </li>
-        </ul>
-      </div>
-
-      {/* Main */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      {/* Main Content */}
+      <div className="flex-1 ml-[220px] p-6 overflow-y-auto">
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
@@ -114,7 +97,6 @@ function Dashboard() {
           {/* RIGHT */}
           <div className="flex items-center gap-4">
 
-           
             <div className="relative w-64">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -128,7 +110,6 @@ function Dashboard() {
 
             <div className="w-10 h-10 min-w-[40px] min-h-[40px]">
               <img
-                src="https://i.pravatar.cc/40"
                 alt="profile"
                 className="w-full h-full rounded-full object-cover border"
               />
@@ -171,7 +152,6 @@ function Dashboard() {
                   {card.dashboardName}
                 </h4>
 
-               
                 <div className="border-t border-gray-200 pt-3 flex items-center justify-center gap-2">
                   <p
                     onClick={(e) => {
