@@ -1,11 +1,4 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaChartLine,
-  FaUsers,
-  FaBox,
-  FaBullhorn,
-  FaBug
-} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
@@ -17,52 +10,32 @@ function Dashboard() {
   const [search, setSearch] = useState("");
   const [cards, setCards] = useState([]);
 
-  const getIcon = (category) => {
-    switch (category) {
-      case "SALES":
-        return <FaChartLine />;
-      case "MARKETING":
-        return <FaBullhorn />;
-      case "CUSTOMER":
-        return <FaUsers />;
-      case "SUPPLY":
-        return <FaBox />;
-      case "QA":
-        return <FaBug />;
-      default:
-        return <FaChartLine />;
-    }
-  };
-
-  const getColor = (category) => {
-    switch (category) {
-      case "SALES":
-        return "#fde2e4";
-      case "MARKETING":
-        return "#e2f0cb";
-      case "CUSTOMER":
-        return "#d0ebff";
-      case "SUPPLY":
-        return "#fff3bf";
-      case "QA":
-        return "#e5dbff";
-      default:
-        return "#e6ecf5";
-    }
-  };
-
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
+        const token = localStorage.getItem("token");
+
         const res = await axios.get(
-          "https://dashboard-backend-cyrd.onrender.com/api/admin/get_dashboards"
+          "https://dashboard-backend-cyrd.onrender.com/api/dashboards",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
-        if (res.data.success) {
-          setCards(res.data.data);
-        }
+        const formattedData = res.data.map((item) => ({
+          dashboardId: item.id,
+          dashboardName: item.name,
+          description: item.description,
+          image: item.image,
+          originalData: item,
+        }));
+
+        setCards(formattedData);
+
       } catch (error) {
-        console.error("Error fetching dashboards:", error);
+        console.error("  API Error:", error.response || error.message);
       }
     };
 
@@ -76,16 +49,12 @@ function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       
-      {/*  Reusable Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
       <div className="flex-1 ml-[220px] p-6 overflow-y-auto">
 
-        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
 
-          {/* LEFT */}
           <div>
             <h2 className="text-xl font-semibold">Select Dashboard</h2>
             <p className="text-sm text-gray-500 mt-2 ml-1">
@@ -94,7 +63,6 @@ function Dashboard() {
             </p>
           </div>
 
-          {/* RIGHT */}
           <div className="flex items-center gap-4">
 
             <div className="relative w-64">
@@ -108,17 +76,17 @@ function Dashboard() {
               />
             </div>
 
-            <div className="w-10 h-10 min-w-[40px] min-h-[40px]">
-              <img
-                alt="profile"
-                className="w-full h-full rounded-full object-cover border"
-              />
+            {/* Profile ICON  */}
+            <div
+              className="w-10 h-10 min-w-[40px] min-h-[40px] cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
+              onClick={() => navigate("/profile")}
+            >
+              <span className="text-gray-600 text-lg font-semibold">👤</span>
             </div>
 
           </div>
         </div>
 
-        {/* CARDS */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
 
           {filteredCards.map((card) => (
@@ -128,25 +96,23 @@ function Dashboard() {
                          transition duration-300 hover:-translate-y-1 hover:shadow-md"
             >
 
-              {/* TOP */}
-              <div
-                className="w-full h-32 flex items-center justify-center relative"
-                style={{ backgroundColor: getColor(card.category) }}
-              >
-                <div className="text-3xl z-10">
-                  {getIcon(card.category)}
-                </div>
+              <div className="w-full h-32 flex items-center justify-center bg-gray-50">
+                {card.image && (
+                  <img
+                    src={card.image}
+                    alt="dashboard"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                )}
+              </div>
 
-                {/* DESCRIPTION */}
-                <div className="absolute bottom-4 left-1/2 w-[80%] 
-                                -translate-x-1/2
-                                bg-blue-100 text-gray-600 text-xs p-2 rounded-lg text-center
+              <div className="absolute top-0 left-0 w-full h-32 flex items-end justify-center pointer-events-none">
+                <div className="mb-2 w-[80%] bg-blue-100 text-gray-600 text-xs p-2 rounded-lg text-center
                                 opacity-0 group-hover:opacity-100 transition duration-300">
                   {card.description}
                 </div>
               </div>
 
-              {/* CONTENT */}
               <div className="p-4">
                 <h4 className="text-sm font-semibold mb-1">
                   {card.dashboardName}
@@ -156,7 +122,7 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate("/reports", { state: card });
+                      navigate("/reports", { state: card.originalData });
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
