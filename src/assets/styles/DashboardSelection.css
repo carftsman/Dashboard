@@ -1,152 +1,138 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: sans-serif;
-}
-
+/* MAIN CONTAINER  */
 .dashboard-container {
-  display: flex;
-  height: 100vh;
+  @apply flex h-screen bg-gray-100;
 }
 
-/* Sidebar */
+/*  SIDEBAR  */
 .sidebar {
-  width: 230px;
-  background-color: #1e335d;
-  color: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
+  @apply w-56 bg-slate-900 text-white p-5;
 }
 
 .logo {
-  font-size: 20px;
-  margin-bottom: 30px;
-  color: #ffc107;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.logo span {
-  color: white;
+  @apply text-lg font-semibold mb-8;
 }
 
 .logo-icon {
-  background: white;
-  color: #1e335d;
-  padding: 4px 6px;
-  border-radius: 4px;
-  font-size: 12px;
+  @apply bg-indigo-600 px-2 py-1 rounded mr-2;
 }
 
-/* Menu */
 .sidebar ul {
-  list-style: none;
+  @apply space-y-2;
 }
 
 .sidebar ul li {
-  padding: 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  @apply flex items-center p-2 rounded cursor-pointer;
 }
 
-.sidebar ul li.active {
-  background-color: #2e4a7d;
+.sidebar ul li.active,
+.sidebar ul li:hover {
+  @apply bg-slate-800;
 }
 
 .menu-icon {
-  font-size: 14px;
+  @apply mr-2;
 }
 
-/* Main */
+
+/*  MAIN CONTENT */
 .main-content {
-  flex: 1;
-  background-color: #f5f6fa;
-  padding: 20px;
+  @apply flex-1 p-6 overflow-y-auto;
 }
 
-/* Header Row */
+
+/*  HEADER */
 .header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
+  @apply flex justify-between items-center mb-6;
 }
 
 .header-text h2 {
-  font-size: 24px;
+  @apply text-xl font-semibold;
 }
 
 .header-text p {
-  color: gray;
-  font-size: 14px;
-  margin-top: 5px;
+  @apply text-sm text-gray-500 mt-2 ml-1;
 }
 
-/* Search */
+
+/* RIGHT SECTION */
+.header-right {
+  @apply flex items-center gap-5;
+}
+
+
+/*  SEARCH  */
 .header-search {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+  @apply relative w-72 bg-gray-100 rounded-full px-5 py-2 flex items-center shadow-inner;
 }
 
 .header-search input {
-  width: 260px;
-  padding: 10px 15px;
-  border-radius: 25px;
-  border: none;
-  background-color: #eaeaea;
+  @apply bg-transparent outline-none text-sm w-full pl-7 text-gray-600;
 }
 
-.header-search img {
-  border-radius: 50%;
+.search-icon {
+  @apply absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm;
 }
 
-/* Cards */
+
+/*  PROFILE */
+.profile-img {
+  @apply w-10 h-10 rounded-full object-cover cursor-pointer border border-gray-200;
+}
+
+
+/* CARDS GRID  */
 .cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  @apply grid gap-5 mt-5;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
+
+/*  CARD  */
 .card {
-  background-color: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  @apply bg-white rounded-xl p-4 border border-gray-200 transition duration-300;
 }
 
+.card:hover {
+  @apply -translate-y-1 shadow-md;
+}
+
+
+/*ICON  */
 .icon-box {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  margin-bottom: 15px;
+  @apply w-11 h-11 rounded-lg flex items-center justify-center text-lg mb-3;
 }
 
-.card-image {
-  height: 80px;
-  background: linear-gradient(to top, #0f2027, #203a43, #2c5364);
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
 
+/*  TEXT */
 .card h4 {
-  margin-bottom: 10px;
+  @apply text-sm font-semibold mb-2;
 }
 
-.card button {
-  border: none;
-  background: none;
-  color: #1e335d;
-  cursor: pointer;
-  font-weight: 500;
+.card p {
+  @apply text-indigo-600 text-sm font-medium cursor-pointer;
+}
+
+
+/*  HOVER DESCRIPTION  */
+.card .group div > div:last-child {
+  @apply absolute top-1/2 left-1/2 w-[80%] 
+         -translate-x-1/2 -translate-y-1/2
+         bg-blue-100 text-gray-600 text-xs p-2 rounded-lg text-center
+         opacity-0 transition duration-300;
+}
+
+.group:hover div > div:last-child {
+  @apply opacity-100;
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar {
+    @apply hidden;
+  }
+
+  .cards {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
 }

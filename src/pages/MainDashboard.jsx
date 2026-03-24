@@ -1,340 +1,225 @@
 import React from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
-  LineChart, Line,
-  CartesianGrid,
-  AreaChart, Area,
-  ScatterChart, Scatter
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  BarChart, Bar, CartesianGrid, Cell
 } from "recharts";
-import { FiUpload, FiDownload, FiSearch } from "react-icons/fi";
-import  "../css/MainDashboard.css"
- 
-// -------------------- DATA --------------------
-const kpis = [
-  { title: "Impressions", value: "1.2M", change: "+12.5%", color: "green" },
-  { title: "Clicks", value: "45.8K", change: "+8.2%", color: "green" },
-  { title: "Leads", value: "2,410", change: "+14.1%", color: "green" },
-  { title: "Orders", value: "894", change: "-2.4%", color: "red" },
-  { title: "Revenue", value: "$142.5K", change: "+21.3%", color: "green" },
-  { title: "Ad Spend", value: "$24,150", change: "target", color: "gray" },
-  { title: "CPC", value: "$0.53", change: "+$0.02", color: "red" },
-  { title: "CPA", value: "$10.02", change: "-$1.20", color: "green" },
-  { title: "ROAS", value: "5.9x", change: "+0.4x", color: "green" },
-  { title: "Conv Rate", value: "2.1%", change: "avg", color: "gray" }
+import Sidebar from "../components/Sidebar.jsx"; 
+
+/* ---------------- DATA ---------------- */
+
+const trendData = [
+  { name: "Jan", value: 20000 },
+  { name: "Feb", value: 80000 },
+  { name: "Mar", value: 150000 },
+  { name: "Apr", value: 120000 },
+  { name: "May", value: 200000 },
+  { name: "Jun", value: 270000 },
 ];
- 
-const COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6"];
- 
-// -------------------- COMPONENTS --------------------
-const Sidebar = () => (
-  <div className="sidebar">
-    <h2>ZestBot</h2>
-    <ul>
-      <li className="active">Dashboards</li>
-      <li>Users</li>
-      <li>Data Schema</li>
-      <li>Reports</li>
-    </ul>
+
+const platformData = [
+  { name: "Facebook", value: 420 },
+  { name: "Google", value: 350 },
+  { name: "Instagram", value: 280 },
+  { name: "Other", value: 150 },
+];
+
+const revenueData = [
+  { name: "Jan", revenue: 540, spend: 500 },
+  { name: "Feb", revenue: 520, spend: 480 },
+  { name: "Mar", revenue: 530, spend: 470 },
+  { name: "Apr", revenue: 510, spend: 460 },
+  { name: "May", revenue: 520, spend: 480 },
+  { name: "Jun", revenue: 530, spend: 490 },
+];
+
+const conversionData = [
+  { name: "A", value: 90 },
+  { name: "B", value: 75 },
+  { name: "C", value: 60 },
+  { name: "D", value: 50 },
+  { name: "E", value: 40 },
+];
+
+/* ---------------- UI CARD ---------------- */
+
+const Card = ({ children }) => (
+  <div className="rounded-xl border border-white/10 bg-gradient-to-br from-[#0f172a] to-[#020617] shadow-[0_0_30px_rgba(0,0,0,0.6)] p-3">
+    {children}
   </div>
 );
- 
-const Header = () => (
-  <div className="header">
-    <h2>Marketing ROI</h2>
- 
-    <div className="actions">
-      <div className="search">
-        <FiSearch />
-        <input placeholder="Search data..." />
+
+/* ---------------- TOOLTIP ---------------- */
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload) {
+    return (
+      <div className="bg-[#020617] border border-white/10 px-2 py-1 text-xs rounded">
+        {payload[0].value}
       </div>
- 
-      <button className="btn light">
-        <FiDownload />
-        Export Data
-      </button>
- 
-      <button className="btn primary">
-        <FiUpload /> Upload Data
-      </button>
- 
-      {/* ✅ Profile Image */}
-      <div className="profile">
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="profile"
-        />
-      </div>
- 
-   
-    </div>
-  </div>
-);
- 
-const KPISection = () => (
-  <div
- 
-  className="kpi-grid">
-    {kpis.map((k, i) => (
-      <div key={i} className="kpi-card">
-        <p>{k.title}</p>
-        <h3>{k.value}</h3>
-        <span className={k.color}>{k.change}</span>
-      </div>
-    ))}
-  </div>
-);
- 
-// ---------------- FUNNEL ----------------
-const Funnel = () => (
-  <div
-  // className="funnel"
- className="w-full h-full min-h-0 bg-white rounded shadow py-2 px-3 flex flex-col justify-between"
-  >
-    <h4>Funnel</h4>
-    <div className="funnel-bar imp">IMP <span>1.2M</span></div>
-    <div className="funnel-bar clk">CLK <span>45K</span></div>
-    <div className="funnel-bar add">ADD <span>8K</span></div>
-    <div className="funnel-bar ord">ORD <span>1.2K</span></div>
-    <div className="funnel-stats">
-      <div>3.8% <span>CTR</span></div>
-      <div>2.7% <span>CVR</span></div>
-    </div>
-  </div>
-);
- 
-const BarChartCard = () => (
-  <div
-  // className="card-main"
-  className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
-  >
-    <h4>Revenue & Orders by Campaign</h4>
-    <div className="flex-1 min-h-0">
- 
-    <ResponsiveContainer width="100%" height={"100%"}>
-      <BarChart data={[
-        { name: "C1", revenue: 12000, orders: 200 },
-        { name: "C2", revenue: 19000, orders: 300 },
-        { name: "C3", revenue: 3000, orders: 100 },
-        { name: "C4", revenue: 5000, orders: 150 },
-        { name: "C5", revenue: 20000, orders: 350 },
-        { name: "C6", revenue: 15000, orders: 250 }
-      ]}>
-        {/* <CartesianGrid strokeDasharray="3 3" /> */}
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="revenue" fill="#3b82f6" />
-        <Bar dataKey="orders" fill="#8b5cf6" />
-      </BarChart>
-    </ResponsiveContainer>
-    </div>
-  </div>
-);
- 
-const PieChartCard = () => (
-  <div
-  className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
-   >
-    <h4>Platform Contribution</h4>
-    <div className="flex-1 min-h-0">
- 
-    <ResponsiveContainer width="100%" height={"100%"}>
-      <PieChart style={{
-        fontSize:12,
-       
-      }}>
-        <Pie data={[
-          { name: "Google Ads", value: 20 },
-          { name: "Facebook", value: 15 },
-          { name: "Instagram", value: 10 },
-          { name: "LinkedIn", value: 15 }
-        ]} dataKey="value" innerRadius={15} outerRadius={30}>
-          {COLORS.map((c, i) => <Cell key={i} fill={c} height={20} width={20} />)}
-        </Pie>
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
-    </div>
-  </div>
-);
- 
-const LineChartCard = () => (
-  <div
-  // className="card-main"
- className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
-  >
-    <h4>Engagement Trends</h4>
-    <div className="flex-1 min-h-0">
- 
-    <ResponsiveContainer width="100%" height={"100%"}>
-      <LineChart data={[
-        { name: "Week 1", clicks: 12000, leads: 500, orders: 200 },
-        { name: "Week 2", clicks: 15000, leads: 600, orders: 250 },
-        { name: "Week 3", clicks: 11000, leads: 450, orders: 180 },
-        { name: "Week 4", clicks: 18000, leads: 700, orders: 300 }
-      ]}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Line dataKey="clicks" stroke="#3b82f6" />
-        <Line dataKey="leads" stroke="#22c55e" />
-        <Line dataKey="orders" stroke="#f59e0b" />
-      </LineChart>
-    </ResponsiveContainer>
-    </div>
-  </div>
-);
- 
-const AreaChartCard = () => (
-  <div
-  // className="h-[calc((68vh-12px)/2)] bg-white rounded-md p-5 shadow-md"
-  className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
-  >
-    <h4>Daily Spend vs Revenue</h4>
-    <div className="flex-1 min-h-0">
- 
-    <ResponsiveContainer width="100%" height={"100%"}>
-      <AreaChart data={[
-        { name: "Oct 1", spend: 2000, revenue: 3000 },
-        { name: "Oct 5", spend: 2500, revenue: 4000 },
-        { name: "Oct 10", spend: 2200, revenue: 3500 },
-        { name: "Oct 15", spend: 3000, revenue: 5000 },
-        { name: "Oct 20", spend: 2800, revenue: 4200 },
-        { name: "Oct 25", spend: 3200, revenue: 4800 },
-        { name: "Oct 30", spend: 3500, revenue: 5500 }
-      ]}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Area dataKey="spend" stroke="#3b82f6" fill="#bfdbfe" />
-        <Area dataKey="revenue" stroke="#22c55e" fill="#bbf7d0" />
-      </AreaChart>
-    </ResponsiveContainer>
-    </div>
-  </div>
-);
- 
-const ScatterChartCard = () => (
-  <div
-  // className="card-main"
- className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
-  >
-    <h4>Campaign Efficiency (Spend vs ROAS)</h4>
-    <div className="flex-1 min-h-0">
- 
-    <ResponsiveContainer width="100%" height={"100%"}>
-      <ScatterChart>
-        <CartesianGrid />
-        <XAxis dataKey="x" />
-        <YAxis dataKey="y" />
-        <Tooltip />
-        <Scatter data={[{ x: 1500, y: 8 }, { x: 2500, y: 5 }, { x: 3000, y: 7 }, { x: 4000, y: 4 }]} fill="#8b5cf6" />
-      </ScatterChart>
-    </ResponsiveContainer>
-    </div>
-  </div>
-);
- 
-const TableSection = () => (
-  <div
-  // className="card-main"
-className="w-full h-full min-h-0 bg-white rounded shadow p-3 flex flex-col overflow-hidden"
- >
-    <h4>Detailed Campaign Performance</h4>
-    <div className="flex-1 min-h-0 overflow-auto">
- 
-    <table className="w-full text-xs">
-      <thead>
-        <tr>
-          <th>Campaign Name</th>
-          <th>Impressions</th>
-          <th>Clicks</th>
-          <th>Leads</th>
-          <th>Orders</th>
-          <th>Revenue</th>
-          <th>ROAS</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Summer Sale 2023</td>
-          <td>450K</td>
-          <td>12.2K</td>
-          <td>850</td>
-          <td>310</td>
-          <td>$42,500</td>
-          <td className="green">6.2x</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-  </div>
-);
- 
-// -------------------- MAIN --------------------
-export default function App() {
+    );
+  }
+  return null;
+};
+
+/* ---------------- MAIN ---------------- */
+
+export default function Dashboard() {
   return (
-    <div
-    // className="layout-main"
-    className="flex h-screen overflow-hidden bg-gray-100"
-    >
+    <div className="h-screen w-full bg-gradient-to-br from-[#020617] via-[#0b1120] to-[#020617] text-white p-3 overflow-hidden flex flex-col">
+          {/* ✅ SIDEBAR (LEFT FIXED) */}
       <Sidebar />
-      <div
-      // className="main"
-     className="flex flex-col flex-1 h-screen overflow-hidden p-3 gap-2"
-      >
-        <div className="h-[55px] shrink-0">
- 
-        <Header />
-        </div>
-        <div className="h-[70px] shrink-0 mb-2">
- 
-        <KPISection />
-        </div>
- 
-        {/* <div className="grid-3">
-          <BarChartCard />
-          <PieChartCard />
-          <Funnel />
-        </div>
- 
-        <div className="grid-2">
-          <LineChartCard />
-          <AreaChartCard />
-        </div>
- 
-        <div className="grid-2">
-          <ScatterChartCard />
-          <TableSection />
-        </div> */}
- 
- {/* GRID */}
-      <div className="flex-1 min-h-0 grid grid-cols-4 grid-rows-[1fr_1fr_1.2fr] gap-3">
- 
-  <BarChartCard />
-  <PieChartCard />
-<div className="col-span-1">
-  <Funnel />
+
+      {/* ✅ MAIN DASHBOARD */}
+      <div className="ml-[220px] w-[calc(100%-220px)] h-full p-3 text-white flex flex-col overflow-hidden">
+
+      {/* HEADER */}
+      <h1 className="text-lg font-semibold mb-2">Marketing ROI Dashboard</h1>
+
+      {/* KPI */}
+     {/* KPI */}
+<div className="grid grid-cols-6 gap-2 mb-2">
+  {[
+    { label: "Total Impressions", value: "1.5M" },
+    { label: "Total Clicks", value: "230K" },
+    { label: "Total Orders", value: "8,450" },
+    { label: "Total Revenue", value: "$125,800" },
+       { label: "Total Ad Spends", value: "$135,800" },
+    { label: "ROAS", value: "4.12" }
+  ].map((item, i) => (
+    <Card key={i}>
+      <p className="text-[10px] text-gray-400">{item.label}</p>
+      <h2 className="text-xl font-bold mt-1">{item.value}</h2>
+    </Card>
+  ))}
 </div>
-  <LineChartCard />
- 
-  <AreaChartCard />
-  <ScatterChartCard />
- 
-  {/* <div
-  className="col-span-2"
-  > */}
-    <TableSection />
-  {/* </div> */}
- 
-</div>
+      {/* ROW 1 */}
+      <div className="grid grid-cols-2 gap-2 flex-1 mb-2">
+
+        {/* LINE */}
+        <Card>
+          <p className="text-xs text-gray-400 mb-1">Impressions Trend</p>
+          <ResponsiveContainer width="100%" height="92%">
+            <LineChart data={trendData}>
+              <CartesianGrid stroke="#1e293b" strokeDasharray="3 3"/>
+              <XAxis dataKey="name" stroke="#475569" tick={{fontSize:10}}/>
+              <YAxis stroke="#475569" tick={{fontSize:10}}/>
+              <Tooltip content={<CustomTooltip/>}/>
+              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2.5}/>
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* PLATFORM */}
+        <Card>
+          <p className="text-xs text-gray-400 mb-1">Platform Performance</p>
+          <ResponsiveContainer width="100%" height="92%">
+            <BarChart data={platformData}>
+              <XAxis dataKey="name" stroke="#475569" tick={{fontSize:10}}/>
+              <YAxis stroke="#475569" tick={{fontSize:10}}/>
+              <Tooltip content={<CustomTooltip/>}/>
+              <Bar dataKey="value" radius={[5,5,0,0]}>
+                {platformData.map((_, i)=>(
+                  <Cell key={i} fill={["#3b82f6","#22c55e","#ec4899","#ef4444"][i]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
       </div>
+
+      {/* ROW 2 */}
+      <div className="grid grid-cols-2 gap-2 flex-1 mb-2">
+
+        {/* REVENUE */}
+        <Card>
+          <p className="text-xs text-gray-400 mb-1">Revenue vs Ad Spend</p>
+          <ResponsiveContainer width="100%" height="92%">
+            <BarChart data={revenueData}>
+              <CartesianGrid stroke="#1e293b" strokeDasharray="3 3"/>
+              <XAxis dataKey="name" stroke="#475569" tick={{fontSize:10}}/>
+              <YAxis stroke="#475569" tick={{fontSize:10}}/>
+              <Tooltip content={<CustomTooltip/>}/>
+              <Bar dataKey="revenue" fill="#22c55e" radius={[4,4,0,0]} />
+              <Bar dataKey="spend" fill="#f43f5e" radius={[4,4,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* CONVERSION */}
+        <Card>
+          <p className="text-xs text-gray-400 mb-1">Conversion Rate</p>
+          <ResponsiveContainer width="100%" height="92%">
+            <BarChart data={conversionData}>
+              <XAxis dataKey="name" stroke="#475569" tick={{fontSize:10}}/>
+              <YAxis stroke="#475569" tick={{fontSize:10}}/>
+              <Tooltip content={<CustomTooltip/>}/>
+              <Bar dataKey="value" fill="#f59e0b" radius={[4,4,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+
+       {/* FUNNEL */}
+     <div className="h-[200px]">
+  <Card>
+    <p className="text-xs text-gray-400 mb-3">Campaign Funnel</p>
+
+    <div className="relative w-full flex flex-col items-center gap-2 text-xs">
+
+      {/* ROW 1 */}
+      <div className="relative w-[95%] h-[32px] flex items-center justify-between px-4 text-white font-medium
+        bg-gradient-to-r from-purple-400 to-blue-400
+        clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
+        <span>1.5M Impressions</span>
+        <span>230K Clicks</span>
+
+        {/* CENTER % */}
+        <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-gray-200">
+          15%
+        </div>
+      </div>
+
+      {/* ROW 2 */}
+      <div className="relative w-[80%] h-[32px] flex items-center justify-between px-4 text-white font-medium
+        bg-gradient-to-r from-blue-400 to-green-400
+        clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
+        <span></span>
+        <span>45K Leads</span>
+
+        <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-gray-200">
+          19%
+        </div>
+      </div>
+
+      {/* ROW 3 */}
+      <div className="relative w-[65%] h-[32px] flex items-center justify-between px-4 text-white font-medium
+        bg-gradient-to-r from-green-400 to-lime-200
+        clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
+        <span></span>
+        <span>19% Lead Conversion</span>
+
+        <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-gray-200">
+          18%
+        </div>
+      </div>
+
+      {/* ROW 4 */}
+      <div className="relative w-[50%] h-[32px] flex items-center justify-between px-4 text-white font-medium
+        bg-gradient-to-r from-orange-400 to-red-400
+        clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
+        <span></span>
+        <span>8,450 Orders</span>
+
+        <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-gray-200">
+          18%
+        </div>
+      </div>
+
+    </div>
+  </Card>
+</div>
+
+    </div>
     </div>
   );
 }
- 
- 
- 

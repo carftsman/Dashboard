@@ -33,9 +33,9 @@ h1, h2 {
 /* Form elements */
 input, select, textarea {
   width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  margin-bottom: 15px;
+  /* padding: 10px; */
+  /* margin-top: 6px; */
+  /* margin-bottom: 15px; */
   border: 1px solid #ccc;
   border-radius: 5px;
 }
@@ -55,11 +55,11 @@ button:hover {
 }
 
 /* Responsive grid layout */
-.grid {
+/* .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-}
+} */
 
 /* Card style used in dashboard */
 .card {
