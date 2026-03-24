@@ -14,6 +14,7 @@ import Reports from "../pages/Reports";
 import AdminDashboard from "../pages/admin/adminDashboard";
 import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
+import Userlogs from "../pages/userlogs";
  
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
@@ -115,6 +116,15 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <ManageUsers />
           </ProtectedRoute>
+        }
+      />
+
+       <Route
+        path="/user-logs"
+        element={
+        //  <ProtectedRoute>
+            <Userlogs />
+        //  </ProtectedRoute>
         }
       />
  
