@@ -6,7 +6,7 @@
   font-family: "Segoe UI", sans-serif;
 }
 
-/* LEFT PANEL (SLIDER) */
+/* LEFT PANEL */
 .left-panel {
   flex: 1;
   position: relative;
@@ -23,7 +23,7 @@
   height: 100%;
 }
 
-/* BLURRED BACKGROUND */
+/* BLUR BACKGROUND */
 .bg-blur {
   position: absolute;
   width: 100%;
@@ -59,7 +59,7 @@
 /* LOGIN CARD */
 .login-card {
   width: 100%;
-  max-width: 420px; /* ✅ FIX: better responsiveness */
+  max-width: 420px;
   padding: 35px 30px;
   border-radius: 14px;
   background: #ffffff;
@@ -71,9 +71,6 @@
 .logo-login {
   width: 55px;
   margin-bottom: 10px;
-
-  /* ❌ removed margin-left */
-  /* ✅ center properly */
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -107,6 +104,7 @@
   display: block;
 }
 
+/* NORMAL INPUT (EMAIL ONLY) */
 .input-group input {
   width: 100%;
   padding: 11px 12px;
@@ -124,7 +122,35 @@
   outline: none;
 }
 
-/* ❗ ERROR TEXT (for validation) */
+/* PASSWORD BOX FIX */
+.password-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e6ef;
+  border-radius: 6px;
+  height: 42px;
+  padding: 0 12px;
+  background: #f9fafc;
+}
+
+/* REMOVE BORDER FROM PASSWORD INPUT */
+.password-box input {
+  flex: 1;
+  border: none !important;
+  outline: none;
+  background: transparent !important;
+  font-size: 13px;
+  padding: 0;
+}
+
+/* FOCUS EFFECT */
+.password-box:focus-within {
+  border-color: #4a90e2;
+  background: #fff;
+}
+
+
+/* ERROR TEXT */
 .error-text {
   color: red;
   font-size: 11px;
@@ -151,7 +177,7 @@
 .login-btn {
   width: 100%;
   padding: 12px;
-  background: #1f2a44;
+  background: #192A51;
   border: none;
   color: #fff;
   font-size: 14px;
@@ -161,7 +187,7 @@
 }
 
 .login-btn:hover {
-  background: #162033;
+  background: #0f1e3d;
 }
 
 /* RESPONSIVE */
@@ -179,7 +205,7 @@
   }
 }
 
-/* EXTRA SMALL DEVICES */
+/* SMALL DEVICES */
 @media (max-width: 500px) {
   .login-card {
     padding: 25px 20px;
