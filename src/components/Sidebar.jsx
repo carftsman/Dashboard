@@ -5,14 +5,14 @@ import {
   FaUserClock,
   FaSignOutAlt,
   FaChevronDown,
-  FaChartLine,      // ROI (already good)
+  FaChartLine,      
   FaUserTie,
   FaStore,
   FaUsers,
   FaMotorcycle,
-  FaBullhorn,       // ✅ Marketing
-  FaShoppingCart,   // ✅ Sales
-  FaMoneyBillWave   // ✅ Optional (Revenue / Sales alt)
+  FaBullhorn,       
+  FaShoppingCart,   
+  FaMoneyBillWave   
 } from "react-icons/fa";
 
 
