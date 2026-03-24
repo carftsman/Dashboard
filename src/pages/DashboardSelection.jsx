@@ -38,21 +38,21 @@ function Dashboard() {
 
   // ✅ ENSURE ALL COLORS UNIQUE
   const getColor = (category) => {
-    switch (category) {
-      case "SALES":
-        return "#fde2e4";
-      case "MARKETING":
-        return "#e2f0cb";
-      case "CUSTOMER":
-        return "#d0ebff";
-      case "SUPPLY":
-        return "#fff3bf";
-      case "QA":
-        return "#e5dbff";
-      default:
-        return "#e6ecf5";
-    }
-  };
+  switch (category) {
+    case "MARKETING":
+      return "#f5e6e8"; // light pink
+    case "SALES":
+      return "#fde8d5"; // peach
+    case "CUSTOMER":
+      return "#d9f3ef"; // mint green
+    case "SUPPLY":
+      return "#e8eef7"; // light blue-gray
+    case "QA":
+      return "#efe6ff"; // lavender
+    default:
+      return "#f1f5f9";
+  }
+};
 
   useEffect(() => {
     const fetchDashboards = async () => {

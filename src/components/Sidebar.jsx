@@ -10,9 +10,9 @@ import {
   FaStore,
   FaUsers,
   FaMotorcycle,
-  FaBullhorn,       // ✅ Marketing
-  FaShoppingCart,   // ✅ Sales
-  FaMoneyBillWave   // ✅ Optional (Revenue / Sales alt)
+  FaBullhorn,       
+  FaShoppingCart,   
+  FaMoneyBillWave   
 } from "react-icons/fa";
 
 
@@ -31,7 +31,7 @@ const Sidebar = () => {
   const fetchDashboards = async () => {
     try {
       const res = await axios.get(
-        "https://dashboard-backend-cyrd.onrender.com/api/admin/get_dashboards"
+        "https://dashboard-backend-cyrd.onrender.com/api/dashboards"
       );
       setDashboards(res.data.data || []);
     } catch (error) {
