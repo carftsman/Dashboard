@@ -5,14 +5,7 @@ import {
   FaUserClock,
   FaSignOutAlt,
   FaChevronDown,
-  FaChartLine,      // ROI (already good)
-  FaUserTie,
-  FaStore,
-  FaUsers,
-  FaMotorcycle,
-  FaBullhorn,       // ✅ Marketing
-  FaShoppingCart,   // ✅ Sales
-  FaMoneyBillWave   // ✅ Optional (Revenue / Sales alt)
+
 } from "react-icons/fa";
 
 import { NavLink, useLocation } from "react-router-dom";
@@ -32,10 +25,10 @@ const Sidebar = () => {
     try {
       const token = localStorage.getItem("token");
 
-      console.log("🔐 TOKEN:", token);
+      console.log(" TOKEN:", token);
 
       if (!token) {
-        console.error("❌ No token found. Please login.");
+        console.error("No token found. Please login.");
         return;
       }
 
@@ -48,13 +41,13 @@ const Sidebar = () => {
         }
       );
 
-      console.log("✅ DASHBOARDS API RESPONSE:", res.data);
+      console.log(" DASHBOARDS API RESPONSE:", res.data);
 
-      // ✅ API returns array
+      //  API returns array
       setDashboards(res.data);
     } catch (error) {
       console.error(
-        "❌ API ERROR:",
+        " API ERROR:",
         error.response?.data || error.message
       );
 
@@ -139,7 +132,7 @@ const Sidebar = () => {
                       }`
                     }
                   >
-                    {/* ✅ IMAGE OR ICON */}
+                    {/*  IMAGE OR ICON */}
                     {item.image ? (
                       <img
                         src={item.image}
