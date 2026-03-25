@@ -5,74 +5,66 @@ import {
   FaUserClock,
   FaSignOutAlt,
   FaChevronDown,
-  FaChartLine,      // ROI (already good)
-  FaUserTie,
-  FaStore,
-  FaUsers,
-  FaMotorcycle,
-  FaBullhorn,       // ✅ Marketing
-  FaShoppingCart,   // ✅ Sales
-  FaMoneyBillWave   // ✅ Optional (Revenue / Sales alt)
 } from "react-icons/fa";
-
-
+ 
 import { NavLink, useLocation } from "react-router-dom";
 import axios from "axios";
-
+ 
 const Sidebar = () => {
   const [openDashboard, setOpenDashboard] = useState(false);
   const [dashboards, setDashboards] = useState([]);
   const location = useLocation();
-
+ 
+ 
   useEffect(() => {
     fetchDashboards();
   }, []);
-
+ 
   const fetchDashboards = async () => {
     try {
+      const token = localStorage.getItem("token");
+ 
+      console.log(" TOKEN:", token);
+ 
+      if (!token) {
+        console.error("No token found. Please login.");
+        return;
+      }
+ 
       const res = await axios.get(
-        "https://dashboard-backend-cyrd.onrender.com/api/admin/get_dashboards"
+        "https://dashboard-backend-cyrd.onrender.com/api/dashboards",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      setDashboards(res.data.data || []);
+ 
+      console.log(" DASHBOARDS API RESPONSE:", res.data);
+ 
+      setDashboards(res.data);
     } catch (error) {
-      console.error("API ERROR:", error);
+      console.error(
+        " API ERROR:",
+        error.response?.data || error.message
+      );
+ 
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
+ 
       setDashboards([]);
     }
   };
-
-  useEffect(() => {
-    if (location.pathname.startsWith("/dashboard")) {
-      setOpenDashboard(true);
-    }
-  }, [location]);
-
-  const getDashboardIcon = (category) => {
-    switch (category) {
-      case "SALES":
-        return <FaShoppingCart/>;
-        case "ROI":
-        return <FaMotorcycle/>;
-        case "Marketing":
-        return <FaBullhorn/>;
-      case "FIELD_SALES":
-        return <FaUserTie />;
-      case "VENDOR":
-        return <FaStore />;
-      case "CUSTOMER":
-        return <FaUsers />;
-      case "RIDER":
-        return <FaMotorcycle />;
-      default:
-        return <FaThLarge />;
-    }
-  };
-
+ 
+ 
   return (
     <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
-      
-      {/* TOP SECTION */}
+     
+      {/* ================= TOP ================= */}
       <div>
-        
+ 
         {/* LOGO */}
         <div className="flex items-center px-2 py-1">
           <img
@@ -85,13 +77,12 @@ const Sidebar = () => {
             <span className="text-[#f4c542]">Bot</span>
           </h2>
         </div>
-
-        {/* DIVIDER */}
+ 
         <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
-
-        {/* MENU */}
+ 
+        {/* ================= MENU ================= */}
         <div className="mt-[15px] px-3">
-
+ 
           {/* DASHBOARD */}
           <div
             onClick={() => setOpenDashboard(!openDashboard)}
@@ -104,36 +95,49 @@ const Sidebar = () => {
           >
             <FaThLarge className="text-[15px]" />
             <span>Dashboard</span>
-
+ 
             <FaChevronDown
               className={`ml-auto text-[12px] transition-transform duration-300 ${
                 openDashboard ? "rotate-180" : ""
               }`}
             />
-
+ 
             {openDashboard && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542] rounded" />
             )}
           </div>
-
-          {/* SUBMENU */}
+ 
+          {/* ================= SUBMENU ================= */}
           {openDashboard && (
             <div className="pl-[35px] mt-[5px]">
+ 
               {dashboards.length > 0 ? (
                 dashboards.map((item) => (
                   <NavLink
-                    key={item.dashboardId}
-                    to={`/dashboard/${item.dashboardId}`}
+                    key={item.id}
+                    to={`/dashboard/${item.id}`}
                     className={({ isActive }) =>
                       `flex items-center gap-2 py-2 text-[13px] transition-all ${
                         isActive
-                          ? "text-white"
+                          ? "text-white font-medium"
                           : "text-slate-300 hover:text-white"
                       }`
                     }
                   >
-                    {getDashboardIcon(item.category)}
-                    <span>{item.dashboardName}</span>
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-[36px] h-[36px] rounded-lg object-cover shadow-sm"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <FaThLarge />
+                    )}
+ 
+                    <span>{item.name}</span>
                   </NavLink>
                 ))
               ) : (
@@ -141,12 +145,13 @@ const Sidebar = () => {
                   No dashboards found
                 </p>
               )}
+ 
             </div>
           )}
-
+ 
           {/* USERS LOG */}
           <NavLink
-            to="/users-log"
+            to="/users-logs"
             className={({ isActive }) =>
               `relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px] transition-all
               ${
@@ -159,13 +164,19 @@ const Sidebar = () => {
             <FaUserClock className="text-[15px]" />
             <span>Users Log</span>
           </NavLink>
-
+ 
         </div>
       </div>
-
-      {/* LOGOUT */}
+ 
+      {/* ================= LOGOUT ================= */}
       <div className="p-[15px]">
-        <button className="w-full bg-[#2a4270] hover:bg-[#3b5a91] transition-all duration-200 transform hover:-translate-y-[2px] text-gray-200 flex items-center justify-center gap-2 py-3 rounded-[10px]">
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+          }}
+          className="w-full bg-[#2a4270] hover:bg-[#3b5a91] transition-all duration-200 transform hover:-translate-y-[2px] text-gray-200 flex items-center justify-center gap-2 py-3 rounded-[10px]"
+        >
           <FaSignOutAlt className="text-[13px]" />
           Logout
         </button>
@@ -173,5 +184,5 @@ const Sidebar = () => {
     </div>
   );
 };
-
+ 
 export default Sidebar;
