@@ -122,7 +122,7 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate("/reports", { state: card.originalData });
+                      navigate(`/reports/${card.dashboardId}`);
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
