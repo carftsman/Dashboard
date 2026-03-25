@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar"; 
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ function Dashboard() {
               />
             </div>
 
-            {/* Profile ICON  */}
+            {/* Profile ICON */}
             <div
               className="w-10 h-10 min-w-[40px] min-h-[40px] cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
               onClick={() => navigate("/profile")}
