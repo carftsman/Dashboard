@@ -98,8 +98,8 @@ export default function ColumnMapping() {
 
         sysCols.forEach((sysCol) => {
           console.log("one sys col",sysCol);
-          const sysNameClean = (sysCol.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-          const sysKeyClean = (sysCol.key || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+          const sysNameClean = (sysCol.displayName || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+          const sysKeyClean = (sysCol.columnKey || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
           // 1. Try exact match loosely
           let match = fileCols.find((fc) => {
@@ -116,8 +116,8 @@ export default function ColumnMapping() {
           }
 
           if (match) {
-            // we use the templateField as key, assuming it's sysCol.key or sysCol.name
-            initialMappings[sysCol.key || sysCol.name] = match;
+            // we use the templateField as key, assuming it's sysCol.columnKey or sysCol.displayName
+            initialMappings[sysCol.columnKey || sysCol.displayName] = match;
           }
         });
 
@@ -252,7 +252,7 @@ export default function ColumnMapping() {
                 {/* Table Body */}
                 <div className="flex flex-col">
                   {sysCols.map((sysCol, index) => {
-                    const colKey = sysCol.key || sysCol.name;
+                    const colKey = sysCol.columnKey || sysCol.displayName;
                     const isMapped = !!mappings[colKey];
                     const selectedValue = mappings[colKey] || "";
 
@@ -265,9 +265,9 @@ export default function ColumnMapping() {
                       >
                         {/* System Column Name */}
                         <div className="flex items-center gap-3">
-                          {getSystemIcon(sysCol.name)}
+                          {getSystemIcon(sysCol.displayName)}
                           <span className="text-[14px] font-medium text-[#334155]">
-                            {sysCol.name}
+                            {sysCol.displayName}
                           </span>
                         </div>
 
