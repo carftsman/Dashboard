@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useContext } from "react";
+import { useLocation } from "react-router-dom";
 
 import { uploadSalesFile } from "../services/uploadService";
 import { AuthContext } from "../context/AuthContext";
@@ -54,9 +55,11 @@ function UploadIcon() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function UploadData() {
-  const { user } = useContext(AuthContext);
+  const location = useLocation();
+  console.log("location.state?.dashboardId",location.state?.dashboardId);
 
-  // Read dashboardId: try context user first, then localStorage fallback
+
+  // Read dashboardId: try navigation state first, then context user, then localStorage fallback
   const storedUser = (() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "{}");
@@ -64,13 +67,8 @@ export default function UploadData() {
       return {};
     }
   })();
-  const dashboardId =
-    user?.dashboardId ||
-    user?.id ||
-    storedUser?.dashboardId ||
-    storedUser?.id ||
-    null;
 
+  const dashboardId =location.state?.dashboardId;
   const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
@@ -192,12 +190,12 @@ export default function UploadData() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100 ">
       {/* Sidebar — untouched */}
       <Sidebar/>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 ml-[220px]">
         {/* Page Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-10">
           {/* Title */}

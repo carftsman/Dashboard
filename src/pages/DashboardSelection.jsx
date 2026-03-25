@@ -89,7 +89,9 @@ function Dashboard() {
 
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
 
-          {filteredCards.map((card) => (
+          {filteredCards.map((card) =>{
+            console.log("card in dashboardselection",card);
+             return  (
             <div
               key={card.dashboardId}
               className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden 
@@ -122,7 +124,7 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate("/reports", { state: card.originalData });
+                      navigate(`/reports/${card.dashboardId}`, { state: card.originalData });
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
@@ -134,7 +136,7 @@ function Dashboard() {
 
               </div>
             </div>
-          ))}
+          )})}
 
         </div>
 

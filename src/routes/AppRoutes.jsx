@@ -83,14 +83,8 @@ const AppRoutes = () => {
         }
       />
  
-      <Route
-        path="/reports"
-        element={
-          //<ProtectedRoute>
-            <Reports />
-          //</ProtectedRoute>
-        }
-      />
+      <Route path="/reports/:id" 
+      element={<Reports />} />
  
       <Route
         path="/profile"

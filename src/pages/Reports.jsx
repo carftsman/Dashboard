@@ -3,13 +3,12 @@ import reportsData from "../mockdata/reportsData";
 import ReportTable from "../components/ReportTable";
 import Sidebar from "../components/Sidebar";
 
+
 export default function Reports() {
   const navigate = useNavigate();
-
-  const { type } = useParams();
-  console.log(type);
+  const {id,type} = useParams();
+  console.log("id",id);
   const reports = reportsData[type] || [];
-  console.log("type and reports");
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -46,7 +45,7 @@ export default function Reports() {
             <button className="bg-[#2B3F8F] hover:bg-[#1f2f6b] text-white px-5 py-2 rounded-lg transition"
             onClick={(e) => {
                   e.stopPropagation();
-                  navigate("/upload-data");
+                  navigate("/upload-data", { state: { dashboardId: id } });
                 }}
             >
               Upload Data
@@ -80,8 +79,6 @@ export default function Reports() {
     : "Reports"}
 </h2>
             </h2>
-            
-
             <p className="text-gray-500 text-sm mb-4">
               Browse, manage and export data summaries
             </p>

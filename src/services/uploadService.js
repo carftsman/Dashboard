@@ -19,7 +19,7 @@ export const uploadSalesFile = async (dashboardId, file) => {
   formData.append("file", file);
 
   try {
-    const response = await api.post("/api/dashboard/upload/sales", formData, {
+    const response = await api.post("/api/upload/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
