@@ -50,7 +50,7 @@ const UserLogs = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-xs md:text-sm border-collapse border-spacing-0">
               
-              <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] md:text-xs">
+              <thead className="bg-[#192A51] text-gray-500 uppercase text-[10px] md:text-xs">
                 <tr>
                   <th className="px-3 md:px-6 py-3 text-left">S.NO</th>
                   <th className="px-3 md:px-6 py-3 text-left">USER</th>
