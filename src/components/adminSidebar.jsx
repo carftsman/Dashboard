@@ -20,34 +20,39 @@ import api from "../api/apiConfig";
 
 const AdminSidebar = () => {
 
-  // State to control dropdowns
+  // State to control dropdown open/close
   const [openDashboard, setOpenDashboard] = useState(false);
   const [openHome, setOpenHome] = useState(false);
 
-  // Stores dashboards fetched from backend API
+  // Store dashboards fetched from backend API
   const [apiDashboards, setApiDashboards] = useState([]);
 
-  // React Router hooks
+  // React Router hooks to get current route and navigate
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Page detection based on current URL
+  // Identify current page based on URL path
   const isHomePage = location.pathname === "/admin-dashboard";
   const isReportsPage = location.pathname.startsWith("/reports");
   const isUsersPage = location.pathname.startsWith("/manage-users");
   const isDataSchemaPage = location.pathname.startsWith("/data-schema");
 
-  // Get selected dashboard (passed via navigation state)
+  // Check if Dashboard section should be highlighted
+  const isDashboardPage =
+    location.pathname.startsWith("/reports") ||
+    location.pathname.startsWith("/dashboard-selection");
+
+  // Get selected dashboard passed via navigation
   const selectedDashboard = location.state?.selectedDashboard;
 
-  // Automatically open Dashboard section if route starts with /dashboard
+  // Automatically open Dashboard dropdown when route starts with /dashboard
   useEffect(() => {
     if (location.pathname.startsWith("/dashboard")) {
       setOpenDashboard(true);
     }
   }, [location]);
 
-  // Automatically open Home section for related pages
+  // Automatically open Home dropdown for related pages
   useEffect(() => {
     if (
       location.pathname.startsWith("/manage-users") ||
@@ -60,7 +65,7 @@ const AdminSidebar = () => {
     }
   }, [location]);
 
-  // Returns icon based on dashboard ID
+  // Return icon based on dashboard id
   const getDashboardIcon = (id) => {
     switch (id) {
       case "sales":
@@ -79,13 +84,17 @@ const AdminSidebar = () => {
   };
 
   return (
+    // Sidebar container
     <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
 
       <div>
 
         {/* App Logo Section */}
         <div className="flex items-center px-2 py-1">
+          {/* Logo Image */}
           <img src={logo} alt="ZestBot" className="w-[85px] h-[85px] object-contain" />
+
+          {/* App Name */}
           <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
             <span className="text-white">Zest</span>
             <span className="text-[#f4c542]">Bot</span>
@@ -99,7 +108,7 @@ const AdminSidebar = () => {
 
           {/* HOME MAIN ITEM */}
           <div
-            onClick={() => setOpenHome(!openHome)} // Toggle Home submenu
+            onClick={() => setOpenHome(!openHome)} // toggle submenu
             className={`relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
             ${isHomePage
               ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
@@ -108,7 +117,7 @@ const AdminSidebar = () => {
             <FaHome />
             <span>Home</span>
 
-            {/* Left indicator bar when active */}
+            {/* Active indicator line */}
             {isHomePage && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
             )}
@@ -131,13 +140,11 @@ const AdminSidebar = () => {
               </NavLink>
 
               {/* Dashboard Selection */}
-              <NavLink to="/dashboard-selection" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
-                hover:scale-105 hover:translate-x-[5px]
-                ${isActive
-                  ? "text-white font-semibold"
-                  : "text-slate-300 hover:text-white"}`
-              }>
+              <NavLink
+                to="/dashboard-selection"
+                className="flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
+                text-slate-300 hover:text-white hover:scale-105 hover:translate-x-[5px]"
+              >
                 <FaThLarge />
                 <span>Dashboards</span>
               </NavLink>
@@ -171,9 +178,9 @@ const AdminSidebar = () => {
 
           {/* DASHBOARD MAIN ITEM */}
           <div
-            onClick={() => navigate("/dashboard-selection")} // Navigate to dashboard page
+            onClick={() => navigate("/dashboard-selection")} // navigate on click
             className={`relative flex items-center justify-between px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
-            ${isReportsPage
+            ${isDashboardPage
               ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
               : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
           >
@@ -182,12 +189,12 @@ const AdminSidebar = () => {
               <span>Dashboard</span>
             </div>
 
-            {/* Dropdown arrow to fetch and toggle dashboards */}
+            {/* Dropdown toggle icon */}
             <FaChevronDown
               onClick={async (e) => {
-                e.stopPropagation(); // Prevent parent click navigation
+                e.stopPropagation(); // prevent parent click
 
-                // Fetch dashboards only when opening for first time
+                // Fetch dashboards only when opening
                 if (!openDashboard) {
                   try {
                     const response = await api.get("/api/dashboards");
@@ -203,26 +210,26 @@ const AdminSidebar = () => {
             />
 
             {/* Active indicator */}
-            {isReportsPage && (
+            {isDashboardPage && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
             )}
           </div>
 
-          {/* DASHBOARD SUBMENU (Dynamic from API) */}
+          {/* DASHBOARD SUBMENU */}
           {openDashboard && (
             <div className="pl-[35px] mt-[5px]">
               {apiDashboards.map((item) => (
                 <NavLink
                   key={item.id}
                   to="/reports"
-                  state={{ selectedDashboard: item.id }} // Pass selected dashboard
+                  state={{ selectedDashboard: item.id }} // pass selected dashboard
                   className={`flex items-start gap-2 py-2 text-[13px] leading-tight transition-all duration-200 transform
                     hover:scale-105 hover:translate-x-[5px]
                     ${selectedDashboard === item.id
                       ? "text-white font-semibold"
                       : "text-slate-300 hover:text-white"}`}
                 >
-                  {/* Dynamic icon */}
+                  {/* Dashboard icon */}
                   <div className="mt-[2px]">
                     {getDashboardIcon(item.id)}
                   </div>
@@ -236,7 +243,7 @@ const AdminSidebar = () => {
             </div>
           )}
 
-          {/* USERS MAIN LINK */}
+          {/* USERS */}
           <NavLink
             to="/manage-users"
             className={({ isActive }) =>
@@ -250,7 +257,7 @@ const AdminSidebar = () => {
             <span>Users</span>
           </NavLink>
 
-          {/* DATA SCHEMA MAIN LINK */}
+          {/* DATA SCHEMA */}
           <NavLink
             to="/data-schema"
             className={({ isActive }) =>
@@ -270,7 +277,7 @@ const AdminSidebar = () => {
       {/* LOGOUT BUTTON */}
       <div className="p-[15px]">
         <button
-          onClick={() => navigate("/profile")} // Redirect to profile page
+          onClick={() => navigate("/profile")} // navigate to profile
           className="w-full bg-[#2a4270] hover:bg-[#3b5a91] flex items-center justify-center gap-2 py-3 rounded-[10px]"
         >
           <FaSignOutAlt />
