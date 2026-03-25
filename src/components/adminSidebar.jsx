@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import logo from "../assets/images/zest.png";
+
+// Icons used in sidebar
 import {
   FaThLarge,
   FaSignOutAlt,
@@ -17,25 +19,35 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import api from "../api/apiConfig";
 
 const AdminSidebar = () => {
+
+  // State to control dropdowns
   const [openDashboard, setOpenDashboard] = useState(false);
   const [openHome, setOpenHome] = useState(false);
+
+  // Stores dashboards fetched from backend API
   const [apiDashboards, setApiDashboards] = useState([]);
+
+  // React Router hooks
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Page detection based on current URL
   const isHomePage = location.pathname === "/admin-dashboard";
   const isReportsPage = location.pathname.startsWith("/reports");
   const isUsersPage = location.pathname.startsWith("/manage-users");
   const isDataSchemaPage = location.pathname.startsWith("/data-schema");
 
+  // Get selected dashboard (passed via navigation state)
   const selectedDashboard = location.state?.selectedDashboard;
 
+  // Automatically open Dashboard section if route starts with /dashboard
   useEffect(() => {
     if (location.pathname.startsWith("/dashboard")) {
       setOpenDashboard(true);
     }
   }, [location]);
 
+  // Automatically open Home section for related pages
   useEffect(() => {
     if (
       location.pathname.startsWith("/manage-users") ||
@@ -48,6 +60,7 @@ const AdminSidebar = () => {
     }
   }, [location]);
 
+  // Returns icon based on dashboard ID
   const getDashboardIcon = (id) => {
     switch (id) {
       case "sales":
@@ -70,7 +83,7 @@ const AdminSidebar = () => {
 
       <div>
 
-        {/* LOGO */}
+        {/* App Logo Section */}
         <div className="flex items-center px-2 py-1">
           <img src={logo} alt="ZestBot" className="w-[85px] h-[85px] object-contain" />
           <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
@@ -79,13 +92,14 @@ const AdminSidebar = () => {
           </h2>
         </div>
 
+        {/* Divider line */}
         <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
 
         <div className="mt-[15px] px-3">
 
-          {/* HOME */}
+          {/* HOME MAIN ITEM */}
           <div
-            onClick={() => setOpenHome(!openHome)}
+            onClick={() => setOpenHome(!openHome)} // Toggle Home submenu
             className={`relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
             ${isHomePage
               ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
@@ -94,14 +108,17 @@ const AdminSidebar = () => {
             <FaHome />
             <span>Home</span>
 
+            {/* Left indicator bar when active */}
             {isHomePage && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
             )}
           </div>
 
+          {/* HOME SUBMENU */}
           {openHome && (
             <div className="pl-[35px] mt-[5px]">
 
+              {/* Manage Users */}
               <NavLink to="/manage-users" className={({ isActive }) =>
                 `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
                 hover:scale-105 hover:translate-x-[5px]
@@ -113,6 +130,7 @@ const AdminSidebar = () => {
                 <span>Manage Users</span>
               </NavLink>
 
+              {/* Dashboard Selection */}
               <NavLink to="/dashboard-selection" className={({ isActive }) =>
                 `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
                 hover:scale-105 hover:translate-x-[5px]
@@ -124,6 +142,7 @@ const AdminSidebar = () => {
                 <span>Dashboards</span>
               </NavLink>
 
+              {/* Data Schema */}
               <NavLink to="/data-schema" className={({ isActive }) =>
                 `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
                 hover:scale-105 hover:translate-x-[5px]
@@ -135,6 +154,7 @@ const AdminSidebar = () => {
                 <span>Edit Data Schema</span>
               </NavLink>
 
+              {/* Reports */}
               <NavLink to="/reports" className={({ isActive }) =>
                 `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
                 hover:scale-105 hover:translate-x-[5px]
@@ -149,9 +169,9 @@ const AdminSidebar = () => {
             </div>
           )}
 
-          {/* DASHBOARD */}
+          {/* DASHBOARD MAIN ITEM */}
           <div
-            onClick={() => navigate("/dashboard-selection")}
+            onClick={() => navigate("/dashboard-selection")} // Navigate to dashboard page
             className={`relative flex items-center justify-between px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
             ${isReportsPage
               ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
@@ -162,11 +182,12 @@ const AdminSidebar = () => {
               <span>Dashboard</span>
             </div>
 
-            {/* ✅ FIXED DOWN ARROW */}
+            {/* Dropdown arrow to fetch and toggle dashboards */}
             <FaChevronDown
               onClick={async (e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent parent click navigation
 
+                // Fetch dashboards only when opening for first time
                 if (!openDashboard) {
                   try {
                     const response = await api.get("/api/dashboards");
@@ -181,29 +202,32 @@ const AdminSidebar = () => {
               className={`transition-transform duration-300 ${openDashboard ? "rotate-180" : ""}`}
             />
 
+            {/* Active indicator */}
             {isReportsPage && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
             )}
           </div>
 
-          {/* DASHBOARD SUBMENU */}
+          {/* DASHBOARD SUBMENU (Dynamic from API) */}
           {openDashboard && (
             <div className="pl-[35px] mt-[5px]">
               {apiDashboards.map((item) => (
                 <NavLink
                   key={item.id}
                   to="/reports"
-                  state={{ selectedDashboard: item.id }}
+                  state={{ selectedDashboard: item.id }} // Pass selected dashboard
                   className={`flex items-start gap-2 py-2 text-[13px] leading-tight transition-all duration-200 transform
                     hover:scale-105 hover:translate-x-[5px]
                     ${selectedDashboard === item.id
                       ? "text-white font-semibold"
                       : "text-slate-300 hover:text-white"}`}
                 >
+                  {/* Dynamic icon */}
                   <div className="mt-[2px]">
                     {getDashboardIcon(item.id)}
                   </div>
 
+                  {/* Dashboard name */}
                   <span className="break-words whitespace-normal">
                     {item.name}
                   </span>
@@ -212,27 +236,29 @@ const AdminSidebar = () => {
             </div>
           )}
 
-          {/* USERS */}
+          {/* USERS MAIN LINK */}
           <NavLink
             to="/manage-users"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
               ${(isUsersPage || isActive)
                 ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
+                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`
+            }
           >
             <FaUsers />
             <span>Users</span>
           </NavLink>
 
-          {/* DATA SCHEMA */}
+          {/* DATA SCHEMA MAIN LINK */}
           <NavLink
             to="/data-schema"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
               ${(isDataSchemaPage || isActive)
                 ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
+                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`
+            }
           >
             <FaDatabase />
             <span>Data Schema</span>
@@ -241,10 +267,10 @@ const AdminSidebar = () => {
         </div>
       </div>
 
-      {/* LOGOUT */}
+      {/* LOGOUT BUTTON */}
       <div className="p-[15px]">
         <button
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/profile")} // Redirect to profile page
           className="w-full bg-[#2a4270] hover:bg-[#3b5a91] flex items-center justify-center gap-2 py-3 rounded-[10px]"
         >
           <FaSignOutAlt />
