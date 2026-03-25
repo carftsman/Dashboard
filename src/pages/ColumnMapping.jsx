@@ -99,19 +99,18 @@ export default function ColumnMapping() {
         sysCols.forEach((sysCol) => {
           console.log("one sys col",sysCol);
           const sysNameClean = (sysCol.displayName || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-          const sysKeyClean = (sysCol.columnKey || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
           // 1. Try exact match loosely
           let match = fileCols.find((fc) => {
             const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
-            return fcClean === sysNameClean || (sysKeyClean && fcClean === sysKeyClean);
+            return fcClean === sysNameClean;
           });
           
           // 2. Try partial match if no exact
           if (!match) {
             match = fileCols.find((fc) => {
               const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
-              return fcClean.includes(sysNameClean) || (sysKeyClean && fcClean.includes(sysKeyClean));
+              return fcClean.includes(sysNameClean);
             });
           }
 
@@ -150,6 +149,17 @@ export default function ColumnMapping() {
       setError("");
       setSuccess("");
 
+      const sysCols = mappingData?.dashboardColumns || [];
+      const totalCols = sysCols.length;
+      const mappedCols = Object.keys(mappings).length;
+
+      // 1. Edge Case: Check if ALL columns are mapped
+      if (mappedCols < totalCols) {
+        setError(`Please map all ${totalCols} system columns before proceeding. You have only mapped ${mappedCols}.`);
+        setSubmitting(false);
+        return;
+      }
+
       const dashboardId = mappingData?.dashboardId || mappingData?.dashboardColumns?.[0]?.dashboardId || 1;
 
       // Formatting payload to hit postManualMapping
@@ -159,8 +169,9 @@ export default function ColumnMapping() {
         fileColumn,
       }));
 
+      // 2. Edge Case: Safety check for empty mappings
       if (payloadMappings.length === 0) {
-        setError("At least one column must be mapped.");
+        setError("No mappings found to submit.");
         setSubmitting(false);
         return;
       }
@@ -170,11 +181,15 @@ export default function ColumnMapping() {
         mappings: payloadMappings,
       });
 
-      // Show success message as per user's request
-      setSuccess("Mappings successfully saved! The file is being processed.");
+      setSuccess("Mappings successfully saved! Redirecting to validation...");
+      
+      // 3. Navigate to Data Validation screen
+      setTimeout(() => {
+        navigate("/data-validation", { state: { fileId } });
+      }, 1500);
+
     } catch (err) {
       setError(err?.message || err?.error || "Failed to submit column mappings.");
-    } finally {
       setSubmitting(false);
     }
   };
@@ -326,9 +341,9 @@ export default function ColumnMapping() {
 
                 <button
                   onClick={handleReviewData}
-                  disabled={submitting || mappedCols === 0}
+                  disabled={submitting}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all ${
-                    submitting || mappedCols === 0
+                    submitting
                       ? "bg-[#94a3b8] text-white cursor-not-allowed opacity-70"
                       : "bg-[#1e293b] hover:bg-[#0f172a] text-white shadow-md active:scale-[0.98]"
                   }`}
