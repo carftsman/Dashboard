@@ -7,7 +7,9 @@ export default function Reports() {
   const navigate = useNavigate();
 
   const { type } = useParams();
+  console.log(type);
   const reports = reportsData[type] || [];
+  console.log("type and reports");
 
   return (
     <div className="flex min-h-screen bg-gray-100">

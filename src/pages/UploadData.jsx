@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback, useContext } from "react";
-import Sidebar from "../common/Sidebar";
+
 import { uploadSalesFile } from "../services/uploadService";
 import { AuthContext } from "../context/AuthContext";
+import Sidebar from "../components/Sidebar";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ACCEPTED_TYPES = [
@@ -193,7 +194,7 @@ export default function UploadData() {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar — untouched */}
-      <Sidebar />
+      <Sidebar/>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
