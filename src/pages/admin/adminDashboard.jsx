@@ -5,6 +5,8 @@ import { MdDashboard } from "react-icons/md";
 import { HiDocumentReport } from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
 import AdminSidebar from "../../components/adminSidebar";
+import { useLocation } from "react-router-dom";
+
 
 /* ---------------- Topbar ---------------- */
 function Topbar() {
@@ -27,11 +29,13 @@ function Topbar() {
 }
 
 /* ---------------- Card ---------------- */
-function Card({ title, description, icon, onClick }) {
+function Card({ title, description, icon, onClick, active }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white border border-[#eee] rounded-xl p-4 min-h-[190px] max-h-[220px] flex flex-col justify-between cursor-pointer transition overflow-hidden hover:shadow-md"
+      className={`bg-white border border-[#eee] rounded-xl p-4 min-h-[190px] max-h-[220px] flex flex-col justify-between cursor-pointer transition overflow-hidden
+      hover:shadow-md
+      ${active ? "scale-105 shadow-xl" : ""}`}
     >
       <div className="flex justify-between items-center">
         <div className="bg-indigo-100 p-2 rounded-[10px] text-[#1e1b4b]">
@@ -55,6 +59,9 @@ function Card({ title, description, icon, onClick }) {
 function AdminDashboard() {
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const hoveredItem = location.state?.hoveredItem;
+
   return (
     <div className="flex h-screen w-full overflow-hidden max-w-full">
 
@@ -74,6 +81,7 @@ function AdminDashboard() {
             <Card
               icon={<FaUsers />}
               title="Manage Users"
+              active={hoveredItem === "users"}
               description="Complete control over user authentication, access levels, and organizational hierarchy. Review active sessions and audit user activities across the platform.Monitor active sessions, manage permissions, and audit user activity across the entire platform to ensure security and compliance."
               onClick={() => navigate("/manage-users")}
             />
@@ -82,6 +90,7 @@ function AdminDashboard() {
             <Card
               icon={<MdDashboard />}
               title="Dashboards"
+              active={hoveredItem === "dashboard"}
               description="Visualize real-time system performance, user engagement metrics, and operational KPIs.Customize your view with modular widgets, interactive charts, and automated data refresh cycles for better decision-making."
               onClick={() => navigate("/dashboard-selection")}
             />
@@ -90,6 +99,7 @@ function AdminDashboard() {
             <Card
               icon={<FaDatabase />}
               title="Edit Data Schema"
+              active={hoveredItem === "schema"}
               description="Modify core database structures, define new entity relations, and manage global metadata configurations.Ensure data consistency and integrity through structured validation rules and flexible schema controls."
               onClick={() => navigate("/data-schema")}
             />
@@ -98,6 +108,7 @@ function AdminDashboard() {
             <Card
               icon={<HiDocumentReport />}
               title="Reports"
+              active={hoveredItem === "reports"}
               description="Generate comprehensive PDF and CSV exports for stakeholder review.Schedule automated report generation, track historical data, and configure alerts for critical insights and anomalies."
               onClick={() => navigate("/reports")}
             />

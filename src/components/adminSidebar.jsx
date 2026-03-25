@@ -9,7 +9,8 @@ import {
   FaDatabase,
   FaChartLine,
   FaBox,
-  FaBug
+  FaBug,
+  FaChevronDown
 } from "react-icons/fa";
 
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -22,20 +23,12 @@ const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchDashboards = async () => {
-      try {
-        const response = await api.get("/api/dashboards");
-        setApiDashboards(response.data || []);
-      } catch (error) {
-        console.error("Error fetching dashboards", error);
-      }
-    };
+  const isHomePage = location.pathname === "/admin-dashboard";
+  const isReportsPage = location.pathname.startsWith("/reports");
+  const isUsersPage = location.pathname.startsWith("/manage-users");
+  const isDataSchemaPage = location.pathname.startsWith("/data-schema");
 
-    if (openDashboard) {
-      fetchDashboards();
-    }
-  }, [openDashboard]);
+  const selectedDashboard = location.state?.selectedDashboard;
 
   useEffect(() => {
     if (location.pathname.startsWith("/dashboard")) {
@@ -75,16 +68,11 @@ const AdminSidebar = () => {
   return (
     <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
 
-      {/* TOP SECTION */}
       <div>
 
         {/* LOGO */}
         <div className="flex items-center px-2 py-1">
-          <img
-            src={logo}
-            alt="ZestBot"
-            className="w-[85px] h-[85px] object-contain"
-          />
+          <img src={logo} alt="ZestBot" className="w-[85px] h-[85px] object-contain" />
           <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
             <span className="text-white">Zest</span>
             <span className="text-[#f4c542]">Bot</span>
@@ -99,14 +87,14 @@ const AdminSidebar = () => {
           <div
             onClick={() => setOpenHome(!openHome)}
             className={`relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
-            ${openHome
+            ${isHomePage
               ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
               : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
           >
             <FaHome />
             <span>Home</span>
 
-            {openHome && (
+            {isHomePage && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
             )}
           </div>
@@ -115,28 +103,44 @@ const AdminSidebar = () => {
             <div className="pl-[35px] mt-[5px]">
 
               <NavLink to="/manage-users" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] ${isActive ? "text-white" : "text-slate-300 hover:text-white"}`
+                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
+                hover:scale-105 hover:translate-x-[5px]
+                ${(isUsersPage || isActive)
+                  ? "text-white font-semibold"
+                  : "text-slate-300 hover:text-white"}`
               }>
                 <FaUsers />
                 <span>Manage Users</span>
               </NavLink>
 
               <NavLink to="/dashboard-selection" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] ${isActive ? "text-white" : "text-slate-300 hover:text-white"}`
+                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
+                hover:scale-105 hover:translate-x-[5px]
+                ${isActive
+                  ? "text-white font-semibold"
+                  : "text-slate-300 hover:text-white"}`
               }>
                 <FaThLarge />
                 <span>Dashboards</span>
               </NavLink>
 
               <NavLink to="/data-schema" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] ${isActive ? "text-white" : "text-slate-300 hover:text-white"}`
+                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
+                hover:scale-105 hover:translate-x-[5px]
+                ${(isDataSchemaPage || isActive)
+                  ? "text-white font-semibold"
+                  : "text-slate-300 hover:text-white"}`
               }>
                 <FaDatabase />
                 <span>Edit Data Schema</span>
               </NavLink>
 
               <NavLink to="/reports" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] ${isActive ? "text-white" : "text-slate-300 hover:text-white"}`
+                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
+                hover:scale-105 hover:translate-x-[5px]
+                ${(isReportsPage || isActive)
+                  ? "text-white font-semibold"
+                  : "text-slate-300 hover:text-white"}`
               }>
                 <FaBullhorn />
                 <span>Reports</span>
@@ -147,16 +151,37 @@ const AdminSidebar = () => {
 
           {/* DASHBOARD */}
           <div
-            onClick={() => setOpenDashboard(!openDashboard)}
-            className={`relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
-            ${openDashboard
+            onClick={() => navigate("/dashboard-selection")}
+            className={`relative flex items-center justify-between px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
+            ${isReportsPage
               ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
               : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
           >
-            <FaThLarge />
-            <span>Dashboard</span>
+            <div className="flex items-center gap-3">
+              <FaThLarge />
+              <span>Dashboard</span>
+            </div>
 
-            {openDashboard && (
+            {/* ✅ FIXED DOWN ARROW */}
+            <FaChevronDown
+              onClick={async (e) => {
+                e.stopPropagation();
+
+                if (!openDashboard) {
+                  try {
+                    const response = await api.get("/api/dashboards");
+                    setApiDashboards(response.data || []);
+                  } catch (error) {
+                    console.error("Error fetching dashboards", error);
+                  }
+                }
+
+                setOpenDashboard(!openDashboard);
+              }}
+              className={`transition-transform duration-300 ${openDashboard ? "rotate-180" : ""}`}
+            />
+
+            {isReportsPage && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
             )}
           </div>
@@ -167,9 +192,13 @@ const AdminSidebar = () => {
               {apiDashboards.map((item) => (
                 <NavLink
                   key={item.id}
-                  to="/dashboard-selection"
+                  to="/reports"
                   state={{ selectedDashboard: item.id }}
-                  className="flex items-start gap-2 py-2 text-[13px] text-slate-300 hover:text-white leading-tight"
+                  className={`flex items-start gap-2 py-2 text-[13px] leading-tight transition-all duration-200 transform
+                    hover:scale-105 hover:translate-x-[5px]
+                    ${selectedDashboard === item.id
+                      ? "text-white font-semibold"
+                      : "text-slate-300 hover:text-white"}`}
                 >
                   <div className="mt-[2px]">
                     {getDashboardIcon(item.id)}
@@ -188,7 +217,7 @@ const AdminSidebar = () => {
             to="/manage-users"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
-              ${isActive
+              ${(isUsersPage || isActive)
                 ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
                 : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
           >
@@ -201,7 +230,7 @@ const AdminSidebar = () => {
             to="/data-schema"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
-              ${isActive
+              ${(isDataSchemaPage || isActive)
                 ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
                 : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
           >
