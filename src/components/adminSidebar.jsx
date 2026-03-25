@@ -7,27 +7,35 @@ import {
   FaUsers,
   FaHome,
   FaDatabase,
-  FaChartLine,   // ✅ added
-  FaBox,         // ✅ added
-  FaBug          // ✅ added
+  FaChartLine,
+  FaBox,
+  FaBug
 } from "react-icons/fa";
 
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import api from "../api/apiConfig";
 
 const AdminSidebar = () => {
   const [openDashboard, setOpenDashboard] = useState(false);
   const [openHome, setOpenHome] = useState(false);
+  const [apiDashboards, setApiDashboards] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const dashboards = [
-    { id: "sales", name: "Sales Performance" },
-    { id: "customer", name: "Customer Insights" },
-    { id: "supply", name: "Supply Chain" },
-    { id: "marketing", name: "Marketing ROI" },
-    { id: "executive", name: "Executive Summary" },
-    { id: "qa", name: "QA and Stability" }
-  ];
+  useEffect(() => {
+    const fetchDashboards = async () => {
+      try {
+        const response = await api.get("/api/dashboards");
+        setApiDashboards(response.data || []);
+      } catch (error) {
+        console.error("Error fetching dashboards", error);
+      }
+    };
+
+    if (openDashboard) {
+      fetchDashboards();
+    }
+  }, [openDashboard]);
 
   useEffect(() => {
     if (location.pathname.startsWith("/dashboard")) {
@@ -47,7 +55,6 @@ const AdminSidebar = () => {
     }
   }, [location]);
 
-  // ✅ ICON FUNCTION (only addition)
   const getDashboardIcon = (id) => {
     switch (id) {
       case "sales":
@@ -84,10 +91,8 @@ const AdminSidebar = () => {
           </h2>
         </div>
 
-        {/* DIVIDER */}
         <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
 
-        {/* MENU */}
         <div className="mt-[15px] px-3">
 
           {/* HOME */}
@@ -106,7 +111,6 @@ const AdminSidebar = () => {
             )}
           </div>
 
-          {/* HOME SUBMENU */}
           {openHome && (
             <div className="pl-[35px] mt-[5px]">
 
@@ -160,15 +164,20 @@ const AdminSidebar = () => {
           {/* DASHBOARD SUBMENU */}
           {openDashboard && (
             <div className="pl-[35px] mt-[5px]">
-              {dashboards.map((item) => (
+              {apiDashboards.map((item) => (
                 <NavLink
                   key={item.id}
                   to="/dashboard-selection"
                   state={{ selectedDashboard: item.id }}
-                  className="flex items-center gap-2 py-2 text-[13px] text-slate-300 hover:text-white"
+                  className="flex items-start gap-2 py-2 text-[13px] text-slate-300 hover:text-white leading-tight"
                 >
-                  {getDashboardIcon(item.id)}   {/* ✅ ONLY CHANGE */}
-                  <span>{item.name}</span>
+                  <div className="mt-[2px]">
+                    {getDashboardIcon(item.id)}
+                  </div>
+
+                  <span className="break-words whitespace-normal">
+                    {item.name}
+                  </span>
                 </NavLink>
               ))}
             </div>
@@ -176,13 +185,12 @@ const AdminSidebar = () => {
 
           {/* USERS */}
           <NavLink
-            to="/userlogs"
+            to="/manage-users"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
               ${isActive
                 ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`
-            }
+                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
           >
             <FaUsers />
             <span>Users</span>
@@ -195,8 +203,7 @@ const AdminSidebar = () => {
               `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
               ${isActive
                 ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`
-            }
+                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
           >
             <FaDatabase />
             <span>Data Schema</span>
