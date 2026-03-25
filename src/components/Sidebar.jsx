@@ -151,7 +151,7 @@ const Sidebar = () => {
  
           {/* USERS LOG */}
           <NavLink
-            to="/users-logs"
+            to="/user-logs"
             className={({ isActive }) =>
               `relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px] transition-all
               ${
@@ -186,3 +186,4 @@ const Sidebar = () => {
 };
  
 export default Sidebar;
+
