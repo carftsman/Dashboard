@@ -5,33 +5,32 @@ import {
   FaUserClock,
   FaSignOutAlt,
   FaChevronDown,
-
 } from "react-icons/fa";
-
+ 
 import { NavLink, useLocation } from "react-router-dom";
 import axios from "axios";
-
+ 
 const Sidebar = () => {
   const [openDashboard, setOpenDashboard] = useState(false);
   const [dashboards, setDashboards] = useState([]);
   const location = useLocation();
-
-  // ================= FETCH DASHBOARDS =================
+ 
+ 
   useEffect(() => {
     fetchDashboards();
   }, []);
-
+ 
   const fetchDashboards = async () => {
     try {
       const token = localStorage.getItem("token");
-
+ 
       console.log(" TOKEN:", token);
-
+ 
       if (!token) {
         console.error("No token found. Please login.");
         return;
       }
-
+ 
       const res = await axios.get(
         "https://dashboard-backend-cyrd.onrender.com/api/dashboards",
         {
@@ -40,39 +39,32 @@ const Sidebar = () => {
           },
         }
       );
-
+ 
       console.log(" DASHBOARDS API RESPONSE:", res.data);
-
-      //  API returns array
+ 
       setDashboards(res.data);
     } catch (error) {
       console.error(
         " API ERROR:",
         error.response?.data || error.message
       );
-
+ 
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
         window.location.href = "/login";
       }
-
+ 
       setDashboards([]);
     }
   };
-
-  // ================= AUTO OPEN =================
-  useEffect(() => {
-    if (location.pathname.startsWith("/dashboard")) {
-      setOpenDashboard(true);
-    }
-  }, [location]);
-
+ 
+ 
   return (
     <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
-      
+     
       {/* ================= TOP ================= */}
       <div>
-
+ 
         {/* LOGO */}
         <div className="flex items-center px-2 py-1">
           <img
@@ -85,12 +77,12 @@ const Sidebar = () => {
             <span className="text-[#f4c542]">Bot</span>
           </h2>
         </div>
-
+ 
         <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
-
+ 
         {/* ================= MENU ================= */}
         <div className="mt-[15px] px-3">
-
+ 
           {/* DASHBOARD */}
           <div
             onClick={() => setOpenDashboard(!openDashboard)}
@@ -103,22 +95,22 @@ const Sidebar = () => {
           >
             <FaThLarge className="text-[15px]" />
             <span>Dashboard</span>
-
+ 
             <FaChevronDown
               className={`ml-auto text-[12px] transition-transform duration-300 ${
                 openDashboard ? "rotate-180" : ""
               }`}
             />
-
+ 
             {openDashboard && (
               <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542] rounded" />
             )}
           </div>
-
+ 
           {/* ================= SUBMENU ================= */}
           {openDashboard && (
             <div className="pl-[35px] mt-[5px]">
-
+ 
               {dashboards.length > 0 ? (
                 dashboards.map((item) => (
                   <NavLink
@@ -132,7 +124,6 @@ const Sidebar = () => {
                       }`
                     }
                   >
-                    {/*  IMAGE OR ICON */}
                     {item.image ? (
                       <img
                         src={item.image}
@@ -145,7 +136,7 @@ const Sidebar = () => {
                     ) : (
                       <FaThLarge />
                     )}
-
+ 
                     <span>{item.name}</span>
                   </NavLink>
                 ))
@@ -154,13 +145,13 @@ const Sidebar = () => {
                   No dashboards found
                 </p>
               )}
-
+ 
             </div>
           )}
-
+ 
           {/* USERS LOG */}
           <NavLink
-            to="/users-log"
+            to="/users-logs"
             className={({ isActive }) =>
               `relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px] transition-all
               ${
@@ -173,10 +164,10 @@ const Sidebar = () => {
             <FaUserClock className="text-[15px]" />
             <span>Users Log</span>
           </NavLink>
-
+ 
         </div>
       </div>
-
+ 
       {/* ================= LOGOUT ================= */}
       <div className="p-[15px]">
         <button
@@ -193,5 +184,5 @@ const Sidebar = () => {
     </div>
   );
 };
-
+ 
 export default Sidebar;
