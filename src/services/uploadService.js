@@ -68,3 +68,75 @@ export const getFilePreview = async (fileId, status = "VALID") => {
     throw error.response?.data || error;
   }
 };
+
+/**
+ * Get dashboard columns and uploaded file columns for mapping
+ * @param {string} fileId - The ID of the file
+ * @returns {Promise<Object>} - The column mapping data
+ */
+export const getMappingData = async (fileId) => {
+  if (!fileId) {
+    throw new Error("File ID is required to get mapping data.");
+  }
+
+  try {
+    const response = await api.get(`/api/upload/mapping/${fileId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Save column mappings for the uploaded file
+ * @param {Object} mappingData - The mapping data containing fileId and mappings array
+ * @returns {Promise<Object>} - The server response
+ */
+export const postManualMapping = async (mappingData) => {
+  if (!mappingData?.fileId || !mappingData?.mappings) {
+    throw new Error("Invalid mapping data provided.");
+  }
+
+  try {
+    const response = await api.post("/api/upload/map", mappingData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Get validation results for the mapped file
+ * @param {string} fileId - The ID of the file
+ * @returns {Promise<Object>} - The validation results
+ */
+export const getValidationResults = async (fileId) => {
+  if (!fileId) {
+    throw new Error("File ID is required to get validation results.");
+  }
+
+  try {
+    const response = await api.get(`/api/upload/validation/${fileId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Process the uploaded file after mapping and validation
+ * @param {string} fileId - The ID of the file to process
+ * @returns {Promise<Object>} - The server response
+ */
+export const processFile = async (fileId) => {
+  if (!fileId) {
+    throw new Error("File ID is required to process the file.");
+  }
+
+  try {
+    const response = await api.post("/api/upload/process", { fileId });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

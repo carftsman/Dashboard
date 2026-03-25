@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useContext } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { uploadSalesFile } from "../services/uploadService";
 import { AuthContext } from "../context/AuthContext";
@@ -56,6 +56,7 @@ function UploadIcon() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function UploadData() {
   const location = useLocation();
+  const navigate = useNavigate();
   console.log("location.state?.dashboardId",location.state?.dashboardId);
 
 
@@ -168,13 +169,20 @@ export default function UploadData() {
     }, 200);
 
     try {
-      await uploadSalesFile(dashboardId, file);
+      const response=await uploadSalesFile(dashboardId, file);
+      console.log("uploaded file",response.fileId);
       clearInterval(progressInterval);
       setUploadProgress(100);
       setSuccess(
         "File uploaded and analysis started successfully! Your data is being processed."
       );
       setFile(null);
+
+      // Navigate to Column Mapping with the fileId
+      setTimeout(() => {
+        navigate("/column-mapping", { state: { fileId: response.fileId } });
+      }, 1500); // Give user a moment to see success message
+
     } catch (err) {
       clearInterval(progressInterval);
       setUploadProgress(0);
