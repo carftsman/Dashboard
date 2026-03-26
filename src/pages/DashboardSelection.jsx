@@ -93,7 +93,9 @@ function Dashboard() {
 
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
 
-          {filteredCards.map((card) => (
+          {filteredCards.map((card) =>{
+            console.log("card in dashboardselection",card);
+             return  (
             <div
               key={card.dashboardId}
               className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden 
@@ -138,7 +140,27 @@ function Dashboard() {
 
               </div>
             </div>
-          ))}
+          )})}
+          
+
+          {role === "admin" && (
+            <div
+              onClick={() => navigate("/create-dashboard")}
+              className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 
+                         rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1 
+                         transition duration-300 h-[220px]"
+            >
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 text-2xl text-gray-600 mb-2">
+                +
+              </div>
+              <h4 className="text-sm font-semibold text-gray-700">
+                Create New
+              </h4>
+              <p className="text-xs text-gray-400 text-center mt-1 px-3">
+                Start from a template or a blank canvas
+              </p>
+            </div>
+          )}
 
           {role === "admin" && (
             <div

@@ -104,6 +104,9 @@ const AppRoutes = () => {
        
       }
       />
+      <Route path="/reports/:id" 
+      element={<Reports />} />
+ 
       <Route
         path="/profile"
         element={
