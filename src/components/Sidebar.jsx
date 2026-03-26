@@ -70,7 +70,10 @@ const Sidebar = () => {
           <img
             src={logo}
             alt="ZestBot"
-            className="w-[85px] h-[85px] object-contain"
+
+            className="w-[85px] h-[85px] object-contain mt-[-10px]"
+
+
           />
           <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
             <span className="text-white">Zest</span>
@@ -151,7 +154,7 @@ const Sidebar = () => {
  
           {/* USERS LOG */}
           <NavLink
-            to="/users-logs"
+            to="/user-logs"
             className={({ isActive }) =>
               `relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px] transition-all
               ${
