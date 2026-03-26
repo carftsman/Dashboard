@@ -122,7 +122,7 @@
   outline: none;
 }
 
-/* PASSWORD BOX FIX */
+/* PASSWORD BOX */
 .password-box {
   display: flex;
   align-items: center;
@@ -131,6 +131,7 @@
   height: 42px;
   padding: 0 12px;
   background: #f9fafc;
+  position: relative;
 }
 
 /* REMOVE BORDER FROM PASSWORD INPUT */
@@ -149,6 +150,13 @@
   background: #fff;
 }
 
+/* CUSTOM EYE ICON */
+.eye-icon {
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
 
 /* ERROR TEXT */
 .error-text {
@@ -214,4 +222,19 @@
   .main-image {
     width: 80%;
   }
+}
+
+/* REMOVE DEFAULT BROWSER PASSWORD EYE ICON */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="password"] {
+  appearance: none;
 }
