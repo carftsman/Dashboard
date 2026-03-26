@@ -7,9 +7,9 @@ import {
   FaUsers,
   FaHome,
   FaDatabase,
-  FaChartLine,   // ✅ added
-  FaBox,         // ✅ added
-  FaBug          // ✅ added
+  FaChartLine,   
+  FaBox,         
+  FaBug          
 } from "react-icons/fa";
 
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -167,7 +167,7 @@ const AdminSidebar = () => {
                   state={{ selectedDashboard: item.id }}
                   className="flex items-center gap-2 py-2 text-[13px] text-slate-300 hover:text-white"
                 >
-                  {getDashboardIcon(item.id)}   {/* ✅ ONLY CHANGE */}
+                  {getDashboardIcon(item.id)}  
                   <span>{item.name}</span>
                 </NavLink>
               ))}

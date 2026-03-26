@@ -122,9 +122,9 @@ const AppRoutes = () => {
        <Route
         path="/user-logs"
         element={
-        //  <ProtectedRoute>
+         <ProtectedRoute>
             <Userlogs />
-        //  </ProtectedRoute>
+         </ProtectedRoute>
         }
       />
  
