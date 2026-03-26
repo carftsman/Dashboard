@@ -1,4 +1,9 @@
+import { useParams } from "react-router-dom";
 export default function ReportTable({ formattedData }) {
+  
+  const {dashboardId} = useParams();
+
+  const showDashboardColumn = !dashboardId;
 
   const downloadFile = (url, name) => {
     const link = document.createElement("a");
@@ -13,6 +18,7 @@ export default function ReportTable({ formattedData }) {
     <table className="w-full">
       <thead>
         <tr className="text-gray-500 border-b text-left">
+          {showDashboardColumn && <th>Dashboard Name</th>}
           <th className="py-2">Name</th>
           <th>Date Generated</th>
           <th>Download Actions</th>
@@ -22,6 +28,14 @@ export default function ReportTable({ formattedData }) {
       <tbody>
         {formattedData.map((item, index) => (
           <tr key={index} className="border-b hover:bg-gray-50">
+           
+           {
+            showDashboardColumn && (
+              <td>
+                {item.dashboardName}
+              </td>
+            )
+           }
             <td className="py-3">{item.name}</td>
             <td>
               {new Date(item.createdAt).toLocaleDateString()}
