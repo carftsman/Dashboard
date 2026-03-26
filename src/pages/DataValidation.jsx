@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { getValidationResults } from "../services/uploadService";
+import { getValidationResults, processFile } from "../services/uploadService";
 
 // Icons
 const CloudUploadIcon = () => (
@@ -38,6 +38,8 @@ export default function DataValidation() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [processError, setProcessError] = useState("");
 
   useEffect(() => {
     if (!fileId) {
@@ -118,10 +120,24 @@ export default function DataValidation() {
     navigate("/upload-data");
   };
 
-  const handleProcess = () => {
+  const handleProcess = async () => {
     if (totalCriticalErrors > 0) return;
-    // Assuming navigation to main dashboard or next step if confirmed
-    navigate("/dashboard");
+    
+    try {
+      setProcessing(true);
+      setProcessError("");
+      const res = await processFile(fileId);
+      
+      if (res.status === "FAILED") {
+        setProcessError(res.message || "Failed to process the file due to errors.");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      setProcessError(err?.message || err?.error || "An error occurred while processing the file.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
@@ -149,15 +165,27 @@ export default function DataValidation() {
               </button>
               <button 
                 onClick={handleProcess}
-                disabled={totalCriticalErrors > 0}
+                disabled={totalCriticalErrors > 0 || processing}
                 className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all flex-1 sm:flex-none ${
-                  totalCriticalErrors > 0
+                  totalCriticalErrors > 0 || processing
                     ? "bg-[#1e293b] text-white opacity-50 cursor-not-allowed"
                     : "bg-[#1e293b] hover:bg-[#0f172a] text-white shadow-md active:scale-[0.98]"
                 }`}
               >
-                <CheckCircleIcon />
-                <span className="whitespace-nowrap">Confirm and Process</span>
+                {processing ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  <>
+                    <CheckCircleIcon />
+                    <span className="whitespace-nowrap">Confirm and Process</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -178,6 +206,13 @@ export default function DataValidation() {
             <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <ErrorIcon />
               {error}
+            </div>
+          )}
+
+          {processError && (
+            <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
+              <ErrorIcon />
+              {processError}
             </div>
           )}
 
