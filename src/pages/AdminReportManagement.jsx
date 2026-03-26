@@ -1,31 +1,30 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import ReportTable from "../components/ReportTable";
-import Sidebar from "../components/Sidebar";
 import { useEffect, useState } from "react";
-import AdminSidebar from "../components/adminSidebar";
+
 import api from '../api/apiConfig';
+import AdminSidebar from "../components/adminSidebar";
 
 export default function Reports() {
-  const navigate = useNavigate();
-  const { dashboardName, dashboardId } = useParams();
-  console.log("dashboardId",dashboardId);
-
+    const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
 const role = localStorage.getItem("role"); // get role
-const [selectedDashboard, setSelectedDashboard] = useState(null);
   useEffect(() => {
-     const fetchData = async () => {
-    try {
-      const response = await api.get(`/api/reports?dashboardId=${dashboardId}`);
+    fetchData();
+  }, []);
 
+  const fetchData = async () => {
+    try {
+      const response = await api.get(`/api/reports/all`);
       console.log(response);
       
       const formattedData = response.data.map((item) => ({
-        id: item.id,
-        name: item.name || item.fileName,
-        createdAt: item.createdAt,
+        id: item.reportId,
+        name: item.reportName || item.fileName,
+        createdAt: new Date(item.generatedAt).toLocaleDateString(),
         fileUrl: item.fileUrl,
+        dashboardName:item.dashboardName
       }));
 
       setFiles(formattedData);
@@ -34,29 +33,20 @@ const [selectedDashboard, setSelectedDashboard] = useState(null);
       console.error("API error:", error.response || error.message);
     }
   };
-fetchData();
-  }, [dashboardId]);
 
- 
- const filteredFiles = files.filter((item) => {
+  /* SEARCH FILTER */
+  const filteredFiles = files.filter((item) => {
   const name = item.name?.toLowerCase() || "";
   const dashboard = item.dashboardName?.toLowerCase() || "";
   const searchValue = search.toLowerCase().trim();
 
-  const matchesSearch =
-    name.includes(searchValue) || dashboard.includes(searchValue);
-
-  const matchesDashboard =
-    !selectedDashboard || item.dashboardName === selectedDashboard;
-
-  return matchesSearch && matchesDashboard;
+  return name.includes(searchValue) || dashboard.includes(searchValue);
 });
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-
-
-     {role === "ADMIN" ? <AdminSidebar /> : <Sidebar />}
+   <>
+        <AdminSidebar/>
+         <div className="flex min-h-screen bg-gray-100">
 
       {/* RIGHT SECTION */}
       <div className="flex-1 flex flex-col ml-[220px]">
@@ -82,19 +72,6 @@ fetchData();
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
-
-          {/* RIGHT */}
-          <div className="flex items-center justify-between lg:justify-end gap-4">
-
-            <button className="bg-[#2B3F8F] hover:bg-[#1f2f6b] text-white px-5 py-2 rounded-lg transition"
-            onClick={(e) => {
-                  e.stopPropagation();
-                  navigate("/upload-data", { state: { dashboardId: dashboardId } });
-                }}
-            >
-              Upload Data
-            </button>
-
             <div className="flex items-center gap-3">
                 <div
               className="w-10 h-10 min-w-[40px] min-h-[40px] cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
@@ -104,7 +81,8 @@ fetchData();
             </div>
             </div>
 
-          </div>
+          {/* RIGHT */}
+        
         </div>
 
         {/* CONTENT */}
@@ -113,30 +91,25 @@ fetchData();
           <div className="bg-white rounded-xl shadow-sm border p-6">
 
             <h2 className="text-lg font-semibold mb-1">
-               {dashboardName ? decodeURIComponent(dashboardName) : "Dashboard"} Reports
+               ALL Reports
             </h2>
 
             
 
             {role === "ADMIN" && (
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={() => navigate(`/dataschema/${dashboardId}`)}>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">
               Edit Schema
             </button>
           )}
 
             {/* TABLE */}
-            <ReportTable
-  formattedData={filteredFiles}
-  role={role}
-  selectedDashboard={selectedDashboard}
-  setSelectedDashboard={setSelectedDashboard}
-/>
-            
+            <ReportTable formattedData={filteredFiles} />
 
           </div>
 
         </div>
       </div>
     </div>
+   </>
   );
 }

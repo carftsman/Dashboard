@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
- 
+
 import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import DashboardSelection from "../pages/DashboardSelection";
@@ -16,22 +16,21 @@ import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
 import UserLogs from "../pages/userlogs";
 
- 
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
- 
+import AdminReportManagement from "../pages/AdminReportManagement";
+
 const AppRoutes = () => {
   return (
     <Routes>
- 
       {/* Public Routes */}
-      <Route path="/" element={<Login/>} />
+      <Route path="/" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/loginOtp"  element={<LoginOtp/>} />
- 
+      <Route path="/loginOtp" element={<LoginOtp />} />
+
       {/* Protected Routes */}
 
-       <Route
+      <Route
         path="/dashboard-selection"
         element={
           <ProtectedRoute>
@@ -39,7 +38,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
- 
+
       <Route
         path="/dashboard"
         element={
@@ -48,7 +47,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
- 
+
       <Route
         path="/upload-data"
         element={
@@ -57,7 +56,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
- 
+
       <Route
         path="/column-mapping"
         element={
@@ -66,7 +65,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
- 
+
       <Route
         path="/data-validation"
         element={
@@ -75,7 +74,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
- 
+
       <Route
         path="/visual-editing"
         element={
@@ -84,16 +83,25 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
- 
+
       <Route
-      
-        path="/reports/:dashboardId"
+        path="/reports/:dashboardId/:dashboardName"
         element={
           <ProtectedRoute>
             <Reports />
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/reports/all"
+        element={
+          <ProtectedRoute>
+            <AdminReportManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/reports/:id" element={<Reports />} />
+
       <Route
         path="/profile"
         element={
@@ -103,7 +111,7 @@ const AppRoutes = () => {
         }
       />
 
-         <Route
+      <Route
         path="/user-logs"
         element={
           <ProtectedRoute>
@@ -111,16 +119,11 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
- 
- 
+
       {/* Admin Routes */}
-     
-   <Route
-    path="/admin-dashboard/*"
-    element={
-    <AdminDashboard />
-    } />
-     
+
+      <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+
       <Route
         path="/manage-users"
         element={
@@ -130,19 +133,16 @@ const AppRoutes = () => {
         }
       />
 
-      
- 
       <Route
-        path="/data-schema"
+        path="/dataschema/:id"
         element={
           <ProtectedRoute>
             <DataSchema />
           </ProtectedRoute>
         }
       />
- 
     </Routes>
   );
 };
- 
+
 export default AppRoutes;

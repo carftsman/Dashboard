@@ -93,11 +93,10 @@ const Sidebar = () => {
                 navigate("/dashboard-selection");
               }}
               className={`relative flex items-center gap-3 pl-2 pr-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px] transition-all duration-200
-              ${
-                isDashboardActive
+              ${isDashboardActive
                   ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
                   : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"
-              }`}
+                }`}
             >
               <FaThLarge className="text-[15px]" />
               <span>Dashboard</span>
@@ -121,10 +120,9 @@ const Sidebar = () => {
                         key={item.id}
                         to={`/reports/${item.id}`}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 py-2 px-3 rounded-xl transition-all duration-200 ${
-                            isActive
-                              ? "bg-[#f4c542] text-black font-semibold shadow"
-                              : "text-slate-300 hover:bg-white/5 hover:translate-x-1"
+                          `flex items-center gap-3 py-2 px-3 rounded-xl transition-all duration-200 ${isActive
+                            ? "bg-[#f4c542] text-black font-semibold shadow"
+                            : "text-slate-300 hover:bg-white/5 hover:translate-x-1"
                           }`
                         }
                       >
@@ -158,10 +156,9 @@ const Sidebar = () => {
               to="/user-logs"
               className={({ isActive }) =>
                 `relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px] transition-all
-                ${
-                  isActive
-                    ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                    : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"
+                ${isActive
+                  ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
+                  : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"
                 }`
               }
             >
@@ -185,27 +182,64 @@ const Sidebar = () => {
 
       {/* MODAL */}
       {showLogoutPopup && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
-          <div className="bg-white w-[320px] p-6 rounded-2xl text-center">
-            <h2 className="text-xl font-semibold mb-2">Confirm Logout</h2>
-            <p className="text-sm text-gray-500 mb-6">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+
+          <div className="bg-white w-[340px] p-6 rounded-2xl shadow-xl text-center">
+
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Confirm Logout
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-5">
               Are you sure you want to logout?
             </p>
 
-            <div className="flex justify-center gap-3">
-              <button onClick={cancelLogout} className="px-4 py-2">
-                <FaTimes /> Cancel
+            {/* ✅ BUTTONS */}
+            <div className="flex justify-center items-center gap-3 mt-5">
+
+              {/* CANCEL */}
+              <button
+                onClick={cancelLogout}
+                className="
+      flex items-center justify-center gap-2
+      h-[40px] px-5
+      rounded-lg
+      bg-blue-500 text-white
+
+      hover:bg-blue-600
+      active:scale-95
+
+      transition-all duration-200
+    "
+              >
+                <FaTimes className="text-[13px]" />
+                Cancel
               </button>
 
+              {/* LOGOUT */}
               <button
                 onClick={confirmLogout}
-                className="px-5 py-2 bg-red-500 text-white rounded"
+                className="
+      flex items-center justify-center gap-2
+      h-[40px] px-5
+      rounded-lg
+      bg-red-500 text-white
+
+      hover:bg-red-600
+      active:scale-95
+
+      transition-all duration-200
+    "
               >
-                <FaSignOutAlt /> Logout
+                <FaSignOutAlt className="text-[13px]" />
+                Logout
               </button>
+
             </div>
           </div>
         </div>
+
+
       )}
     </>
   );

@@ -123,7 +123,7 @@ function AdminDashboard() {
               title="Reports"
               active={hoveredItem === "reports"}
               description="Generate comprehensive PDF and CSV exports for stakeholder review.Schedule automated report generation, track historical data, and configure alerts for critical insights and anomalies."
-              onClick={() => navigate("/reports")}
+              onClick={() => navigate("/reports/all")}
             />
 
           </div>
