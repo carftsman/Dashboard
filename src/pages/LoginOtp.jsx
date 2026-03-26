@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import "../css/loginOtp.css";
 import logo from "../assets/images/Background.png.png";
 import { useNavigate, useLocation } from "react-router-dom";
+import { FaArrowLeft, FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const LoginOtp = () => {
   const navigate = useNavigate();
@@ -16,6 +16,10 @@ const LoginOtp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Toggle states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const inputs = useRef([]);
 
   useEffect(() => {
@@ -24,6 +28,7 @@ const LoginOtp = () => {
     }
   }, [email, navigate]);
 
+  // OTP INPUT
   const handleChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) return;
 
@@ -42,7 +47,7 @@ const LoginOtp = () => {
     }
   };
 
-  //  Timer
+  // TIMER
   useEffect(() => {
     if (timeLeft === 0) return;
 
@@ -53,41 +58,16 @@ const LoginOtp = () => {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  //  Resend
   const handleResend = () => {
     setTimeLeft(30);
     setOtp(["", "", "", "", "", ""]);
     setOtpStatus(null);
     inputs.current[0]?.focus();
-
-    
   };
 
-  //  Verify OTP locally 
-  const handleVerify = () => {
-    const enteredOtp = otp.join("");
-
-    if (enteredOtp.length === 6) {
-      setOtpStatus("valid");
-    } else {
-      setOtpStatus("invalid");
-    }
-  };
-
-  //  Auto verify when filled
-  // useEffect(() => {
-  //   if (otp.every((digit) => digit !== "")) {
-  //     handleVerify();
-  //   }
-  // }, [otp]);
-
-  // FINAL API CALL
+  // API CALL
   const handleResetPassword = async () => {
     const enteredOtp = otp.join("");
-
-    console.log("EMAIL:", email);
-    console.log("OTP:", enteredOtp);
-    console.log("PASSWORD:", password);
 
     if (enteredOtp.length !== 6) {
       setOtpStatus("invalid");
@@ -109,54 +89,59 @@ const LoginOtp = () => {
         "https://dashboard-backend-cyrd.onrender.com/api/auth/reset-password",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-  email: email,
-  otp: enteredOtp,
-  newPassword: password,
-  confirmPassword: confirmPassword,
-})
+            email,
+            otp: enteredOtp,
+            newPassword: password,
+            confirmPassword,
+          }),
         }
       );
 
       const data = await response.json();
 
-      console.log("STATUS:", response.status);
-    console.log("Data:", data)
-
       if (response.ok) {
-        alert("Password reset successful ✅");
+        alert("Password reset successful ");
         navigate("/");
       } else {
-        alert(data.message || "Reset failed ❌");
+        alert(data.message || "Reset failed ");
         setOtpStatus("invalid");
       }
     } catch (error) {
-      console.error("ERROR:", error);
-      alert("Something went wrong ❌");
+      console.error(error);
+      alert("Something went wrong ");
     }
   };
 
   return (
-    <div className="container-otp">
-      <div className="card-otp">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-[360px] bg-white p-8 rounded-2xl shadow-lg text-center">
 
         {/* LOGO */}
-        <div className="background-otp">
-          <img src={logo} alt="logo" />
+        <div className="flex justify-center mb-4">
+          <img src={logo} alt="logo" className="w-16 h-16 object-contain" />
         </div>
 
-        <h2>Verify OTP</h2>
-        <p className="subtitle-otp">
+        <h2 className="text-lg font-semibold">Verify OTP</h2>
+        <p className="text-xs text-gray-500 mb-5">
           Enter the OTP sent to your registered email
         </p>
 
-        {/* OTP INPUT */}
-        <div className="otp-wrapper">
+        {/* OTP PURE CIRCLES */}
+        <div className="flex justify-between mb-4">
           {otp.map((digit, index) => (
-            <div key={index} className={`otp-circle ${otpStatus}`}>
+            <div
+              key={index}
+              className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all
+              ${
+                otpStatus === "valid"
+                  ? "bg-green-500 border-green-500"
+                  : otpStatus === "invalid"
+                  ? "bg-red-500 border-red-500"
+                  : "bg-white border-gray-300"
+              } focus-within:ring-2 focus-within:ring-blue-400`}
+            >
               <input
                 type="text"
                 maxLength="1"
@@ -164,6 +149,7 @@ const LoginOtp = () => {
                 ref={(el) => (inputs.current[index] = el)}
                 onChange={(e) => handleChange(e.target.value, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
+                className="w-6 h-6 text-center bg-transparent outline-none border-none text-lg font-semibold text-black caret-transparent"
               />
             </div>
           ))}
@@ -171,61 +157,83 @@ const LoginOtp = () => {
 
         {/* STATUS */}
         {otpStatus === "valid" && (
-          <p className="otp-success">✔ OTP Verified</p>
+          <p className="text-green-600 text-xs mb-2">✔ OTP Verified</p>
         )}
-
         {otpStatus === "invalid" && (
-          <p className="otp-error">✖ Invalid OTP</p>
+          <p className="text-red-600 text-xs mb-2">✖ Invalid OTP</p>
         )}
 
         {/* TIMER */}
-        <p className="resend-otp">
+        <p className="text-xs mb-5">
           {timeLeft > 0 ? (
-            <span style={{ color: "#888" }}>
+            <span className="text-gray-400">
               Resend OTP (00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft})
             </span>
           ) : (
-            <span onClick={handleResend}>
+            <span
+              onClick={handleResend}
+              className="text-blue-600 cursor-pointer"
+            >
               Resend OTP
             </span>
           )}
         </p>
 
         {/* PASSWORD */}
-        <div className="input-group">
-          <label>New Password</label>
-          <div className="input-box">
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {/* <span className="eye">👁</span> */}
-          </div>
+        <div className="text-left mb-4 relative">
+          <label className="text-xs text-gray-500">New Password</label>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter New Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border rounded-md px-3 py-2 text-sm mt-1 outline-none pr-10"
+          />
+          <span
+            className="absolute right-3 top-9 cursor-pointer text-gray-500"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
         </div>
 
-        <div className="input-group">
-          <label>Confirm Password</label>
-          <div className="input-box">
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            {/* <span className="eye">👁</span> */}
-          </div>
+        {/* CONFIRM PASSWORD */}
+        <div className="text-left mb-4 relative">
+          <label className="text-xs text-gray-500">Confirm Password</label>
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full border rounded-md px-3 py-2 text-sm mt-1 outline-none pr-10"
+          />
+          <span
+            className="absolute right-3 top-9 cursor-pointer text-gray-500"
+            onClick={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+          >
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
         </div>
 
         {/* BUTTON */}
-        <button className="submit-btn" onClick={handleResetPassword}>
-          Verify & Reset Password →
-        </button>
+        
+          <button
+  onClick={handleResetPassword}
+  className="w-full bg-[#192A51] text-white py-3 rounded-full flex items-center justify-center gap-2 hover:bg-[#0f1e3d] transition"
+>
+  Verify & Reset Password
+  <FaArrowRight />
+</button>
 
         {/* BACK */}
-        <p className="back" onClick={() => navigate("/reset-password")}>
-          ← Back to Reset Password
+        <p
+          onClick={() => navigate("/reset-password")}
+          className="mt-4 text-sm text-gray-700 cursor-pointer flex items-center justify-center gap-2"
+        >
+          <FaArrowLeft />
+          Back to Reset Password
         </p>
       </div>
     </div>

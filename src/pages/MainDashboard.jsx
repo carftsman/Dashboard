@@ -4,6 +4,10 @@ import {
   BarChart, Bar, CartesianGrid, Cell
 } from "recharts";
 import Sidebar from "../components/Sidebar.jsx"; 
+import ChartOverLay from "../components/ChartOverLay.jsx";
+import { useState } from "react";
+
+
 
 /* ---------------- DATA ---------------- */
 
@@ -64,6 +68,7 @@ const CustomTooltip = ({ active, payload }) => {
 /* ---------------- MAIN ---------------- */
 
 export default function Dashboard() {
+  const [openOverlay, setOpenOverlay] = useState(false);
   return (
     <div className="h-screen w-full bg-gradient-to-br from-[#020617] via-[#0b1120] to-[#020617] text-white p-3 overflow-hidden flex flex-col">
       
@@ -95,21 +100,32 @@ export default function Dashboard() {
       </div>
 
       {/* KPI */}
-      <div className="grid grid-cols-6 gap-2 mb-2">
-        {[
-          { label: "Total Impressions", value: "1.5M" },
-          { label: "Total Clicks", value: "230K" },
-          { label: "Total Orders", value: "8,450" },
-          { label: "Total Revenue", value: "$125,800" },
-          { label: "Total Ad Spends", value: "$135,800" },
-          { label: "ROAS", value: "4.12" }
-        ].map((item, i) => (
-          <Card key={i}>
-            <p className="text-[10px] text-gray-400">{item.label}</p>
-            <h2 className="text-xl font-bold mt-1">{item.value}</h2>
-          </Card>
-        ))}
-      </div>
+     {/* KPI */}
+<div className="flex gap-1.5 mb-2 flex-wrap">
+  {[
+    { label: "Total Impressions", value: "1.5M" },
+    { label: "Total Clicks", value: "230K" },
+    { label: "Total Orders", value: "8,450" },
+    { label: "Total Revenue", value: "$125,800" },
+    { label: "Total Ad Spends", value: "$135,800" },
+    { label: "ROAS", value: "4.12" }
+  ].map((item, i) => (
+    <div
+      key={i}
+      className="px-2 py-1.5 rounded-lg border border-white/10
+      bg-gradient-to-br from-[#0f172a] to-[#020617]
+      shadow-[0_0_10px_rgba(0,0,0,0.4)]
+      w-fit min-w-[90px]"
+    >
+      <p className="text-[9px] text-gray-400 leading-none whitespace-nowrap">
+        {item.label}
+      </p>
+      <h2 className="text-sm font-semibold mt-1 leading-none whitespace-nowrap">
+        {item.value}
+      </h2>
+    </div>
+  ))}
+</div>
 
       {/* ROW 1 */}
       <div className="grid grid-cols-2 gap-2 flex-1 mb-2">
@@ -118,7 +134,7 @@ export default function Dashboard() {
         <Card>
           <p className="text-xs text-gray-400 mb-1">Impressions Trend</p>
           <ResponsiveContainer width="100%" height="92%">
-            <LineChart data={trendData}>
+            <LineChart data={trendData} onClick={() => setOpenOverlay(true)}>
               <CartesianGrid stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3"/>
               <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
               <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
@@ -132,7 +148,7 @@ export default function Dashboard() {
         <Card>
           <p className="text-xs text-gray-400 mb-1">Platform Performance</p>
           <ResponsiveContainer width="100%" height="92%">
-            <BarChart data={platformData}>
+            <BarChart data={platformData} onClick={() => setOpenOverlay(true)}>
               <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
               <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
               <Tooltip content={<CustomTooltip/>}/>
@@ -153,7 +169,7 @@ export default function Dashboard() {
         <Card>
           <p className="text-xs text-gray-400 mb-1">Revenue vs Ad Spend</p>
           <ResponsiveContainer width="100%" height="92%">
-            <BarChart data={revenueData}>
+            <BarChart data={revenueData} onClick={() => setOpenOverlay(true)}>
               <CartesianGrid stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3"/>
               <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
               <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
@@ -168,7 +184,7 @@ export default function Dashboard() {
         <Card>
           <p className="text-xs text-gray-400 mb-1">Conversion Rate</p>
           <ResponsiveContainer width="100%" height="92%">
-            <BarChart data={conversionData}>
+            <BarChart data={conversionData} onClick={() => setOpenOverlay(true)}>
               <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
               <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
               <Tooltip content={<CustomTooltip/>}/>
@@ -220,7 +236,7 @@ export default function Dashboard() {
           </div>
         </Card>
       </div>
-
+       <ChartOverLay open={openOverlay} onClose={() => setOpenOverlay(false)} />
       </div>
     </div>
   );
