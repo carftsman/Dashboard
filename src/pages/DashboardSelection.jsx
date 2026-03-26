@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
+import AdminSidebar from "../components/adminSidebar"; 
 
 function Dashboard() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [cards, setCards] = useState([]);
+
+  const role = localStorage.getItem("role")?.toLowerCase();
 
   useEffect(() => {
     const fetchDashboards = async () => {
@@ -35,7 +38,7 @@ function Dashboard() {
         setCards(formattedData);
 
       } catch (error) {
-        console.error("  API Error:", error.response || error.message);
+        console.error("API Error:", error.response || error.message);
       }
     };
 
@@ -48,8 +51,10 @@ function Dashboard() {
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
-      
-      <Sidebar />
+
+      {/* ROLE BASED SIDEBAR */}
+      {role === "admin" && <AdminSidebar />}
+      {role !== "admin" && <Sidebar />}
 
       <div className="flex-1 ml-[220px] p-6 overflow-y-auto">
 
@@ -76,9 +81,8 @@ function Dashboard() {
               />
             </div>
 
-            {/* Profile ICON  */}
             <div
-              className="w-10 h-10 min-w-[40px] min-h-[40px] cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
+              className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
               onClick={() => navigate("/profile")}
             >
               <span className="text-gray-600 text-lg font-semibold">👤</span>
@@ -122,7 +126,7 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate("/reports", { state: card.originalData });
+                      navigate(`/reports/${card.dashboardId}`);
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
@@ -135,6 +139,25 @@ function Dashboard() {
               </div>
             </div>
           ))}
+
+          {role === "admin" && (
+            <div
+              onClick={() => navigate("/create-dashboard")}
+              className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 
+                         rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1 
+                         transition duration-300 h-[220px]"
+            >
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 text-2xl text-gray-600 mb-2">
+                +
+              </div>
+              <h4 className="text-sm font-semibold text-gray-700">
+                Create New
+              </h4>
+              <p className="text-xs text-gray-400 text-center mt-1 px-3">
+                Start from a template or a blank canvas
+              </p>
+            </div>
+          )}
 
         </div>
 

@@ -1,4 +1,14 @@
-export default function ReportTable({ reports }) {
+export default function ReportTable({ formattedData }) {
+
+  const downloadFile = (url, name) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name || "report.pdf"; 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <table className="w-full">
       <thead>
@@ -10,16 +20,19 @@ export default function ReportTable({ reports }) {
       </thead>
 
       <tbody>
-        {reports.map((item, index) => (
+        {formattedData.map((item, index) => (
           <tr key={index} className="border-b hover:bg-gray-50">
             <td className="py-3">{item.name}</td>
-            <td>{item.date}</td>
             <td>
-              <button className="bg-red-100 text-red-600 px-3 py-1 rounded mr-2">
+              {new Date(item.createdAt).toLocaleDateString()}
+            </td>
+
+            <td>
+              <button
+                className="bg-red-100 text-red-600 px-3 py-1 rounded mr-2"
+                onClick={() => downloadFile(item.fileUrl, item.name)}
+              >
                 PDF
-              </button>
-              <button className="bg-green-100 text-green-600 px-3 py-1 rounded">
-                Excel
               </button>
             </td>
           </tr>
