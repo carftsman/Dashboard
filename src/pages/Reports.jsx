@@ -2,34 +2,24 @@ import { useNavigate, useParams } from "react-router-dom";
 import ReportTable from "../components/ReportTable";
 import Sidebar from "../components/Sidebar";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import AdminSidebar from "../components/adminSidebar";
+import api from '../api/apiConfig';
 
 export default function Reports() {
   const navigate = useNavigate();
-  const { type, dashboardId } = useParams();
+  const { dashboardName, dashboardId } = useParams();
 
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
 const role = localStorage.getItem("role"); // get role
+const [selectedDashboard, setSelectedDashboard] = useState(null);
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+     const fetchData = async () => {
     try {
+      const response = await api.get(`/api/reports?dashboardId=${dashboardId}`);
 
-      const token = localStorage.getItem("token");
-
-      const response = await axios.get(
-        `https://dashboard-backend-cyrd.onrender.com/api/reports?dashboardId=${dashboardId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      console.log(response);
+      
       const formattedData = response.data.map((item) => ({
         id: item.id,
         name: item.name || item.fileName,
@@ -43,20 +33,29 @@ const role = localStorage.getItem("role"); // get role
       console.error("API error:", error.response || error.message);
     }
   };
+fetchData();
+  }, [dashboardId]);
 
-  /* SEARCH FILTER */
-  const filteredFiles = files.filter((item) =>
-    item.name?.toLowerCase().includes(search.toLowerCase())
-  );
+ 
+ const filteredFiles = files.filter((item) => {
+  const name = item.name?.toLowerCase() || "";
+  const dashboard = item.dashboardName?.toLowerCase() || "";
+  const searchValue = search.toLowerCase().trim();
+
+  const matchesSearch =
+    name.includes(searchValue) || dashboard.includes(searchValue);
+
+  const matchesDashboard =
+    !selectedDashboard || item.dashboardName === selectedDashboard;
+
+  return matchesSearch && matchesDashboard;
+});
 
   return (
     <div className="flex min-h-screen bg-gray-100">
 
 
      {role === "ADMIN" ? <AdminSidebar /> : <Sidebar />}
-
-      {/* Sidebar */}
-      <Sidebar />
 
       {/* RIGHT SECTION */}
       <div className="flex-1 flex flex-col ml-[220px]">
@@ -108,12 +107,10 @@ const role = localStorage.getItem("role"); // get role
           <div className="bg-white rounded-xl shadow-sm border p-6">
 
             <h2 className="text-lg font-semibold mb-1">
-              Analytics Reports
+               {dashboardName ? decodeURIComponent(dashboardName) : "Dashboard"} Reports
             </h2>
 
-            <p className="text-gray-500 text-sm mb-4">
-              Browse, manage and export data summaries
-            </p>
+            
 
             {role === "ADMIN" && (
             <button className="bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={() => navigate(`/dataschema/${dashboardId}`)}>
@@ -122,7 +119,13 @@ const role = localStorage.getItem("role"); // get role
           )}
 
             {/* TABLE */}
-            <ReportTable formattedData={filteredFiles} />
+            <ReportTable
+  formattedData={filteredFiles}
+  role={role}
+  selectedDashboard={selectedDashboard}
+  setSelectedDashboard={setSelectedDashboard}
+/>
+            
 
           </div>
 

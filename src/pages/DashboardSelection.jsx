@@ -126,7 +126,7 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/reports/${card.dashboardId}`);
+                      navigate(`/reports/${card.dashboardId}/${encodeURIComponent(card.dashboardName.trim())}`);
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
