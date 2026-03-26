@@ -119,7 +119,7 @@ const AppRoutes = () => {
       />
  
       <Route
-        path="/data-schema"
+        path="/dataschema/:id"
         element={
           <ProtectedRoute>
             <DataSchema />
