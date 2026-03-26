@@ -1,290 +1,196 @@
 import React, { useState, useEffect } from "react";
 import logo from "../assets/images/zest.png";
 
-// Icons used in sidebar
+// Icons
 import {
-  FaThLarge,
-  FaSignOutAlt,
-  FaBullhorn,
-  FaUsers,
   FaHome,
-  FaDatabase,
-  FaChartLine,
-  FaBox,
-  FaBug,
-  FaChevronDown
+  FaUsers,
+  FaBullhorn,
+  FaThLarge,
+  FaChevronDown,
+  FaSignOutAlt
 } from "react-icons/fa";
 
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import api from "../api/apiConfig";
 
 const AdminSidebar = () => {
 
-  // State to control dropdown open/close
-  const [openDashboard, setOpenDashboard] = useState(false);
-  const [openHome, setOpenHome] = useState(false);
-
-  // Store dashboards fetched from backend API
-  const [apiDashboards, setApiDashboards] = useState([]);
-
-  // React Router hooks to get current route and navigate
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Identify current page based on URL path
+  // Active checks
   const isHomePage = location.pathname === "/admin-dashboard";
-  const isReportsPage = location.pathname.startsWith("/reports");
   const isUsersPage = location.pathname.startsWith("/manage-users");
-  const isDataSchemaPage = location.pathname.startsWith("/data-schema");
+  const isDashboardPage = location.pathname.startsWith("/dashboard-selection");
+  const isReportsPage = location.pathname.startsWith("/reports");
 
-  // Check if Dashboard section should be highlighted
-  const isDashboardPage =
-    location.pathname.startsWith("/reports") ||
-    location.pathname.startsWith("/dashboard-selection");
+  const isHomeActive =
+    isHomePage || isUsersPage || isDashboardPage || isReportsPage;
 
-  // Get selected dashboard passed via navigation
-  const selectedDashboard = location.state?.selectedDashboard;
+  const [openHome, setOpenHome] = useState(
+    isHomeActive && location.pathname !== "/admin-dashboard"
+  );
 
-  // Automatically open Dashboard dropdown when route starts with /dashboard
+  // Popup state
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+
   useEffect(() => {
-    if (location.pathname.startsWith("/dashboard")) {
-      setOpenDashboard(true);
-    }
-  }, [location]);
+    setOpenHome(
+      isHomeActive && location.pathname !== "/admin-dashboard"
+    );
+  }, [location]); // ✅ FIXED HERE
 
-  // Automatically open Home dropdown for related pages
-  useEffect(() => {
-    if (
-      location.pathname.startsWith("/manage-users") ||
-      location.pathname.startsWith("/dashboard-selection") ||
-      location.pathname.startsWith("/data-schema") ||
-      location.pathname.startsWith("/reports") ||
-      location.pathname.startsWith("/userlogs")
-    ) {
-      setOpenHome(true);
-    }
-  }, [location]);
+  // Logout function
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-  // Return icon based on dashboard id
-  const getDashboardIcon = (id) => {
-    switch (id) {
-      case "sales":
-        return <FaChartLine />;
-      case "marketing":
-        return <FaBullhorn />;
-      case "customer":
-        return <FaUsers />;
-      case "supply":
-        return <FaBox />;
-      case "qa":
-        return <FaBug />;
-      default:
-        return <FaThLarge />;
+      localStorage.removeItem("token");
+      localStorage.clear();
+
+      navigate("/profile");
+
+    } catch (error) {
+      console.error("Logout failed:", error);
+
+      localStorage.clear();
+      navigate("/profile");
     }
   };
 
   return (
-    // Sidebar container
-    <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
+    <>
+      <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
 
-      <div>
+        <div>
 
-        {/* App Logo Section */}
-        <div className="flex items-center px-2 py-1">
-          {/* Logo Image */}
-          <img src={logo} alt="ZestBot" className="w-[85px] h-[85px] object-contain" />
+          {/* LOGO */}
+          <div className="flex items-center px-2 py-1">
+            <img src={logo} alt="ZestBot" className="w-[85px] h-[85px] object-contain" />
 
-          {/* App Name */}
-          <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
-            <span className="text-white">Zest</span>
-            <span className="text-[#f4c542]">Bot</span>
-          </h2>
-        </div>
-
-        {/* Divider line */}
-        <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
-
-        <div className="mt-[15px] px-3">
-
-          {/* HOME MAIN ITEM */}
-          <div
-            onClick={() => setOpenHome(!openHome)} // toggle submenu
-            className={`relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
-            ${isHomePage
-              ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-              : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
-          >
-            <FaHome />
-            <span>Home</span>
-
-            {/* Active indicator line */}
-            {isHomePage && (
-              <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
-            )}
+            <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
+              <span className="text-white">Zest</span>
+              <span className="text-[#f4c542]">Bot</span>
+            </h2>
           </div>
 
-          {/* HOME SUBMENU */}
-          {openHome && (
-            <div className="pl-[35px] mt-[5px]">
+          <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
 
-              {/* Manage Users */}
-              <NavLink to="/manage-users" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
-                hover:scale-105 hover:translate-x-[5px]
-                ${(isUsersPage || isActive)
-                  ? "text-white font-semibold"
-                  : "text-slate-300 hover:text-white"}`
-              }>
-                <FaUsers />
-                <span>Manage Users</span>
-              </NavLink>
+          <div className="mt-[15px] px-3">
 
-              {/* Dashboard Selection */}
-              <NavLink
-                to="/dashboard-selection"
-                className="flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
-                text-slate-300 hover:text-white hover:scale-105 hover:translate-x-[5px]"
-              >
-                <FaThLarge />
-                <span>Dashboards</span>
-              </NavLink>
+            {/* HOME */}
+            <div
+              onClick={() => {
+                setOpenHome(!openHome);
 
-              {/* Data Schema */}
-              <NavLink to="/data-schema" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
-                hover:scale-105 hover:translate-x-[5px]
-                ${(isDataSchemaPage || isActive)
-                  ? "text-white font-semibold"
-                  : "text-slate-300 hover:text-white"}`
-              }>
-                <FaDatabase />
-                <span>Edit Data Schema</span>
-              </NavLink>
-
-              {/* Reports */}
-              <NavLink to="/reports" className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-[13px] transition-all duration-200 transform
-                hover:scale-105 hover:translate-x-[5px]
-                ${(isReportsPage || isActive)
-                  ? "text-white font-semibold"
-                  : "text-slate-300 hover:text-white"}`
-              }>
-                <FaBullhorn />
-                <span>Reports</span>
-              </NavLink>
-
-            </div>
-          )}
-
-          {/* DASHBOARD MAIN ITEM */}
-          <div
-            onClick={() => navigate("/dashboard-selection")} // navigate on click
-            className={`relative flex items-center justify-between px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
-            ${isDashboardPage
-              ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-              : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
-          >
-            <div className="flex items-center gap-3">
-              <FaThLarge />
-              <span>Dashboard</span>
-            </div>
-
-            {/* Dropdown toggle icon */}
-            <FaChevronDown
-              onClick={async (e) => {
-                e.stopPropagation(); // prevent parent click
-
-                // Fetch dashboards only when opening
-                if (!openDashboard) {
-                  try {
-                    const response = await api.get("/api/dashboards");
-                    setApiDashboards(response.data || []);
-                  } catch (error) {
-                    console.error("Error fetching dashboards", error);
-                  }
+                if (location.pathname !== "/admin-dashboard") {
+                  navigate("/admin-dashboard");
                 }
-
-                setOpenDashboard(!openDashboard);
               }}
-              className={`transition-transform duration-300 ${openDashboard ? "rotate-180" : ""}`}
-            />
+              className={`relative flex items-center justify-between gap-3 px-4 py-3 mb-[10px] rounded-[30px] cursor-pointer text-[14px]
+              ${isHomeActive
+                ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
+                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`}
+            >
+              <div className="flex items-center gap-3">
+                <FaHome />
+                <span>Home</span>
+              </div>
 
-            {/* Active indicator */}
-            {isDashboardPage && (
-              <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
-            )}
-          </div>
+              <FaChevronDown
+                className={`transition-transform duration-300 ${openHome ? "rotate-180" : ""}`}
+              />
 
-          {/* DASHBOARD SUBMENU */}
-          {openDashboard && (
-            <div className="pl-[35px] mt-[5px]">
-              {apiDashboards.map((item) => (
-                <NavLink
-                  key={item.id}
-                  to="/reports"
-                  state={{ selectedDashboard: item.id }} // pass selected dashboard
-                  className={`flex items-start gap-2 py-2 text-[13px] leading-tight transition-all duration-200 transform
-                    hover:scale-105 hover:translate-x-[5px]
-                    ${selectedDashboard === item.id
-                      ? "text-white font-semibold"
-                      : "text-slate-300 hover:text-white"}`}
-                >
-                  {/* Dashboard icon */}
-                  <div className="mt-[2px]">
-                    {getDashboardIcon(item.id)}
-                  </div>
-
-                  {/* Dashboard name */}
-                  <span className="break-words whitespace-normal">
-                    {item.name}
-                  </span>
-                </NavLink>
-              ))}
+              {isHomeActive && (
+                <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
+              )}
             </div>
-          )}
 
-          {/* USERS */}
-          <NavLink
-            to="/manage-users"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
-              ${(isUsersPage || isActive)
-                ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`
-            }
+            {/* HOME SUBMENU */}
+            {openHome && (
+              <div className="pl-[35px] mt-[5px]">
+
+                <NavLink to="/manage-users" className={({ isActive }) =>
+                  `flex items-center gap-2 py-2 text-[13px]
+                  ${(isUsersPage || isActive)
+                    ? "text-white font-semibold"
+                    : "text-slate-300 hover:text-white"}`
+                }>
+                  <FaUsers />
+                  <span>Manage Users</span>
+                </NavLink>
+
+                <NavLink to="/dashboard-selection" className={({ isActive }) =>
+                  `flex items-center gap-2 py-2 text-[13px]
+                  ${(isDashboardPage || isActive)
+                    ? "text-white font-semibold"
+                    : "text-slate-300 hover:text-white"}`
+                }>
+                  <FaThLarge />
+                  <span>Dashboards</span>
+                </NavLink>
+
+                <NavLink to="/reports" className={({ isActive }) =>
+                  `flex items-center gap-2 py-2 text-[13px]
+                  ${(isReportsPage || isActive)
+                    ? "text-white font-semibold"
+                    : "text-slate-300 hover:text-white"}`
+                }>
+                  <FaBullhorn />
+                  <span>Reports</span>
+                </NavLink>
+
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* LOGOUT BUTTON */}
+        <div className="p-[15px]">
+          <button
+            onClick={() => setShowLogoutPopup(true)}
+            className="w-full bg-[#2a4270] hover:bg-[#3b5a91] flex items-center justify-center gap-2 py-3 rounded-[10px]"
           >
-            <FaUsers />
-            <span>Users</span>
-          </NavLink>
-
-          {/* DATA SCHEMA */}
-          <NavLink
-            to="/data-schema"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px]
-              ${(isDataSchemaPage || isActive)
-                ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"}`
-            }
-          >
-            <FaDatabase />
-            <span>Data Schema</span>
-          </NavLink>
-
+            <FaSignOutAlt />
+            Logout
+          </button>
         </div>
       </div>
 
-      {/* LOGOUT BUTTON */}
-      <div className="p-[15px]">
-        <button
-          onClick={() => navigate("/profile")} // navigate to profile
-          className="w-full bg-[#2a4270] hover:bg-[#3b5a91] flex items-center justify-center gap-2 py-3 rounded-[10px]"
-        >
-          <FaSignOutAlt />
-          Logout
-        </button>
-      </div>
-    </div>
+      {/* LOGOUT POPUP */}
+      {showLogoutPopup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 font-inherit">
+          <div className="bg-white text-black p-6 rounded-[12px] w-[300px] text-center shadow-lg">
+
+            <h3 className="text-lg font-semibold mb-4">
+              Are you sure you want to exit?
+            </h3>
+
+            <div className="flex justify-center gap-4">
+
+              {/* YES */}
+              <button
+                onClick={handleLogout}
+                className="bg-gray-200 hover:bg-gray-300 text-black px-4 py-2 rounded"
+              >
+                Yes
+              </button>
+
+              {/* NO */}
+              <button
+                autoFocus
+                onClick={() => setShowLogoutPopup(false)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow-md"
+              >
+                No
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
