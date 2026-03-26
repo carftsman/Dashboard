@@ -14,45 +14,46 @@ import {
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const AdminSidebar = () => {
+  const location = useLocation();   // Gives current URL path
+  const navigate = useNavigate();   // Used for navigation
 
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Active checks
+  /* ---------- ACTIVE PAGE CHECKS ---------- */
   const isHomePage = location.pathname === "/admin-dashboard";
   const isUsersPage = location.pathname.startsWith("/manage-users");
   const isDashboardPage = location.pathname.startsWith("/dashboard-selection");
   const isReportsPage = location.pathname.startsWith("/reports");
 
+  // Home is active if any of its sub-pages are active
   const isHomeActive =
     isHomePage || isUsersPage || isDashboardPage || isReportsPage;
 
+  /* ---------- STATE ---------- */
+
+  // Controls opening/closing of Home submenu
   const [openHome, setOpenHome] = useState(
     isHomeActive && location.pathname !== "/admin-dashboard"
   );
 
-  // Popup state
+  // Controls logout popup visibility
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 
+  /* ---------- EFFECT ---------- */
+
+  // Automatically open submenu when navigating to subpages
   useEffect(() => {
     setOpenHome(
       isHomeActive && location.pathname !== "/admin-dashboard"
     );
-  }, [location]); // ✅ FIXED HERE
+  }, [location]);
 
-  // Logout function
-  const handleLogout = async () => {
+  /* ---------- LOGOUT ---------- */
+
+  const handleLogout = () => {
     try {
-      const token = localStorage.getItem("token");
-
-      localStorage.removeItem("token");
-      localStorage.clear();
-
-      navigate("/profile");
-
+      localStorage.clear();     // Clear all stored data
+      navigate("/profile");    // Redirect after logout
     } catch (error) {
       console.error("Logout failed:", error);
-
       localStorage.clear();
       navigate("/profile");
     }
@@ -60,13 +61,17 @@ const AdminSidebar = () => {
 
   return (
     <>
+      {/* ---------- SIDEBAR ---------- */}
       <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
 
         <div>
-
-          {/* LOGO */}
+          {/* Logo Section */}
           <div className="flex items-center px-2 py-1">
-            <img src={logo} alt="ZestBot" className="w-[85px] h-[85px] object-contain" />
+            <img
+              src={logo}
+              alt="ZestBot"
+              className="w-[85px] h-[85px] object-contain"
+            />
 
             <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
               <span className="text-white">Zest</span>
@@ -74,15 +79,17 @@ const AdminSidebar = () => {
             </h2>
           </div>
 
+          {/* Divider */}
           <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
 
           <div className="mt-[15px] px-3">
 
-            {/* HOME */}
+            {/* ---------- HOME MENU ---------- */}
             <div
               onClick={() => {
-                setOpenHome(!openHome);
+                setOpenHome(!openHome);  // Toggle submenu
 
+                // Always redirect to main dashboard when clicking Home
                 if (location.pathname !== "/admin-dashboard") {
                   navigate("/admin-dashboard");
                 }
@@ -97,56 +104,69 @@ const AdminSidebar = () => {
                 <span>Home</span>
               </div>
 
+              {/* Arrow rotation when open */}
               <FaChevronDown
                 className={`transition-transform duration-300 ${openHome ? "rotate-180" : ""}`}
               />
 
+              {/* Active indicator line */}
               {isHomeActive && (
                 <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
               )}
             </div>
 
-            {/* HOME SUBMENU */}
+            {/* ---------- HOME SUBMENU ---------- */}
             {openHome && (
               <div className="pl-[35px] mt-[5px]">
 
-                <NavLink to="/manage-users" className={({ isActive }) =>
-                  `flex items-center gap-2 py-2 text-[13px]
-                  ${(isUsersPage || isActive)
-                    ? "text-white font-semibold"
-                    : "text-slate-300 hover:text-white"}`
-                }>
+                {/* Manage Users */}
+                <NavLink
+                  to="/manage-users"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 py-2 text-[13px]
+                    ${(isUsersPage || isActive)
+                      ? "text-white font-semibold"
+                      : "text-slate-300 hover:text-white"}`
+                  }
+                >
                   <FaUsers />
                   <span>Manage Users</span>
                 </NavLink>
 
-                <NavLink to="/dashboard-selection" className={({ isActive }) =>
-                  `flex items-center gap-2 py-2 text-[13px]
-                  ${(isDashboardPage || isActive)
-                    ? "text-white font-semibold"
-                    : "text-slate-300 hover:text-white"}`
-                }>
+                {/* Dashboards */}
+                <NavLink
+                  to="/dashboard-selection"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 py-2 text-[13px]
+                    ${(isDashboardPage || isActive)
+                      ? "text-white font-semibold"
+                      : "text-slate-300 hover:text-white"}`
+                  }
+                >
                   <FaThLarge />
                   <span>Dashboards</span>
                 </NavLink>
 
-                <NavLink to="/reports" className={({ isActive }) =>
-                  `flex items-center gap-2 py-2 text-[13px]
-                  ${(isReportsPage || isActive)
-                    ? "text-white font-semibold"
-                    : "text-slate-300 hover:text-white"}`
-                }>
+                {/* Reports */}
+                <NavLink
+                  to="/reports"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 py-2 text-[13px]
+                    ${(isReportsPage || isActive)
+                      ? "text-white font-semibold"
+                      : "text-slate-300 hover:text-white"}`
+                  }
+                >
                   <FaBullhorn />
                   <span>Reports</span>
                 </NavLink>
 
               </div>
             )}
-
           </div>
         </div>
 
-        {/* LOGOUT BUTTON */}
+        {/* ---------- LOGOUT BUTTON ---------- */}
         <div className="p-[15px]">
           <button
             onClick={() => setShowLogoutPopup(true)}
@@ -158,9 +178,9 @@ const AdminSidebar = () => {
         </div>
       </div>
 
-      {/* LOGOUT POPUP */}
+      {/* ---------- LOGOUT POPUP ---------- */}
       {showLogoutPopup && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 font-inherit">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white text-black p-6 rounded-[12px] w-[300px] text-center shadow-lg">
 
             <h3 className="text-lg font-semibold mb-4">
@@ -169,15 +189,15 @@ const AdminSidebar = () => {
 
             <div className="flex justify-center gap-4">
 
-              {/* YES */}
+              {/* Confirm Logout */}
               <button
                 onClick={handleLogout}
-                className="bg-gray-200 hover:bg-gray-300 text-black px-4 py-2 rounded"
+                className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
               >
                 Yes
               </button>
 
-              {/* NO */}
+              {/* Cancel Logout */}
               <button
                 autoFocus
                 onClick={() => setShowLogoutPopup(false)}
