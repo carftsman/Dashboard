@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { toast } from "react-toastify";
 
+
 export default function EditProfile(){
 
 const { user, setUser } = useContext(UserContext);

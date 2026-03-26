@@ -1,15 +1,13 @@
-
 import { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
 
-// import "../../src/pages/styles/login.css";
 import "../css/login.css";
 
 import img1 from "../assets/images/Login-1.png";
@@ -22,30 +20,36 @@ import img6 from "../assets/images/Login-6.png";
 import logo from "../assets/images/Background.png.png";
 
 const sliderImages = [img1, img2, img3, img4, img5, img6];
+
 export default function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // ✅ EMAIL VALIDATION
+  //  TOGGLE STATE
+  const [showPassword, setShowPassword] = useState(false);
+
+  // EMAIL VALIDATION
   const validateEmail = (value) => {
-    
     const regex = /^[a-zA-Z0-9._%+-]+@(dhatvibs\.com|gmail\.com)$/;
     if (!regex.test(value)) {
-      setEmailError("Invalid email! ");
+      setEmailError("Invalid email!");
+      return false;
     } else {
       setEmailError("");
+      return true;
     }
   };
 
-  // ✅ PASSWORD VALIDATION
+  //  PASSWORD VALIDATION
   const validatePassword = (value) => {
     if (value.length < 8 || value.length > 12) {
       setPasswordError("Password must be 8-12 characters only");
-      return;
+      return false;
     }
 
     const regex =
@@ -55,12 +59,14 @@ export default function Login() {
       setPasswordError(
         "Must include Upper, Lower, Number & Special character"
       );
+      return false;
     } else {
       setPasswordError("");
+      return true;
     }
   };
 
-  // ✅ HANDLE PASSWORD INPUT (LIMIT 12)
+  //  PASSWORD INPUT
   const handlePasswordChange = (e) => {
     const value = e.target.value;
 
@@ -70,11 +76,13 @@ export default function Login() {
     }
   };
 
-const handleLogin = async () => {
-  validateEmail(email);
-  validatePassword(password);
+  // LOGIN FUNCTION
+  const handleLogin = async () => {
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
 
-  if (!emailError && !passwordError && email && password) {
+    if (!isEmailValid || !isPasswordValid) return;
+
     try {
       const response = await fetch(
         "https://dashboard-backend-cyrd.onrender.com/api/auth/login",
@@ -83,36 +91,32 @@ const handleLogin = async () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-          }),
+          body: JSON.stringify({ email, password }),
         }
       );
 
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        // ✅ Store token (optional but recommended)
-        localStorage.setItem("token", result.data.token);
-        localStorage.setItem("user", JSON.stringify(result.data.user));
+      if (response.ok) {
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("role", result.role);
 
-        // ✅ Role-based redirect (from API)
-        if (result.data.user.role === "ADMIN") {
+        const role = result.role?.toUpperCase();
+
+        if (role === "ADMIN") {
           navigate("/admin-dashboard");
         } else {
           navigate("/dashboard-selection");
         }
       } else {
-        // ❌ API error message
         setPasswordError(result.message || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error);
       setPasswordError("Something went wrong. Try again.");
     }
-  }
-};
+  };
+
   return (
     <div className="login-page">
       {/* LEFT SLIDER */}
@@ -169,29 +173,41 @@ const handleLogin = async () => {
             )}
           </div>
 
-          {/* PASSWORD */}
-          <div className="input-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={handlePasswordChange}
-              placeholder="Enter Strong Password"
-            />
-            {passwordError && (
-              <p className="error-text">{passwordError}</p>
-            )}
-          </div>
+          {/* PASSWORD WITH TOGGLE */}
+<div className="input-group">
+  <label>Password</label>
 
+  <div className="password-box">
+    <input
+      type={showPassword ? "text" : "password"}
+      value={password}
+      onChange={handlePasswordChange}
+      placeholder="Enter Strong Password"
+      className="password-input"
+    />
+
+    <span
+      onClick={() => setShowPassword(!showPassword)}
+      className="eye-icon"
+    >
+      {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+    </span>
+  </div>
+
+  {passwordError && (
+    <p className="error-text">{passwordError}</p>
+  )}
+</div>
           {/* FORGOT */}
           <div className="forgot-container">
-            <Link to="/reset-password">
-              Forgot password?
-            </Link>
+            <Link to="/reset-password">Forgot password?</Link>
           </div>
 
           {/* BUTTON */}
-          <button className="login-btn" onClick={handleLogin}>
+          <button
+            className="login-btn bg-[#192A51] hover:bg-[#0f1e3d] text-white"
+            onClick={handleLogin}
+          >
             Login
           </button>
         </motion.div>
