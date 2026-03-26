@@ -116,7 +116,7 @@ const role = localStorage.getItem("role"); // get role
             </p>
 
             {role === "ADMIN" && (
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={() => navigate(`/dataschema/${dashboardId}`)}>
               Edit Schema
             </button>
           )}
