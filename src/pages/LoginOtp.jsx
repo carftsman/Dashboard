@@ -182,40 +182,70 @@ const LoginOtp = () => {
         {/* PASSWORD */}
         <div className="text-left mb-4 relative">
           <label className="text-xs text-gray-500">New Password</label>
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter New Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-md px-3 py-2 text-sm mt-1 outline-none pr-10"
-          />
-          <span
-            className="absolute right-3 top-9 cursor-pointer text-gray-500"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </span>
+         <input
+  type="text"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  placeholder="Enter New Password"
+  autoComplete="off"
+  style={{
+    WebkitTextSecurity: showPassword ? "none" : "disc",
+  }}
+  className="w-full border rounded-md px-3 py-2 text-sm mt-1 outline-none pr-10"
+/>
+         <span
+  className={`absolute right-3 top-9 ${
+    password ? "cursor-pointer text-gray-500" : "text-gray-300 cursor-not-allowed"
+  }`}
+  onClick={() => {
+    if (!password) return;
+
+    setShowPassword(true);
+
+    setTimeout(() => {
+      setShowPassword(false);
+    }, 3000);
+  }}
+>
+  {showPassword ? <FaEyeSlash /> : <FaEye />}
+</span>
         </div>
 
-        {/* CONFIRM PASSWORD */}
-        <div className="text-left mb-4 relative">
-          <label className="text-xs text-gray-500">Confirm Password</label>
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border rounded-md px-3 py-2 text-sm mt-1 outline-none pr-10"
-          />
-          <span
-            className="absolute right-3 top-9 cursor-pointer text-gray-500"
-            onClick={() =>
-              setShowConfirmPassword(!showConfirmPassword)
-            }
-          >
-            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-          </span>
-        </div>
+    {/* CONFIRM PASSWORD */}
+<div className="text-left mb-4 relative">
+  <label className="text-xs text-gray-500">Confirm Password</label>
+
+  <input
+    type="text"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    placeholder="Confirm Password"
+    autoComplete="off"
+    style={{
+      WebkitTextSecurity: showConfirmPassword ? "none" : "disc",
+    }}
+    className="w-full border rounded-md px-3 py-2 text-sm mt-1 outline-none pr-10"
+  />
+
+  <span
+    className={`absolute right-3 top-9 ${
+      confirmPassword
+        ? "cursor-pointer text-gray-500"
+        : "text-gray-300 cursor-not-allowed"
+    }`}
+    onClick={() => {
+      if (!confirmPassword) return;
+
+      setShowConfirmPassword(true);
+
+      setTimeout(() => {
+        setShowConfirmPassword(false);
+      }, 3000);
+    }}
+  >
+    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
 
         {/* BUTTON */}
         

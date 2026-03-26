@@ -14,9 +14,12 @@ import Reports from "../pages/Reports";
 import AdminDashboard from "../pages/admin/adminDashboard";
 import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
+import UserLogs from "../pages/userlogs";
+
  
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
+import AdminReportManagement from '../pages/AdminReportManagement';
  
 const AppRoutes = () => {
   return (
@@ -83,6 +86,24 @@ const AppRoutes = () => {
         }
       />
  
+      <Route
+      
+        path="/reports/:dashboardId/:dashboardName"
+        element={
+          <ProtectedRoute>
+            <Reports />
+          </ProtectedRoute>
+        }
+      />
+      <Route 
+      path="/reports/all"
+      element={
+        <ProtectedRoute>
+           <AdminReportManagement/>
+        </ProtectedRoute>
+       
+      }
+      />
       <Route path="/reports/:id" 
       element={<Reports />} />
  
@@ -94,6 +115,16 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+         <Route
+        path="/user-logs"
+        element={
+          <ProtectedRoute>
+            <UserLogs />
+          </ProtectedRoute>
+        }
+      />
+ 
  
       {/* Admin Routes */}
      
@@ -111,9 +142,11 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      
  
       <Route
-        path="/data-schema"
+        path="/dataschema/:id"
         element={
           <ProtectedRoute>
             <DataSchema />
