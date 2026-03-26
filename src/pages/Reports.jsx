@@ -8,6 +8,7 @@ import api from '../api/apiConfig';
 export default function Reports() {
   const navigate = useNavigate();
   const { dashboardName, dashboardId } = useParams();
+  console.log("dashboardId",dashboardId);
 
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
@@ -88,7 +89,7 @@ fetchData();
             <button className="bg-[#2B3F8F] hover:bg-[#1f2f6b] text-white px-5 py-2 rounded-lg transition"
             onClick={(e) => {
                   e.stopPropagation();
-                  navigate("/upload-data", { state: { dashboardId: id } });
+                  navigate("/upload-data", { state: { dashboardId: dashboardId } });
                 }}
             >
               Upload Data
