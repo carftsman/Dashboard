@@ -15,6 +15,7 @@ import AdminDashboard from "../pages/admin/adminDashboard";
 import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
 import UserLogs from "../pages/UserLogs";
+
  
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
@@ -128,6 +129,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      
  
       <Route
         path="/data-schema"

@@ -70,7 +70,10 @@ const Sidebar = () => {
           <img
             src={logo}
             alt="ZestBot"
+
             className="w-[85px] h-[85px] object-contain mt-[-10px]"
+
+
           />
           <h2 className="text-[30px] font-semibold ml-[-10px] tracking-[0.5px]">
             <span className="text-white">Zest</span>
