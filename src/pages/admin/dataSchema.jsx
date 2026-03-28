@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getColumns, updateColumn, createColumn , deleteColumn} from "../../services/editDataSchemaService";
 import { useParams } from "react-router-dom";
-import AdminSidebar from "../../components/adminSidebar";
+import AdminSidebar from "../../components/AdminSidebar";
 import { toast } from "react-toastify";
 
 export default function DataSchema() {

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
-import AdminSidebar from "../components/adminSidebar"; 
+import AdminSidebar from "../components/AdminSidebar"; 
 
 function Dashboard() {
   const navigate = useNavigate();
