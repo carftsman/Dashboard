@@ -3,14 +3,11 @@ import { Link } from "react-router-dom";
 import logo from "../assets/images/Background.png.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-
-// ✅ FIXED PATH;
+import { FaArrowLeft } from "react-icons/fa"
 import "../css/ResetPassword.css";
-// import ResetPassword from './ResetPassword';
-
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ added
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
 
   return (
@@ -64,7 +61,7 @@ export default function ResetPassword() {
                 );
 
                 const data = await response.json();
-                 console.log("Data:",response.data)
+                console.log("Data:", response.data)
                 if (response.ok) {
                   console.log("OTP Sent:", data);
                   navigate("/loginOtp", { state: { email } });
@@ -79,11 +76,14 @@ export default function ResetPassword() {
               }
             }}
           >
-            {loading ? "Sending..." : "Send Otp →"}
+            {loading ? "Sending..." : "Send Otp "}
           </button>
 
           <div className="back-link">
-            <Link to="/">← Back to login</Link>
+            <Link to="/">
+              <FaArrowLeft style={{ marginRight: "8px" }} />
+              Back to login
+            </Link>
           </div>
         </motion.div>
       </div>
