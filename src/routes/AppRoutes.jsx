@@ -17,6 +17,8 @@ import DataSchema from "../pages/admin/dataSchema";
  
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
+import EditProfile from "../pages/EditProfile";
+import ChangePassword from "../pages/ChangePassword";
  
 const AppRoutes = () => {
   return (
@@ -100,6 +102,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route path="/edit-profile" element={<EditProfile />} />
+      <Route path="/change-password" element={<ChangePassword />} />
  
       {/* Admin Routes */}
      
