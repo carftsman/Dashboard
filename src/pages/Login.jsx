@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-
 
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -30,6 +29,20 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
+
+  //  Stay logged in (prevent going back to login)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (token) {
+      if (role?.toUpperCase() === "ADMIN") {
+        navigate("/admin-dashboard", { replace: true });
+      } else {
+        navigate("/dashboard-selection", { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const validateEmail = (value) => {
     const regex = /^[a-zA-Z0-9._%+-]+@(dhatvibs\.com|gmail\.com)$/;
@@ -89,15 +102,17 @@ export default function Login() {
       const result = await response.json();
 
       if (response.ok) {
+        // Store token
         localStorage.setItem("token", result.token);
         localStorage.setItem("role", result.role);
 
         const role = result.role?.toUpperCase();
 
+        //  Redirect based on role
         if (role === "ADMIN") {
-          navigate("/admin-dashboard");
+          navigate("/admin-dashboard", { replace: true });
         } else {
-          navigate("/dashboard-selection");
+          navigate("/dashboard-selection", { replace: true });
         }
       } else {
         setPasswordError(result.message || "Login failed");
@@ -109,11 +124,10 @@ export default function Login() {
   };
 
   return (
-    
-    <div className="flex h-screen w-full font-sans max-[900px]:flex-col">
+    <div className="flex h-screen w-full font-sans max-[900px]:flex-col max-[600px]:h-auto">
 
       {/* LEFT PANEL */}
-      <div className="flex-1 relative overflow-hidden max-[900px]:h-[40%]">
+      <div className="flex-1 relative overflow-hidden max-[900px]:h-[250px] max-[600px]:hidden">
         <Swiper
           modules={[Autoplay, EffectFade]}
           effect="fade"
@@ -124,17 +138,15 @@ export default function Login() {
           {sliderImages.map((image, index) => (
             <SwiperSlide key={index} className="relative w-full h-full">
               
-              {/* BLUR BG */}
               <div
                 className="absolute w-full h-full bg-cover bg-center blur-[25px] brightness-[0.6] scale-110"
                 style={{ backgroundImage: `url(${image})` }}
               ></div>
 
-              {/* MAIN IMAGE */}
               <img
                 src={image}
                 alt="delivery"
-                className="relative w-[65%] max-[500px]:w-[80%] mx-auto top-1/2 -translate-y-1/2 z-10"
+                className="relative w-[65%] max-[900px]:w-[50%] max-[500px]:w-[80%] mx-auto top-1/2 -translate-y-1/2 z-10"
               />
             </SwiperSlide>
           ))}
@@ -142,28 +154,21 @@ export default function Login() {
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="flex-1 flex justify-center items-center bg-[#f4f6fb] max-[900px]:h-[60%]">
+      <div className="flex-1 flex justify-center items-center bg-[#f4f6fb] max-[900px]:h-auto max-[600px]:min-h-screen px-4">
         
         <motion.div
           initial={{ opacity: 0, x: 80 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-[420px] p-[35px_30px] max-[500px]:p-[25px_20px] rounded-[14px] bg-white shadow-[0_8px_25px_rgba(0,0,0,0.08)] text-center"
+          className="w-full max-w-[420px] p-[35px_30px] max-[500px]:p-[25px_20px] max-[400px]:p-[20px_15px] rounded-[14px] bg-white shadow-[0_8px_25px_rgba(0,0,0,0.08)] text-center"
         >
           
-          {/* LOGO */}
-          <img
-            src={logo}
-            alt="logo"
-            className="w-[55px] mx-auto mb-2"
-          />
+          <img src={logo} alt="logo" className="w-[55px] mx-auto mb-2" />
 
-          {/* TITLE */}
           <h2 className="mb-1 text-[22px] font-semibold text-[#1f2a44]">
             Welcome back
           </h2>
 
-          {/* SUBTEXT */}
           <p className="text-[13px] text-[#8a94a6] mb-5">
             Please enter your details to access your account
           </p>
@@ -200,35 +205,33 @@ export default function Login() {
 
             <div className="flex items-center border border-[#e2e6ef] rounded-md h-[42px] px-3 bg-[#f9fafc] focus-within:border-[#4a90e2] focus-within:bg-white">
               
-    <input
-  type="text"
-  value={password}
-  onChange={handlePasswordChange}
-  placeholder="Enter Strong Password"
-  autoComplete="off"
-  style={{
-    WebkitTextSecurity: showPassword ? "none" : "disc",
-  }}
-  className="flex-1 bg-transparent border-none outline-none shadow-none focus:ring-0 text-[13px] p-0 m-0"
-/>
-     <span
-  onClick={() => {
-    if (!password) return;
+              <input
+                type="text"
+                value={password}
+                onChange={handlePasswordChange}
+                placeholder="Enter Strong Password"
+                autoComplete="off"
+                style={{
+                  WebkitTextSecurity: showPassword ? "none" : "disc",
+                }}
+                className="flex-1 bg-transparent border-none outline-none shadow-none focus:ring-0 text-[13px] p-0 m-0"
+              />
 
-    setShowPassword(true);
+              <span
+                onClick={() => {
+                  if (!password) return;
 
-    setTimeout(() => {
-      setShowPassword(false);
-    }, 3000);
-  }}
-  className={`flex items-center ${
-    password
-      ? "cursor-pointer text-gray-500"
-      : "cursor-not-allowed text-gray-300"
-  }`}
->
-  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-</span>
+                  setShowPassword(true);
+                  setTimeout(() => setShowPassword(false), 3000);
+                }}
+                className={`flex items-center ${
+                  password
+                    ? "cursor-pointer text-gray-500"
+                    : "cursor-not-allowed text-gray-300"
+                }`}
+              >
+                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+              </span>
             </div>
 
             {passwordError && (
