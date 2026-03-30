@@ -4,7 +4,7 @@ import { FaUsers } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { HiDocumentReport } from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
-import AdminSidebar from "../../components/adminSidebar";
+import AdminSidebar from "../../components/AdminSidebar";
 import { useLocation } from "react-router-dom";
 
 

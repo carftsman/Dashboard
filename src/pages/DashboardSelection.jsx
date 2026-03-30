@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
-import AdminSidebar from "../components/adminSidebar"; 
+import AdminSidebar from "../components/AdminSidebar"; 
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -162,24 +162,7 @@ function Dashboard() {
             </div>
           )}
 
-          {role === "admin" && (
-            <div
-              onClick={() => navigate("/create-dashboard")}
-              className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 
-                         rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1 
-                         transition duration-300 h-[220px]"
-            >
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 text-2xl text-gray-600 mb-2">
-                +
-              </div>
-              <h4 className="text-sm font-semibold text-gray-700">
-                Create New
-              </h4>
-              <p className="text-xs text-gray-400 text-center mt-1 px-3">
-                Start from a template or a blank canvas
-              </p>
-            </div>
-          )}
+          
 
         </div>
 

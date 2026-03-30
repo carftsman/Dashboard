@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ReportTable from "../components/ReportTable";
 import Sidebar from "../components/Sidebar";
 import { useEffect, useState } from "react";
-import AdminSidebar from "../components/adminSidebar";
+import AdminSidebar from "../components/AdminSidebar";
 import api from '../api/apiConfig';
 
 export default function Reports() {
