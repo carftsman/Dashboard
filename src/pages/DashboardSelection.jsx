@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
-import AdminSidebar from "../components/adminSidebar";
+import AdminSidebar from "../components/AdminSidebar";
 // IMPORT MODALS
 import CreateDashboard from "../components/CreateDashboard";
 import VisualizationModal from "../components/VisualizationModal";
@@ -156,7 +156,7 @@ function Dashboard() {
             </div>
           ))}
 
-          {/* ✅ CREATE NEW (OPEN MODAL INSTEAD OF NAVIGATION) */}
+          {/* CREATE NEW */}
           {role === "admin" && (
             <div
               onClick={() => setOpenCreateModal(true)}
@@ -178,7 +178,7 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ✅ CREATE DASHBOARD MODAL */}
+      {/* CREATE DASHBOARD MODAL */}
       <CreateDashboard
         isOpen={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
