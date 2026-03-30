@@ -122,7 +122,12 @@ const AppRoutes = () => {
 
       {/* Admin Routes */}
 
-      <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+      <Route path="/admin-dashboard/*" 
+       element={
+         <ProtectedRoute>
+            <AdminDashboard />
+       </ProtectedRoute>
+       } />
 
       <Route
         path="/manage-users"
