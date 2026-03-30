@@ -10,10 +10,10 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen w-full font-sans bg-[#f8f9fc] items-center justify-center">
-      
+    <div className="flex min-h-screen w-full font-sans bg-[#f8f9fc] items-center justify-center px-4">
+
       <motion.div
-        className="w-[360px] p-10 rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)] text-center"
+        className="w-[360px] max-[500px]:w-full p-10 max-[500px]:p-6 rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)] text-center"
         initial={{ opacity: 0, y: 60 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -22,11 +22,11 @@ export default function ResetPassword() {
         <img
           src={logo}
           alt="logo"
-          className="w-[50px] mx-auto mb-5"
+          className="w-[50px] max-[500px]:w-[45px] mx-auto mb-5"
         />
 
         {/* TITLE */}
-        <h2 className="mb-2 text-2xl text-[#333]">
+        <h2 className="mb-2 text-2xl max-[500px]:text-xl text-[#333]">
           Reset Password
         </h2>
 
@@ -37,7 +37,7 @@ export default function ResetPassword() {
 
         {/* INPUT */}
         <div className="text-left mb-8">
-          <label className="text-base font-semibold text-[#333] mb-2 block">
+          <label className="text-base max-[500px]:text-sm font-semibold text-[#333] mb-2 block">
             Email Address
           </label>
 
@@ -55,8 +55,17 @@ export default function ResetPassword() {
           type="button"
           disabled={loading}
           onClick={async () => {
+
+            // Empty check
             if (!email.trim()) {
               alert("Enter email");
+              return;
+            }
+
+            // Email validation (ONLY gmail & dhatvibs allowed)
+            const regex = /^[a-zA-Z0-9._%+-]+@(dhatvibs\.com|gmail\.com)$/;
+            if (!regex.test(email)) {
+              alert("Invalid email!");
               return;
             }
 
@@ -98,7 +107,7 @@ export default function ResetPassword() {
         <div className="flex justify-center mt-4">
           <Link
             to="/"
-            className="flex items-center text-sm text-[#1f2a44] hover:underline"
+            className="flex items-center text-sm max-[500px]:text-xs text-[#1f2a44] hover:underline"
           >
             <FaArrowLeft className="mr-2" />
             Back to login
