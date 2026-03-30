@@ -42,9 +42,9 @@ const AppRoutes = () => {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
             <MainDashboard />
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }
       />
 

@@ -26,7 +26,7 @@ body {
 }
 
 /* Headings */
-h1, h2, h3 {
+h1, h2 {
   margin-bottom: 15px;
 }
 
@@ -55,11 +55,11 @@ button:hover {
 }
 
 /* Responsive grid layout */
-.grid {
+/* .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-}
+} */
 
 /* Card style used in dashboard */
 .card {
