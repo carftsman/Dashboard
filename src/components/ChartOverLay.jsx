@@ -14,6 +14,9 @@ export default function ChartOverlay({ open, onClose }) {
   // ✅ ADDED: widgets state
   const [widgets, setWidgets] = useState([]);
 
+  // ✅ ADDED: get token safely
+  const token = localStorage.getItem("token");
+
   const handleDragStart = (e, item) => {
     e.dataTransfer.setData("text/plain", item);
   };
@@ -27,7 +30,7 @@ export default function ChartOverlay({ open, onClose }) {
 
   const allowDrop = (e) => e.preventDefault();
 
-  // ✅ ADDED: API CALL FUNCTION (POST)
+  // ✅ UPDATED: API CALL FUNCTION (POST)
   const handleSaveChart = async () => {
     if (!xAxis || !yAxis) {
       alert("Please select both X and Y axis");
@@ -43,7 +46,7 @@ export default function ChartOverlay({ open, onClose }) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Authorization: `Bearer ${localStorage.getItem("token")}`,
+            ...(token && { Authorization: `Bearer ${token}` }), // ✅ FIXED
           },
           body: JSON.stringify({
             dashboardId: 1,
@@ -63,12 +66,12 @@ export default function ChartOverlay({ open, onClose }) {
       if (response.ok) {
         alert("Chart saved successfully ✅");
 
-        // ✅ ADDED: refresh widgets after save
+        // ✅ refresh widgets
         fetchWidgets();
 
         onClose();
       } else {
-        alert(data.message || "Something went wrong ❌");
+        alert(data.message || "Unauthorized or error ❌");
       }
     } catch (error) {
       console.error("API ERROR:", error);
@@ -78,7 +81,7 @@ export default function ChartOverlay({ open, onClose }) {
     }
   };
 
-  // ✅ ADDED: GET API FUNCTION
+  // ✅ UPDATED: GET API FUNCTION
   const fetchWidgets = async () => {
     try {
       const response = await fetch(
@@ -87,7 +90,7 @@ export default function ChartOverlay({ open, onClose }) {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            // Authorization: `Bearer ${localStorage.getItem("token")}`,
+            ...(token && { Authorization: `Bearer ${token}` }), // ✅ FIXED
           },
         }
       );
@@ -98,7 +101,7 @@ export default function ChartOverlay({ open, onClose }) {
       if (response.ok) {
         setWidgets(data.widgets || []);
       } else {
-        console.error("Failed to fetch widgets");
+        console.error("Failed to fetch widgets", data);
       }
     } catch (error) {
       console.error("GET API ERROR:", error);
@@ -251,7 +254,7 @@ export default function ChartOverlay({ open, onClose }) {
           )}
         </div>
 
-        {/* ✅ SAVE BUTTON */}
+        {/* SAVE BUTTON */}
         <button
           onClick={handleSaveChart}
           disabled={loading}
@@ -260,7 +263,7 @@ export default function ChartOverlay({ open, onClose }) {
           {loading ? "Saving..." : "Save"}
         </button>
 
-        {/* ✅ OPTIONAL: SHOW FETCHED WIDGETS */}
+        {/* DEBUG WIDGET VIEW */}
         <div className="absolute bottom-2 left-2 text-[10px] bg-white p-2 max-h-40 overflow-auto border">
           <p className="font-semibold">Widgets:</p>
           {widgets.map((w) => (
@@ -270,7 +273,7 @@ export default function ChartOverlay({ open, onClose }) {
           ))}
         </div>
 
-        {/* CLOSE button */}
+        {/* CLOSE */}
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-xs bg-black text-white px-2 py-1 rounded focus:outline-none"

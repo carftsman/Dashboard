@@ -6,6 +6,7 @@ import {
 import Sidebar from "../components/Sidebar.jsx"; 
 import ChartOverLay from "../components/ChartOverLay.jsx";
 import { useState } from "react";
+import {  useEffect } from "react";
 
 
 /* ---------------- DATA ---------------- */
@@ -69,18 +70,17 @@ const CustomTooltip = ({ active, payload }) => {
 export default function Dashboard() {
 
   const [openOverlay, setOpenOverlay] = useState(false);
+  const [chartConfig, setChartConfig] = useState(null);
 
-  // ✅ ADDED STATE
+  
   const [apiData, setApiData] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // ✅ ADDED API FUNCTION (WITH TOKEN)
- // ✅ REPLACE ONLY YOUR fetchChartData FUNCTION WITH THIS
+ 
 
 const fetchChartData = async () => {
   setLoading(true);
   try {
-    // ✅ GET TOKEN (TRY MULTIPLE KEYS)
+    
     const token =
       localStorage.getItem("token") ||
       localStorage.getItem("accessToken") ||
@@ -137,6 +137,41 @@ const fetchChartData = async () => {
     setLoading(false);
   }
 };
+const fetchChartConfig = async () => {
+  try {
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("authToken") ||
+      localStorage.getItem("jwt");
+
+    console.log("CONFIG TOKEN:", token);
+
+    const response = await fetch("https://dashboard-backend-cyrd.onrender.com/api/chart-types/config", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (response.status === 401) {
+      console.error("Unauthorized config API");
+      return;
+    }
+
+    const result = await response.json();
+    console.log("CHART CONFIG:", result);
+
+    setChartConfig(result);
+
+  } catch (error) {
+    console.error("CONFIG API ERROR:", error);
+  }
+};
+useEffect(() => {
+  fetchChartConfig();
+}, []);
 
   return (
     <div className="h-screen w-full bg-gradient-to-br from-[#020617] via-[#0b1120] to-[#020617] text-white p-3 overflow-hidden flex flex-col">
