@@ -62,7 +62,7 @@ const AdminSidebar = () => {
   return (
     <>
       {/* ---------- SIDEBAR ---------- */}
-      <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
+      <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0 hidden lg:block">
 
         <div>
           {/* Logo Section */}
