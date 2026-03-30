@@ -14,44 +14,42 @@ import {
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const AdminSidebar = () => {
-  const location = useLocation();   // Gives current URL path
-  const navigate = useNavigate();   // Used for navigation
+  const location = useLocation();   // current URL
+  const navigate = useNavigate();   // navigation function
 
-  /* ---------- ACTIVE PAGE CHECKS ---------- */
+  // Check which page is active
   const isHomePage = location.pathname === "/admin-dashboard";
   const isUsersPage = location.pathname.startsWith("/manage-users");
   const isDashboardPage = location.pathname.startsWith("/dashboard-selection");
   const isReportsPage = location.pathname.startsWith("/reports");
 
-  // Home is active if any of its sub-pages are active
+  // Home is active if any related page is active
   const isHomeActive =
     isHomePage || isUsersPage || isDashboardPage || isReportsPage;
 
-  /* ---------- STATE ---------- */
-
-  // Controls opening/closing of Home submenu
+  // State: submenu open/close
   const [openHome, setOpenHome] = useState(
     isHomeActive && location.pathname !== "/admin-dashboard"
   );
 
-  // Controls logout popup visibility
+  // State: logout popup visibility
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 
-  /* ---------- EFFECT ---------- */
+  // State: controls hover highlight (default = "no")
+  const [hoveredOption, setHoveredOption] = useState("no");
 
-  // Automatically open submenu when navigating to subpages
+  // Open submenu automatically when navigating
   useEffect(() => {
     setOpenHome(
       isHomeActive && location.pathname !== "/admin-dashboard"
     );
   }, [location]);
 
-  /* ---------- LOGOUT ---------- */
-
+  // Logout function
   const handleLogout = () => {
     try {
-      localStorage.clear();     // Clear all stored data
-      navigate("/profile");    // Redirect after logout
+      localStorage.clear();
+      navigate("/profile");
     } catch (error) {
       console.error("Logout failed:", error);
       localStorage.clear();
@@ -61,11 +59,11 @@ const AdminSidebar = () => {
 
   return (
     <>
-      {/* ---------- SIDEBAR ---------- */}
-      <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0 hidden lg:block">
+      {/* Sidebar */}
+      <div className="w-[220px] h-screen bg-[#192A51] flex flex-col justify-between text-white fixed top-0 left-0">
 
         <div>
-          {/* Logo Section */}
+          {/* Logo */}
           <div className="flex items-center px-2 py-1">
             <img
               src={logo}
@@ -79,17 +77,14 @@ const AdminSidebar = () => {
             </h2>
           </div>
 
-          {/* Divider */}
           <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
 
           <div className="mt-[15px] px-3">
 
-            {/* ---------- HOME MENU ---------- */}
+            {/* Home menu */}
             <div
               onClick={() => {
-                setOpenHome(!openHome);  // Toggle submenu
-
-                // Always redirect to main dashboard when clicking Home
+                setOpenHome(!openHome);
                 if (location.pathname !== "/admin-dashboard") {
                   navigate("/admin-dashboard");
                 }
@@ -104,22 +99,21 @@ const AdminSidebar = () => {
                 <span>Home</span>
               </div>
 
-              {/* Arrow rotation when open */}
+              {/* Arrow rotates when submenu is open */}
               <FaChevronDown
                 className={`transition-transform duration-300 ${openHome ? "rotate-180" : ""}`}
               />
 
-              {/* Active indicator line */}
+              {/* Left highlight bar when active */}
               {isHomeActive && (
                 <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[4px] h-[60%] bg-[#f4c542]" />
               )}
             </div>
 
-            {/* ---------- HOME SUBMENU ---------- */}
+            {/* Submenu */}
             {openHome && (
               <div className="pl-[35px] mt-[5px]">
 
-                {/* Manage Users */}
                 <NavLink
                   to="/manage-users"
                   className={({ isActive }) =>
@@ -133,7 +127,6 @@ const AdminSidebar = () => {
                   <span>Manage Users</span>
                 </NavLink>
 
-                {/* Dashboards */}
                 <NavLink
                   to="/dashboard-selection"
                   className={({ isActive }) =>
@@ -147,9 +140,8 @@ const AdminSidebar = () => {
                   <span>Dashboards</span>
                 </NavLink>
 
-                {/* Reports */}
                 <NavLink
-                  to="/reports"
+                  to="/reports/all"
                   className={({ isActive }) =>
                     `flex items-center gap-2 py-2 text-[13px]
                     ${(isReportsPage || isActive)
@@ -166,7 +158,7 @@ const AdminSidebar = () => {
           </div>
         </div>
 
-        {/* ---------- LOGOUT BUTTON ---------- */}
+        {/* Logout button */}
         <div className="p-[15px]">
           <button
             onClick={() => setShowLogoutPopup(true)}
@@ -178,7 +170,7 @@ const AdminSidebar = () => {
         </div>
       </div>
 
-      {/* ---------- LOGOUT POPUP ---------- */}
+      {/* Logout popup */}
       {showLogoutPopup && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white text-black p-6 rounded-[12px] w-[300px] text-center shadow-lg">
@@ -189,19 +181,30 @@ const AdminSidebar = () => {
 
             <div className="flex justify-center gap-4">
 
-              {/* Confirm Logout */}
+              {/* Yes button */}
               <button
+                onMouseEnter={() => setHoveredOption("yes")}
+                onMouseLeave={() => setHoveredOption("no")}
                 onClick={handleLogout}
-                className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
+                className={`px-4 py-2 rounded transition
+                  ${hoveredOption === "yes"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"}
+                `}
               >
                 Yes
               </button>
 
-              {/* Cancel Logout */}
+              {/* No button */}
               <button
                 autoFocus
+                onMouseEnter={() => setHoveredOption("no")}
                 onClick={() => setShowLogoutPopup(false)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow-md"
+                className={`px-4 py-2 rounded transition
+                  ${hoveredOption === "no"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"}
+                `}
               >
                 No
               </button>
