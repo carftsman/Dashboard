@@ -1,7 +1,6 @@
 import { useNavigate} from "react-router-dom";
 import ReportTable from "../components/ReportTable";
 import { useEffect, useState } from "react";
-
 import api from '../api/apiConfig';
 import AdminSidebar from "../components/AdminSidebar";
 
