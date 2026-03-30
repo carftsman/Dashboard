@@ -98,6 +98,7 @@ export default function Login() {
           navigate("/admin-dashboard");
         } else {
           navigate("/dashboard-selection");
+          // navigate("/dashboard")
         }
       } else {
         setPasswordError(result.message || "Login failed");

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function ChartOverlay({ open, onClose }) {
   const [showFilters, setShowFilters] = useState(true);
@@ -7,6 +7,12 @@ export default function ChartOverlay({ open, onClose }) {
 
   const [xAxis, setXAxis] = useState(null);
   const [yAxis, setYAxis] = useState(null);
+
+  // ✅ ADDED: loading state
+  const [loading, setLoading] = useState(false);
+
+  // ✅ ADDED: widgets state
+  const [widgets, setWidgets] = useState([]);
 
   const handleDragStart = (e, item) => {
     e.dataTransfer.setData("text/plain", item);
@@ -20,6 +26,91 @@ export default function ChartOverlay({ open, onClose }) {
   };
 
   const allowDrop = (e) => e.preventDefault();
+
+  // ✅ ADDED: API CALL FUNCTION (POST)
+  const handleSaveChart = async () => {
+    if (!xAxis || !yAxis) {
+      alert("Please select both X and Y axis");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        "https://dashboard-backend-cyrd.onrender.com/api/widgets/custom",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            dashboardId: 1,
+            name: "Custom Chart",
+            type: "BAR",
+            config: {
+              xAxis: xAxis,
+              yAxis: yAxis,
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+      console.log("API RESPONSE:", data);
+
+      if (response.ok) {
+        alert("Chart saved successfully ✅");
+
+        // ✅ ADDED: refresh widgets after save
+        fetchWidgets();
+
+        onClose();
+      } else {
+        alert(data.message || "Something went wrong ❌");
+      }
+    } catch (error) {
+      console.error("API ERROR:", error);
+      alert("Failed to save chart");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ ADDED: GET API FUNCTION
+  const fetchWidgets = async () => {
+    try {
+      const response = await fetch(
+        "https://dashboard-backend-cyrd.onrender.com/api/widgets/1",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            // Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      console.log("WIDGETS API RESPONSE:", data);
+
+      if (response.ok) {
+        setWidgets(data.widgets || []);
+      } else {
+        console.error("Failed to fetch widgets");
+      }
+    } catch (error) {
+      console.error("GET API ERROR:", error);
+    }
+  };
+
+  // ✅ ADDED: CALL API WHEN OPEN
+  useEffect(() => {
+    if (open) {
+      fetchWidgets();
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -110,7 +201,7 @@ export default function ChartOverlay({ open, onClose }) {
           )}
         </div>
 
-        {/* DATA panel grows and moves right */}
+        {/* DATA panel */}
         <div className={`flex-1 transition-all duration-300 p-3 flex flex-col h-full overflow-hidden`}>
           <div className="flex justify-between items-center mb-2">
             {showData && <h3 className="text-[12px] font-semibold text-gray-700">Data</h3>}
@@ -158,6 +249,25 @@ export default function ChartOverlay({ open, onClose }) {
               </div>
             </>
           )}
+        </div>
+
+        {/* ✅ SAVE BUTTON */}
+        <button
+          onClick={handleSaveChart}
+          disabled={loading}
+          className="absolute top-2 right-20 text-xs bg-blue-600 text-white px-2 py-1 rounded"
+        >
+          {loading ? "Saving..." : "Save"}
+        </button>
+
+        {/* ✅ OPTIONAL: SHOW FETCHED WIDGETS */}
+        <div className="absolute bottom-2 left-2 text-[10px] bg-white p-2 max-h-40 overflow-auto border">
+          <p className="font-semibold">Widgets:</p>
+          {widgets.map((w) => (
+            <div key={w.id}>
+              {w.name} ({w.type})
+            </div>
+          ))}
         </div>
 
         {/* CLOSE button */}
