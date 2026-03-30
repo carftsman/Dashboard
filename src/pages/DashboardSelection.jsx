@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
-import AdminSidebar from "../components/AdminSidebar"; 
+import AdminSidebar from "../components/AdminSidebar";
+// IMPORT MODALS
+import CreateDashboard from "../components/CreateDashboard";
+import VisualizationModal from "../components/VisualizationModal";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -11,13 +14,17 @@ function Dashboard() {
   const [search, setSearch] = useState("");
   const [cards, setCards] = useState([]);
 
+  //  MODAL STATES
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openVizModal, setOpenVizModal] = useState(false);
+  const [createdDashboardId, setCreatedDashboardId] = useState(null);
+
   const role = localStorage.getItem("role")?.toLowerCase();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
-        const token = localStorage.getItem("token");
-
         const res = await axios.get(
           "https://dashboard-backend-cyrd.onrender.com/api/dashboards",
           {
@@ -36,14 +43,13 @@ function Dashboard() {
         }));
 
         setCards(formattedData);
-
       } catch (error) {
         console.error("API Error:", error.response || error.message);
       }
     };
 
     fetchDashboards();
-  }, []);
+  }, [token]);
 
   const filteredCards = cards.filter((card) =>
     card.dashboardName.toLowerCase().includes(search.toLowerCase())
@@ -52,12 +58,13 @@ function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
 
-      {/* ROLE BASED SIDEBAR */}
+      {/* ✅ ROLE BASED SIDEBAR */}
       {role === "admin" && <AdminSidebar />}
       {role !== "admin" && <Sidebar />}
 
       <div className="flex-1 ml-[220px] p-6 overflow-y-auto">
 
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
 
           <div>
@@ -70,6 +77,7 @@ function Dashboard() {
 
           <div className="flex items-center gap-4">
 
+            {/* SEARCH */}
             <div className="relative w-64">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -81,6 +89,7 @@ function Dashboard() {
               />
             </div>
 
+            {/* PROFILE ICON */}
             <div
               className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
               onClick={() => navigate("/profile")}
@@ -91,17 +100,17 @@ function Dashboard() {
           </div>
         </div>
 
+        {/* DASHBOARD CARDS */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
 
-          {filteredCards.map((card) =>{
-            console.log("card in dashboardselection",card);
-             return  (
+          {filteredCards.map((card) => (
             <div
               key={card.dashboardId}
-              className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden 
+              className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden
                          transition duration-300 hover:-translate-y-1 hover:shadow-md"
             >
 
+              {/* IMAGE */}
               <div className="w-full h-32 flex items-center justify-center bg-gray-50">
                 {card.image && (
                   <img
@@ -112,6 +121,7 @@ function Dashboard() {
                 )}
               </div>
 
+              {/* DESCRIPTION HOVER */}
               <div className="absolute top-0 left-0 w-full h-32 flex items-end justify-center pointer-events-none">
                 <div className="mb-2 w-[80%] bg-blue-100 text-gray-600 text-xs p-2 rounded-lg text-center
                                 opacity-0 group-hover:opacity-100 transition duration-300">
@@ -119,6 +129,7 @@ function Dashboard() {
                 </div>
               </div>
 
+              {/* FOOTER */}
               <div className="p-4">
                 <h4 className="text-sm font-semibold mb-1">
                   {card.dashboardName}
@@ -128,7 +139,11 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/reports/${card.dashboardId}/${encodeURIComponent(card.dashboardName.trim())}`);
+                      navigate(
+                        `/reports/${card.dashboardId}/${encodeURIComponent(
+                          card.dashboardName.trim()
+                        )}`
+                      );
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
@@ -137,17 +152,16 @@ function Dashboard() {
 
                   <span className="text-blue-700 text-lg">→</span>
                 </div>
-
               </div>
             </div>
-          )})}
-          
+          ))}
 
+          {/* CREATE NEW */}
           {role === "admin" && (
             <div
-              onClick={() => navigate("/create-dashboard")}
-              className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 
-                         rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1 
+              onClick={() => setOpenCreateModal(true)}
+              className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300
+                         rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1
                          transition duration-300 h-[220px]"
             >
               <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 text-2xl text-gray-600 mb-2">
@@ -161,12 +175,31 @@ function Dashboard() {
               </p>
             </div>
           )}
-
-          
-
         </div>
-
       </div>
+
+      {/* CREATE DASHBOARD MODAL */}
+      <CreateDashboard
+        isOpen={openCreateModal}
+        onClose={() => setOpenCreateModal(false)}
+        token={token}
+        onSuccess={(dashboardId) => {
+          setCreatedDashboardId(dashboardId);
+          setOpenCreateModal(false);
+          setOpenVizModal(true);
+        }}
+      />
+
+      {/* ✅ VISUALIZATION MODAL */}
+      <VisualizationModal
+        isOpen={openVizModal}
+        onClose={() => {
+          setOpenVizModal(false);
+          window.location.reload();
+        }}
+        dashboardId={createdDashboardId}
+        token={token}
+      />
     </div>
   );
 }
