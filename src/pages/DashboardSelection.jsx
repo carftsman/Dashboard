@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
-import AdminSidebar from "../components/adminSidebar"; 
+import AdminSidebar from "../components/AdminSidebar"; 
+import api from '../api/apiConfig';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -12,22 +12,39 @@ function Dashboard() {
   const [cards, setCards] = useState([]);
 
   const role = localStorage.getItem("role")?.toLowerCase();
+  const profileImage = localStorage.getItem("profileImage");
+
+  useEffect(() => {
+    const handleBack = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handleBack);
+
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token === null || token === undefined || token === "") {
+      
+      return;
+    }
+
+    // ✔ if token exists → stay here
+  }, []);
 
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const res = await api.get("/api/dashboards");
 
-        const res = await axios.get(
-          "https://dashboard-backend-cyrd.onrender.com/api/dashboards",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const sortedData = res.data.sort((a, b) => a.id - b.id);
 
-        const formattedData = res.data.map((item) => ({
+        const formattedData = sortedData.map((item) => ({
           dashboardId: item.id,
           dashboardName: item.name,
           description: item.description,
@@ -52,12 +69,13 @@ function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
 
-      {/* ROLE BASED SIDEBAR */}
+      {/* Sidebar */}
       {role === "admin" && <AdminSidebar />}
       {role !== "admin" && <Sidebar />}
 
       <div className="flex-1 ml-[220px] p-6 overflow-y-auto">
 
+        {/* Header */}
         <div className="flex justify-between items-center mb-6">
 
           <div>
@@ -68,8 +86,10 @@ function Dashboard() {
             </p>
           </div>
 
+          {/* Search + Profile */}
           <div className="flex items-center gap-4">
 
+            {/* Search */}
             <div className="relative w-64">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -81,16 +101,26 @@ function Dashboard() {
               />
             </div>
 
+            {/* Profile */}
             <div
-              className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
+              className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-200 overflow-hidden"
               onClick={() => navigate("/profile")}
             >
-              <span className="text-gray-600 text-lg font-semibold">👤</span>
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt="profile"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                "👤"
+              )}
             </div>
 
           </div>
         </div>
 
+        {/* Cards */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
 
           {filteredCards.map((card) => (
@@ -111,8 +141,7 @@ function Dashboard() {
               </div>
 
               <div className="absolute top-0 left-0 w-full h-32 flex items-end justify-center pointer-events-none">
-                <div className="mb-2 w-[80%] bg-blue-100 text-gray-600 text-xs p-2 rounded-lg text-center
-                                opacity-0 group-hover:opacity-100 transition duration-300">
+                <div className="mb-2 w-[80%] bg-blue-100 text-gray-600 text-xs p-2 rounded-lg opacity-0 group-hover:opacity-100 transition duration-300">
                   {card.description}
                 </div>
               </div>
@@ -126,20 +155,19 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/reports/${card.dashboardId}`);
+                      navigate(`/reports/${card.dashboardId}/${encodeURIComponent(card.dashboardName.trim())}`);
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
                     View Dashboard
                   </p>
-
                   <span className="text-blue-700 text-lg">→</span>
                 </div>
-
               </div>
             </div>
           ))}
 
+          {/* Create New */}
           {role === "admin" && (
             <div
               onClick={() => navigate("/create-dashboard")}

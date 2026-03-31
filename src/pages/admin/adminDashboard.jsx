@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUsers, FaDatabase } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { HiDocumentReport } from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
-import AdminSidebar from "../../components/adminSidebar";
+import AdminSidebar from "../../components/AdminSidebar";
 import { useLocation } from "react-router-dom";
 
 
@@ -115,14 +115,7 @@ function AdminDashboard() {
               onClick={() => navigate("/dashboard-selection")}
             />
 
-            {/* Data Schema Card */}
-            <Card
-              icon={<FaDatabase />}
-              title="Edit Data Schema"
-              active={hoveredItem === "schema"}
-              description="Modify core database structures, define new entity relations, and manage global metadata configurations.Ensure data consistency and integrity through structured validation rules and flexible schema controls."
-              onClick={() => navigate("/data-schema")}
-            />
+           
 
             {/* Reports Card */}
             <Card
@@ -130,7 +123,7 @@ function AdminDashboard() {
               title="Reports"
               active={hoveredItem === "reports"}
               description="Generate comprehensive PDF and CSV exports for stakeholder review.Schedule automated report generation, track historical data, and configure alerts for critical insights and anomalies."
-              onClick={() => navigate("/reports")}
+              onClick={() => navigate("/reports/all")}
             />
 
           </div>

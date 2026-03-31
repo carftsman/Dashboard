@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AdminSidebar from "../components/adminSidebar";
+import AdminSidebar from "../components/AdminSidebar";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -13,7 +13,8 @@ import {
 
 function ChangePassword() {
   const navigate = useNavigate();
-  const role = localStorage.getItem("role");
+
+  const role = localStorage.getItem("role")?.toLowerCase();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -49,34 +50,33 @@ function ChangePassword() {
     } catch (error) {
       console.error(error);
       alert(
-        error?.response?.data?.message || "Failed to update password ❌"
+        error?.response?.data?.message || "Failed to update password "
       );
     }
   };
 
   return (
-    <div className="flex bg-gray-100 min-h-screen">
+    <div className="flex bg-gray-100 min-h-screen overflow-x-hidden">
 
-      {/* Sidebar */}
       {role === "admin" ? <AdminSidebar /> : <Sidebar />}
 
-      <div className="flex-1 ml-[220px]">
+      <div className="flex-1 ml-[220px] flex flex-col">
 
-        {/* ✅ HEADER (EXACT MATCH LIKE PROFILE PAGE) */}
-        <div className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
+        {/* HEADER */}
+        <div className="fixed top-0 left-[220px] right-0 z-50 bg-white shadow-sm px-8 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate("/profile")}
-            className="text-gray-600 font-medium bg-transparent p-0 hover:underline focus:outline-none"
+            className="text-gray-600 font-medium bg-transparent p-0 
+                       hover:text-gray-600 hover:bg-transparent 
+                       focus:outline-none focus:ring-0 
+                       active:bg-transparent active:text-gray-600"
           >
             &lt; Back
           </button>
-
-          <div className="flex-1"></div>
-          <div></div>
         </div>
 
-        {/* CONTENT */}
-        <div className="flex justify-center items-start py-12">
+        {/* REDUCED SPACE HERE */}
+        <div className="mt-[60px] flex justify-center py-6 overflow-y-auto">
 
           <div className="bg-white rounded-xl shadow-md w-[500px] p-6">
 
@@ -104,11 +104,7 @@ function ChangePassword() {
                   onClick={() => setShowCurrent(!showCurrent)}
                   className="absolute right-3 top-2.5 cursor-pointer text-gray-400"
                 >
-                  {showCurrent ? (
-                    <EyeSlashIcon className="h-5 w-5" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5" />
-                  )}
+                  {showCurrent ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </div>
               </div>
             </div>
@@ -129,11 +125,7 @@ function ChangePassword() {
                   onClick={() => setShowNew(!showNew)}
                   className="absolute right-3 top-2.5 cursor-pointer text-gray-400"
                 >
-                  {showNew ? (
-                    <EyeSlashIcon className="h-5 w-5" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5" />
-                  )}
+                  {showNew ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </div>
               </div>
             </div>
@@ -154,28 +146,23 @@ function ChangePassword() {
                   onClick={() => setShowConfirm(!showConfirm)}
                   className="absolute right-3 top-2.5 cursor-pointer text-gray-400"
                 >
-                  {showConfirm ? (
-                    <EyeSlashIcon className="h-5 w-5" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5" />
-                  )}
+                  {showConfirm ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </div>
               </div>
             </div>
 
             {/* Security Checklist */}
-            <div className="bg-blue-50 border rounded-md p-4 text-sm text-gray-600 mb-6">
-              <p className="font-semibold text-gray-700 mb-2">
+            <div className="mb-6 bg-gray-50 border rounded-md p-4">
+              <h4 className="text-xs font-semibold text-gray-600 mb-2">
                 SECURITY CHECKLIST
-              </p>
-              <ul className="space-y-1">
-                <li>✔ Minimum 12 characters</li>
-                <li>✔ One uppercase & one lowercase letter</li>
-                <li>✔ One number & one special character</li>
+              </h4>
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li>• Minimum 12 characters</li>
+                <li>• One uppercase & one lowercase letter</li>
+                <li>• One number & one special character</li>
               </ul>
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-between">
               <button
                 onClick={() => navigate("/profile")}

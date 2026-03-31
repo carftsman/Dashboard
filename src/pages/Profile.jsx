@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AdminSidebar from "../components/adminSidebar";
+import AdminSidebar from "../components/AdminSidebar";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiPhone, FiBriefcase, FiEdit, FiLock, FiUser } from "react-icons/fi";
@@ -7,11 +7,13 @@ import axios from "axios";
 
 function Profile() {
 
-  // ✅ SAFE ROLE HANDLING (no logic change, just fix case issue)
   const role = localStorage.getItem("role")?.toLowerCase();
 
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+
+  //  NEW (GET IMAGE FROM STORAGE)
+  const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -32,12 +34,9 @@ function Profile() {
           }
         );
 
-        console.log("API RESPONSE:", res.data);
-
         if (res.data) {
           setUser(res.data);
 
-          // ✅ OPTIONAL: store role from API (SAFE)
           if (res.data.role) {
             localStorage.setItem("role", res.data.role);
           }
@@ -49,21 +48,33 @@ function Profile() {
     };
 
     fetchProfile();
+
+    
+    const img = localStorage.getItem("profileImage");
+    if (img) {
+      setProfileImage(img);
+    }
+
   }, []);
 
   return (
     <div className="flex bg-gray-100 min-h-screen">
 
-      {/* ✅ Sidebar condition (UNCHANGED LOGIC) */}
+      {/* Sidebar */}
       {role === "admin" ? <AdminSidebar /> : <Sidebar />}
 
       <div className="flex-1 ml-[220px]">
 
         {/* HEADER */}
         <div className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
+
           <button
             onClick={() => navigate(-1)}
-            className="text-gray-600 font-medium bg-transparent p-0 hover:underline"
+            style={{ outline: "none" }}
+            className="text-gray-600 font-medium bg-transparent p-0 
+                       hover:text-gray-600 hover:bg-transparent 
+                       focus:outline-none focus:ring-0 focus:text-gray-600 
+                       active:bg-transparent active:text-gray-600"
           >
             &lt; Back
           </button>
@@ -76,14 +87,22 @@ function Profile() {
 
           <div className="bg-white rounded-xl shadow-md max-w-4xl mx-auto overflow-hidden">
 
-            {/* TOP HEADER */}
             <div className="h-32 bg-gradient-to-r from-[#8FAFD1] to-[#1F2A44]"></div>
 
             {/* PROFILE */}
             <div className="flex items-center gap-6 px-8 -mt-12">
 
-              <div className="w-24 h-24 rounded-full border-4 border-white shadow bg-gray-200 flex items-center justify-center">
-                <FiUser size={40} className="text-gray-500" />
+              {/* ✅ UPDATED IMAGE LOGIC */}
+              <div className="w-24 h-24 rounded-full border-4 border-white shadow bg-gray-200 flex items-center justify-center overflow-hidden">
+                {profileImage ? (
+                  <img
+                    src={profileImage}
+                    alt="profile"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <FiUser size={40} className="text-gray-500" />
+                )}
               </div>
 
               <div className="flex-1">
@@ -123,7 +142,6 @@ function Profile() {
             {/* DETAILS */}
             <div className="grid grid-cols-2 gap-10 px-8 py-6">
 
-              {/* CONTACT */}
               <div>
                 <h3 className="text-xs font-semibold text-gray-400 mb-4 tracking-wide">
                   CONTACT DETAILS
@@ -154,7 +172,6 @@ function Profile() {
                 </div>
               </div>
 
-              {/* WORK */}
               <div>
                 <h3 className="text-xs font-semibold text-gray-400 mb-4 tracking-wide">
                   WORK INFORMATION
