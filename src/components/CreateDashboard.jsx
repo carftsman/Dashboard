@@ -22,6 +22,7 @@ const CreateDashboard = ({ isOpen, onClose, onSuccess }) => {
 
   if (!isOpen) return null;
 
+  // ✅ Create Dashboard
   const createDashboard = async () => {
     try {
       const res = await api.post("/api/dashboards", {
@@ -34,119 +35,79 @@ const CreateDashboard = ({ isOpen, onClose, onSuccess }) => {
       setDashboardId(id);
       return id;
     } catch (err) {
-      console.error("Dashboard create failed ❌", err);
+      console.error("Dashboard create failed ", err);
     }
   };
 
-  const addColumn = async () => {
+  // ✅ ADD COLUMN (LOCAL ONLY)
+  const addColumn = () => {
     if (!columnName || !dataType) return;
-
-    let id = dashboardId;
-
-    if (!id) {
-      id = await createDashboard();
-    }
 
     const columnKey = columnName.toLowerCase().replace(/\s+/g, "_");
 
-    try {
-      await api.post(`/api/dashboards/${id}/columns`, {
-        columns: [
-          {
-            columnKey,
-            displayName: columnName,
-            dataType,
-            required: true,
-          },
-        ],
-      });
+    const newColumn = {
+      id: Date.now(),
+      columnKey,
+      displayName: columnName,
+      dataType,
+      required: true,
+    };
 
-      await fetchColumns(id);
+    setColumns((prev) => [...prev, newColumn]);
 
-      setColumnName("");
-      setDataType("");
-    } catch (err) {
-      console.error("Add column failed", err.response?.data || err);
-    }
+    setColumnName("");
+    setDataType("");
   };
 
-  const fetchColumns = async (id) => {
-    try {
-      const res = await api.get(`/api/dashboards/${id}`);
-      const cols = res.data?.columns || [];
-
-      const formatted = cols.map((col) => ({
-        id: col.id,
-        columnKey: col.columnKey,
-        displayName: col.displayName,
-        dataType: col.dataType,
-        required: col.required,
-      }));
-
-      setColumns(formatted);
-    } catch (err) {
-      console.error("Fetch columns failed ❌", err);
-    }
+  // ✅ DELETE (LOCAL)
+  const deleteColumn = (columnId) => {
+    setColumns((prev) => prev.filter((col) => col.id !== columnId));
   };
 
-  const deleteColumn = async (columnId) => {
-    try {
-      await api.delete(
-        `/api/dashboards/${dashboardId}/columns/${columnId}`
-      );
-
-      setColumns((prev) =>
-        prev.filter((col) => col.id !== columnId)
-      );
-    } catch (err) {
-      console.error("Delete failed ❌", err.response?.data || err);
-    }
-  };
-
+  // ✅ START EDIT
   const startEdit = (col) => {
     setEditingId(col.id);
     setEditName(col.displayName);
     setEditType(col.dataType);
   };
 
-  const updateColumn = async () => {
-    try {
-      const column = columns.find((c) => c.id === editingId);
-      if (!column) return;
+  // ✅ UPDATE (LOCAL)
+  const updateColumn = () => {
+    setColumns((prev) =>
+      prev.map((col) =>
+        col.id === editingId
+          ? { ...col, displayName: editName, dataType: editType }
+          : col
+      )
+    );
 
-      await api.put(
-        `/api/dashboards/${dashboardId}/columns/${editingId}`,
-        {
-          columnKey: column.columnKey,
-          displayName: editName,
-          dataType: editType,
-          required: true,
-        }
-      );
-
-      setColumns((prev) =>
-        prev.map((col) =>
-          col.id === editingId
-            ? { ...col, displayName: editName, dataType: editType }
-            : col
-        )
-      );
-
-      setEditingId(null);
-    } catch (err) {
-      console.error("Update failed ❌", err.response?.data || err);
-    }
+    setEditingId(null);
   };
 
+  // ✅ FINAL SUBMIT
   const handleNext = async () => {
-    let id = dashboardId;
+    try {
+      let id = dashboardId;
 
-    if (!id) {
-      id = await createDashboard();
-    }
+      if (!id) {
+        id = await createDashboard();
+      }
 
-    if (id) {
+      // 🔥 SEND ALL COLUMNS TO BACKEND
+      if (columns.length > 0) {
+        await api.post(`/api/dashboards/${id}/columns`, {
+          columns: columns.map((col) => ({
+            columnKey: col.columnKey,
+            displayName: col.displayName,
+            dataType: col.dataType,
+            required: true,
+          })),
+        });
+      }
+
       onSuccess(id);
+    } catch (err) {
+      console.error("Final submit failed", err.response?.data || err);
     }
   };
 
@@ -163,9 +124,8 @@ const CreateDashboard = ({ isOpen, onClose, onSuccess }) => {
           Create New Dashboard
         </h2>
 
-        {/* ✅ ONLY FIX APPLIED */}
         <div className="flex gap-6">
-
+          {/* LEFT SIDE */}
           <div className="flex-1">
             <label className="text-sm font-medium">Dashboard Name</label>
             <input
@@ -193,12 +153,11 @@ const CreateDashboard = ({ isOpen, onClose, onSuccess }) => {
             />
           </div>
 
+          {/* RIGHT SIDE */}
           <div className="flex-1">
             <h3 className="font-semibold text-gray-700 mb-2">
               Add New Column
             </h3>
-
-            {/* SAME CODE CONTINUES */}
 
             <input
               className="w-full p-2 border rounded-md text-sm mb-2"
@@ -225,86 +184,83 @@ const CreateDashboard = ({ isOpen, onClose, onSuccess }) => {
               + Add Column
             </button>
 
-<div className="mt-3 flex flex-col gap-2">
-  {columns.map((col) => (
-    <div
-      key={col.id}
-      className="flex justify-between px-4 py-3 border border-blue-300 bg-blue-50 rounded-lg"
-    >
-      {editingId === col.id ? (
-        <div className="flex gap-2 w-full">
-          <input
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            className="border px-2 py-1 w-[40%]"
-          />
+            {/* COLUMN LIST */}
+            <div className="mt-3 flex flex-col gap-2">
+              {columns.map((col) => (
+                <div
+                  key={col.id}
+                  className="flex justify-between px-4 py-3 border border-blue-300 bg-blue-50 rounded-lg"
+                >
+                  {editingId === col.id ? (
+                    <div className="flex gap-2 w-full">
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="border px-2 py-1 w-[40%]"
+                      />
 
-          <select
-            value={editType}
-            onChange={(e) => setEditType(e.target.value)}
-            className="border px-2 py-1"
-          >
-            {dataTypes.map((d) => (
-              <option key={d}>{d}</option>
-            ))}
-          </select>
+                      <select
+                        value={editType}
+                        onChange={(e) => setEditType(e.target.value)}
+                        className="border px-2 py-1"
+                      >
+                        {dataTypes.map((d) => (
+                          <option key={d}>{d}</option>
+                        ))}
+                      </select>
 
-          {/* SAVE BUTTON */}
+                      <button
+                        onClick={updateColumn}
+                        className="px-3 py-1.5 bg-[#1e3a8a] text-white rounded-md"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        {col.displayName} ({col.dataType})
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => startEdit(col)}
+                          className="w-11 h-11 flex items-center justify-center rounded-lg bg-[#1e3a8a]"
+                        >
+                          <FaEdit className="text-white text-lg" />
+                        </button>
+
+                        <button
+                          onClick={() => deleteColumn(col.id)}
+                          className="w-11 h-11 flex items-center justify-center rounded-lg bg-[#1e3a8a]"
+                        >
+                          <FaTrash className="text-white text-lg" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER */}
+        <div className="flex justify-end mt-6 gap-3">
           <button
-            onClick={updateColumn}
-            className="px-3 py-1.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-md"
+            onClick={onClose}
+            className="px-4 py-2 bg-[#1e3a8a] text-white rounded-md"
           >
-            Save
+            Cancel
+          </button>
+
+          <button
+            onClick={handleNext}
+            className="px-4 py-2 bg-[#1e3a8a] text-white rounded-md"
+          >
+            Next
           </button>
         </div>
-      ) : (
-        <>
-          <div>
-            {col.displayName} ({col.dataType})
-          </div>
-
-          <div className="flex gap-2">
-             {/* EDIT BUTTON */}
-<button
-  onClick={() => startEdit(col)}
-  className="w-11 h-11 flex items-center justify-center rounded-lg bg-[#1e3a8a] hover:bg-[#1e40af]"
->
-  <FaEdit className="text-white text-lg" />
-</button>
-
-{/* DELETE BUTTON */}
-<button
-  onClick={() => deleteColumn(col.id)}
-  className="w-11 h-11 flex items-center justify-center rounded-lg bg-[#1e3a8a] hover:bg-[#1e40af]"
->
-  <FaTrash className="text-white text-lg" />
-</button>
-          </div>
-        </>
-      )}
-    </div>
-  ))}
-</div>
-</div>
-</div>
-
-<div className="flex justify-end mt-6 gap-3">
-  {/*CANCEL BUTTON */}
-  <button
-    onClick={onClose}
-    className="px-4 py-2 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-md"
-  >
-    Cancel
-  </button>
-
-  {/* NEXT BUTTON  */}
-  <button
-    onClick={handleNext}
-    className="px-4 py-2 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-md"
-  >
-    Next
-  </button>
-</div>
       </div>
     </div>
   );
