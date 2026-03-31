@@ -5,15 +5,15 @@ import {
   useDraggable,
   useDroppable,
 } from "@dnd-kit/core";
-import { FaTimes } from "react-icons/fa"; 
+import { FaTimes } from "react-icons/fa";
 
 const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
   const [columns, setColumns] = useState([]);
-  const [widgets, setWidgets] = useState([]);
   const [selectedWidget, setSelectedWidget] = useState(null);
   const [formData, setFormData] = useState({});
   const [chartConfigs, setChartConfigs] = useState([]);
   const [selectedFields, setSelectedFields] = useState({});
+  const [pendingWidgets, setPendingWidgets] = useState([]);
 
   const graphList = [
     { type: "BAR", icon: "📊" },
@@ -21,24 +21,15 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
     { type: "PIE", icon: "🥧" },
     { type: "KPI", icon: "🔢" },
     { type: "TABLE", icon: "📋" },
-    { type: "FUNNEL", icon: "🕳️" },
-    { type: "COMBO", icon: "📉" },
-    { type: "SCATTER", icon: "📍" },
   ];
 
   useEffect(() => {
     if (!dashboardId || !isOpen) return;
 
     const fetchData = async () => {
-      try {
-        const res = await api.get(`/api/dashboards/${dashboardId}`);
-        const dashboard = res.data.dashboard || res.data;
-
-        setColumns(dashboard.columns || []);
-        setWidgets(dashboard.widgets || []);
-      } catch (err) {
-        console.error(err);
-      }
+      const res = await api.get(`/api/dashboards/${dashboardId}`);
+      const dashboard = res.data.dashboard || res.data;
+      setColumns(dashboard.columns || []);
     };
 
     fetchData();
@@ -46,12 +37,8 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
 
   useEffect(() => {
     const fetchChartConfig = async () => {
-      try {
-        const res = await api.get("/api/chart-types/config");
-        setChartConfigs(res.data.charts || []);
-      } catch (err) {
-        console.error("Chart config error:", err);
-      }
+      const res = await api.get("/api/chart-types/config");
+      setChartConfigs(res.data.charts || []);
     };
 
     fetchChartConfig();
@@ -63,22 +50,33 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const createWidget = async () => {
+  const createWidget = () => {
     if (!selectedWidget) return;
+
+    const newWidget = {
+      type: selectedWidget.type,
+      name: formData.title || selectedWidget.type,
+      config: {
+        type: selectedWidget.type.toLowerCase(),
+        title: formData.title || selectedWidget.type,
+        ...formData,
+      },
+    };
+
+    setPendingWidgets((prev) => [...prev, newWidget]);
+    setFormData({});
+  };
+
+  const submitAllWidgets = async () => {
+    if (pendingWidgets.length === 0) return;
 
     try {
       await api.post(`/api/dashboards/${dashboardId}/widgets`, {
-        widgets: [
-          {
-            type: selectedWidget.type.toLowerCase(),
-            title: formData.title || selectedWidget.type,
-            ...formData,
-          },
-        ],
+        widgets: pendingWidgets,
       });
 
-      setFormData({});
-      setSelectedFields({});
+      setPendingWidgets([]);
+      onClose(); // close popup
     } catch (err) {
       console.error(err);
     }
@@ -95,7 +93,6 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
 
     setSelectedFields((prev) => {
       const existing = prev[field] || [];
-
       if (existing.includes(column.displayName)) return prev;
 
       const updated = [...existing, column.displayName];
@@ -105,30 +102,21 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
         [field]: updated,
       }));
 
-      return {
-        ...prev,
-        [field]: updated,
-      };
+      return { ...prev, [field]: updated };
     });
   };
 
   const DraggableItem = ({ col }) => {
-    const { attributes, listeners, setNodeRef, transform } =
-      useDraggable({ id: col.id });
-
-    const style = {
-      transform: transform
-        ? `translate(${transform.x}px, ${transform.y}px)`
-        : undefined,
-    };
+    const { attributes, listeners, setNodeRef } = useDraggable({
+      id: col.id,
+    });
 
     return (
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        style={style}
-        className="p-2 text-sm bg-gray-100 rounded-md mb-2 cursor-grab"
+        className="p-3 bg-gray-100 rounded-md mb-2 cursor-grab"
       >
         {col.displayName}
       </div>
@@ -141,14 +129,13 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
     return (
       <div
         ref={setNodeRef}
-        className="flex flex-wrap gap-2 mt-2 mb-2 min-h-[40px] p-2 border rounded-md bg-gray-50"
+        className="flex flex-wrap gap-2 mt-2 p-2 border rounded-md bg-gray-50 min-h-[45px]"
       >
         {children}
       </div>
     );
   };
 
-  // ✅ UPDATED WITH REMOVE ICON
   const renderFields = () => {
     if (!selectedWidget) return null;
 
@@ -159,39 +146,34 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
     if (!config) return null;
 
     return config.requiredFields.map((field) => (
-      <div key={field} className="mb-4">
-        <label className="text-xs font-semibold text-gray-600 uppercase">
-          {field}
-        </label>
+      <div key={field} className="mb-3">
+        <label className="text-sm text-gray-600">{field}</label>
 
         <DroppableField field={field}>
           {(selectedFields[field] || []).map((col) => (
             <span
               key={col}
-              className="flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-md"
+              className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-[#1e3a8a] text-xs rounded-md"
             >
               {col}
-
-              {/*  REMOVE ICON */}
               <button
                 onClick={() => {
                   setSelectedFields((prev) => {
-                    const updated = prev[field].filter((c) => c !== col);
+                    const updated = prev[field].filter(
+                      (c) => c !== col
+                    );
 
                     setFormData((prevData) => ({
                       ...prevData,
                       [field]: updated,
                     }));
 
-                    return {
-                      ...prev,
-                      [field]: updated,
-                    };
+                    return { ...prev, [field]: updated };
                   });
                 }}
-                className="ml-1 text-red-500 hover:text-red-700"
+                className="ml-1 flex items-center justify-center w-4 h-4 rounded hover:bg-red-100"
               >
-                <FaTimes size={10} />
+                <FaTimes size={10} className="text-red-500" />
               </button>
             </span>
           ))}
@@ -202,28 +184,21 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div
-        className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
-        onClick={onClose}
-      >
-        <div
-          className="bg-white w-[820px] max-w-[95%] p-4 rounded-2xl shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+        <div className="bg-white w-[1000px] max-w-[95%] p-4 rounded-xl shadow-lg">
           <div className="flex gap-4">
 
+            {/* LEFT */}
             <div className="flex-1 border-r pr-3">
-              <h3 className="font-semibold text-gray-700 mb-2 text-sm">
-                Columns
-              </h3>
-
+              <h3 className="text-gray-700 mb-2 text-sm">Columns</h3>
               {columns.map((col) => (
                 <DraggableItem key={col.id} col={col} />
               ))}
             </div>
 
-            <div className="flex-1 max-h-[500px] overflow-y-auto pr-2">
-              <h3 className="font-semibold text-gray-700 mb-2 text-sm">
+            {/* RIGHT */}
+            <div className="flex-1 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#1e3a8a]">
+              <h3 className="text-gray-700 mb-2 text-sm">
                 Visualizations
               </h3>
 
@@ -243,47 +218,56 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
                     }`}
                   >
                     <div>{g.icon}</div>
-                    <p className="text-[9px]">{g.type}</p>
+                    <p className="text-[10px]">{g.type}</p>
                   </div>
                 ))}
               </div>
 
               {selectedWidget && (
                 <>
-                  <p className="text-xs font-semibold text-gray-500 mb-2">
-                    BUILD VISUAL
-                  </p>
-
                   {renderFields()}
 
-                  <div className="mb-3">
-                    <label className="text-xs font-semibold text-gray-600">
-                      TITLE
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full mt-1 p-2 border rounded-md text-sm"
-                      placeholder="Enter chart title"
-                      onChange={(e) =>
-                        handleChange("title", e.target.value)
-                      }
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Enter chart title"
+                    className="w-full mt-2 p-2 border rounded-md text-sm"
+                    value={formData.title || ""}
+                    onChange={(e) =>
+                      handleChange("title", e.target.value)
+                    }
+                  />
 
-                  <div className="flex justify-end gap-3 mt-3">
-                    <button
-                      onClick={onClose}
-                      className="px-3 py-1.5 bg-[#1e3a8a] text-white rounded-md text-sm"
-                    >
-                      Cancel
-                    </button>
+                  {pendingWidgets.length > 0 && (
+                    <div className="mt-3 text-sm text-[#1e3a8a]">
+                      {pendingWidgets.map((w, i) => (
+                        <div key={i}>{w.name}</div>
+                      ))}
+                    </div>
+                  )}
 
+                  <div className="flex justify-between mt-3">
                     <button
                       onClick={createWidget}
                       className="px-3 py-1.5 bg-[#1e3a8a] text-white rounded-md text-sm"
                     >
-                      + Create
+                      + Add
                     </button>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={submitAllWidgets}
+                        className="px-3 py-1.5 bg-[#1e3a8a] text-white rounded-md text-sm"
+                      >
+                        Create
+                      </button>
+
+                      <button
+                        onClick={onClose}
+                        className="px-3 py-1.5 bg-gray-300 rounded-md text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
