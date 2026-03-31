@@ -5,11 +5,23 @@ import Sidebar from "../components/Sidebar";
 import AdminSidebar from "../components/AdminSidebar"; 
 import api from '../api/apiConfig';
 
+// IMPORT MODALS
+import CreateDashboard from "../components/CreateDashboard";
+import VisualizationModal from "../components/VisualizationModal";
+
 function Dashboard() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [cards, setCards] = useState([]);
+
+  // ✅ TOKEN FIX
+  const token = localStorage.getItem("token");
+
+  // MODAL STATES
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openVizModal, setOpenVizModal] = useState(false);
+  const [createdDashboardId, setCreatedDashboardId] = useState(null);
 
   const role = localStorage.getItem("role")?.toLowerCase();
   const profileImage = localStorage.getItem("profileImage");
@@ -26,16 +38,10 @@ function Dashboard() {
       window.removeEventListener("popstate", handleBack);
     };
   }, []);
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token === null || token === undefined || token === "") {
-      
-      return;
-    }
-
-    // ✔ if token exists → stay here
-  }, []);
+    if (!token) return;
+  }, [token]);
 
   useEffect(() => {
     const fetchDashboards = async () => {
@@ -53,14 +59,13 @@ function Dashboard() {
         }));
 
         setCards(formattedData);
-
       } catch (error) {
         console.error("API Error:", error.response || error.message);
       }
     };
 
     fetchDashboards();
-  }, []);
+  }, [token]);
 
   const filteredCards = cards.filter((card) =>
     card.dashboardName.toLowerCase().includes(search.toLowerCase())
@@ -89,7 +94,6 @@ function Dashboard() {
           {/* Search + Profile */}
           <div className="flex items-center gap-4">
 
-            {/* Search */}
             <div className="relative w-64">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -101,7 +105,6 @@ function Dashboard() {
               />
             </div>
 
-            {/* Profile */}
             <div
               className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-200 overflow-hidden"
               onClick={() => navigate("/profile")}
@@ -126,7 +129,7 @@ function Dashboard() {
           {filteredCards.map((card) => (
             <div
               key={card.dashboardId}
-              className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden 
+              className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden
                          transition duration-300 hover:-translate-y-1 hover:shadow-md"
             >
 
@@ -155,7 +158,11 @@ function Dashboard() {
                   <p
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/reports/${card.dashboardId}/${encodeURIComponent(card.dashboardName.trim())}`);
+                      navigate(
+                        `/reports/${card.dashboardId}/${encodeURIComponent(
+                          card.dashboardName.trim()
+                        )}`
+                      );
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
@@ -167,12 +174,12 @@ function Dashboard() {
             </div>
           ))}
 
-          {/* Create New */}
+          {/* ✅ FIXED CREATE NEW (ONLY ONE BLOCK) */}
           {role === "admin" && (
             <div
-              onClick={() => navigate("/create-dashboard")}
-              className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 
-                         rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1 
+              onClick={() => setOpenCreateModal(true)}
+              className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300
+                         rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1
                          transition duration-300 h-[220px]"
             >
               <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 text-2xl text-gray-600 mb-2">
@@ -188,8 +195,29 @@ function Dashboard() {
           )}
 
         </div>
-
       </div>
+
+      {/* MODALS */}
+      <CreateDashboard
+        isOpen={openCreateModal}
+        onClose={() => setOpenCreateModal(false)}
+        token={token}
+        onSuccess={(dashboardId) => {
+          setCreatedDashboardId(dashboardId);
+          setOpenCreateModal(false);
+          setOpenVizModal(true);
+        }}
+      />
+
+      <VisualizationModal
+        isOpen={openVizModal}
+        onClose={() => {
+          setOpenVizModal(false);
+          window.location.reload();
+        }}
+        dashboardId={createdDashboardId}
+        token={token}
+      />
     </div>
   );
 }
