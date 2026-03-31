@@ -121,24 +121,42 @@ export default function DataValidation() {
   };
 
   const handleProcess = async () => {
-    if (totalCriticalErrors > 0) return;
-    
-    try {
-      setProcessing(true);
-      setProcessError("");
-      const res = await processFile(fileId);
-      
-      if (res.status === "FAILED") {
-        setProcessError(res.message || "Failed to process the file due to errors.");
-      } else {
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      setProcessError(err?.message || err?.error || "An error occurred while processing the file.");
-    } finally {
-      setProcessing(false);
+  if (totalCriticalErrors > 0) return;
+
+  try {
+    setProcessing(true);
+    setProcessError("");
+
+    // ✅ Step 1: process file
+    const res = await processFile(fileId);
+
+    if (res.status === "FAILED") {
+      setProcessError(res.message || "Processing failed");
+      return;
     }
-  };
+
+    // ✅ Step 2: get mappings from previous page
+    const mappings = location.state?.mappings;
+
+    if (!mappings) {
+      setProcessError("Mappings missing. Please go back and map columns.");
+      return;
+    }
+
+    // ✅ Step 3: navigate to dashboard with data
+    navigate("/dashboard", {
+      state: {
+        fileId: fileId,
+        mappings: mappings,
+      },
+    });
+
+  } catch (err) {
+    setProcessError(err?.message || "Processing error");
+  } finally {
+    setProcessing(false);
+  }
+};
 
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans">

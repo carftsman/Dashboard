@@ -185,8 +185,12 @@ export default function ColumnMapping() {
       
       // 3. Navigate to Data Validation screen
       setTimeout(() => {
-        navigate("/data-validation", { state: { fileId } });
-      }, 1500);
+navigate("/data-validation", {
+  state: {
+    fileId: fileId,
+    mappings: mappings, // 🔥 THIS FIXES EVERYTHING
+  },
+});     }, 1500);
 
     } catch (err) {
       setError(err?.message || err?.error || "Failed to submit column mappings.");
