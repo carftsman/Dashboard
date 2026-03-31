@@ -4,6 +4,8 @@ import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiPhone, FiBriefcase, FiEdit, FiLock, FiUser } from "react-icons/fi";
 import axios from "axios";
+import { FaArrowLeft } from "react-icons/fa";
+import api from '../api/apiConfig'; 
 
 function Profile() {
 
@@ -12,10 +14,11 @@ function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
-  //  NEW (GET IMAGE FROM STORAGE)
   const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
+
+    //  FETCH USER PROFILE
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -24,19 +27,17 @@ function Profile() {
           console.error("No token found");
           return;
         }
+        const res = await api.get("/api/users/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },
+        });
 
-        const res = await axios.get(
-          "https://dashboard-backend-cyrd.onrender.com/api/users/profile",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+        //  SET USER DATA
         if (res.data) {
           setUser(res.data);
 
+          //  STORE ROLE
           if (res.data.role) {
             localStorage.setItem("role", res.data.role);
           }
@@ -49,7 +50,7 @@ function Profile() {
 
     fetchProfile();
 
-    
+    // GET IMAGE FROM LOCAL STORAGE
     const img = localStorage.getItem("profileImage");
     if (img) {
       setProfileImage(img);
@@ -69,14 +70,14 @@ function Profile() {
         <div className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
 
           <button
-            onClick={() => navigate(-1)}
-            style={{ outline: "none" }}
-            className="text-gray-600 font-medium bg-transparent p-0 
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2 text-gray-600 font-medium bg-transparent p-0 
                        hover:text-gray-600 hover:bg-transparent 
-                       focus:outline-none focus:ring-0 focus:text-gray-600 
+                       focus:outline-none focus:ring-0 
                        active:bg-transparent active:text-gray-600"
           >
-            &lt; Back
+            <FaArrowLeft />
+            Back
           </button>
 
           <div className="flex-1"></div>
@@ -87,12 +88,13 @@ function Profile() {
 
           <div className="bg-white rounded-xl shadow-md max-w-4xl mx-auto overflow-hidden">
 
+            {/* HEADER BG */}
             <div className="h-32 bg-gradient-to-r from-[#8FAFD1] to-[#1F2A44]"></div>
 
             {/* PROFILE */}
             <div className="flex items-center gap-6 px-8 -mt-12">
 
-              {/* ✅ UPDATED IMAGE LOGIC */}
+              {/*  PROFILE IMAGE */}
               <div className="w-24 h-24 rounded-full border-4 border-white shadow bg-gray-200 flex items-center justify-center overflow-hidden">
                 {profileImage ? (
                   <img
@@ -105,6 +107,7 @@ function Profile() {
                 )}
               </div>
 
+              {/* USER INFO */}
               <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-800">
                   {user ? user.name : ""}
@@ -114,6 +117,7 @@ function Profile() {
                 </p>
               </div>
 
+              {/* ACTION BUTTONS */}
               <div className="flex gap-3">
 
                 <button
@@ -142,6 +146,7 @@ function Profile() {
             {/* DETAILS */}
             <div className="grid grid-cols-2 gap-10 px-8 py-6">
 
+              {/* CONTACT */}
               <div>
                 <h3 className="text-xs font-semibold text-gray-400 mb-4 tracking-wide">
                   CONTACT DETAILS
@@ -172,6 +177,7 @@ function Profile() {
                 </div>
               </div>
 
+              {/* WORK */}
               <div>
                 <h3 className="text-xs font-semibold text-gray-400 mb-4 tracking-wide">
                   WORK INFORMATION
