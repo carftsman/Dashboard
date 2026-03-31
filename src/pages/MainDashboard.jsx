@@ -10,11 +10,12 @@ export default function Dashboard() {
   const fileId = location.state?.fileId;
   const mappings = location.state?.mappings;
 
+  // ✅ FIX: dynamic dashboardId (NO HARDCODE)
+  const dashboardId = location.state?.dashboardId;
+
   const [dashboard, setDashboard] = useState(null);
   const [widgetData, setWidgetData] = useState({});
   const [loading, setLoading] = useState(true);
-
-  const dashboardId = 133;
 
   // ✅ Fetch dashboard
   const fetchDashboard = async () => {
@@ -30,72 +31,83 @@ export default function Dashboard() {
 
   // ✅ Convert displayName → columnKey
   const getColumnKey = (name) => {
-    const col = dashboard?.columns?.find(
-      (c) => c.displayName.toLowerCase() === name.toLowerCase()
-    );
-    return col?.columnKey;
-  };
+  if (!name || !dashboard?.columns) return null;
 
-  // ✅ Fetch widget data (🔥 FINAL FIXED)
-  const fetchWidgetData = async (widget) => {
-    try {
-      let mappedConfig = { ...widget.config };
+  const col = dashboard.columns.find(
+    (c) =>
+      c.displayName?.toLowerCase().trim() ===
+      name.toLowerCase().trim()
+  );
 
-      if (mappedConfig.groupBy) {
-        mappedConfig.groupBy = mappedConfig.groupBy.map((g) =>
-          getColumnKey(g)
-        );
-      }
+  if (!col) {
+    console.warn("❌ Column not found for:", name);
+  }
 
-      console.log("FILE ID:", fileId);
-      console.log("MAPPINGS:", mappings);
-      console.log("CONFIG:", mappedConfig);
-
-      const res = await api.post(`/api/upload/analyze`, {
-        dashboardId: widget.dashboardId,
-        fileId: fileId,
-        chartType: widget.type,
-
-        groupBy: mappedConfig.groupBy,
-        aggregation: "COUNT",
-
-        mappings: mappings, // 🔥 CRITICAL FIX
-      });
-
-      console.log("API RESPONSE:", res.data);
-
-      setWidgetData((prev) => ({
-        ...prev,
-        [widget.id]: res.data.data || [],
-      }));
-
-    } catch (err) {
-      console.error("Widget error:", err.response?.data);
-    }
-  };
-  const generatePieData = (data, groupBy, metric) => {
-  if (!data || data.length === 0) return [];
-
-  const map = {};
-
-  data.forEach((row) => {
-    const key = row[groupBy];
-    const value = Number(row[metric]) || 0;
-
-    if (!key) return;
-
-    map[key] = (map[key] || 0) + value;
-  });
-
-  return Object.keys(map).map((key) => ({
-    name: key,
-    value: map[key],
-  }));
+  return col?.columnKey || null;
 };
 
+  // ✅ Fetch widget data
+   const fetchWidgetData = async (widget) => {
+  try {
+    let mappedConfig = { ...widget.config };
+
+    // ✅ safe groupBy
+    const groupBy = mappedConfig.groupBy?.map((g) =>
+      getColumnKey(g)
+    ) || [];
+
+    // ✅ safe metric
+    const metric = mappedConfig.metric?.map((m) =>
+      getColumnKey(m)
+    ) || [];
+
+    // ✅ FIX mappings format (VERY IMPORTANT)
+    const formattedMappings = Object.entries(mappings || {}).map(
+      ([templateField, fileColumn]) => ({
+        templateField,
+        fileColumn,
+      })
+    );
+
+    console.log("FINAL PAYLOAD:", {
+      dashboardId: widget.dashboardId,
+      fileId,
+      chartType: widget.type,
+      groupBy,
+      metric,
+      mappings: formattedMappings,
+    });
+
+    const res = await api.post(`/api/upload/analyze`, {
+      dashboardId: widget.dashboardId,
+      fileId: fileId,
+      chartType: widget.type,
+      groupBy,
+      metric, // ✅ REQUIRED
+      aggregation: "COUNT",
+      mappings: formattedMappings, // ✅ FIXED
+    });
+
+    console.log("API RESPONSE:", res.data);
+
+    setWidgetData((prev) => ({
+      ...prev,
+      [widget.id]: res.data?.data || [],
+    }));
+
+  } catch (err) {
+    console.error("Widget error:", err.response?.data || err.message);
+  }
+};
+
+  // ✅ FIX: wait for dashboardId
   useEffect(() => {
+    if (!dashboardId) {
+      console.error("Dashboard ID missing");
+      return;
+    }
     fetchDashboard();
-  }, []);
+  }, [dashboardId]);
 
   useEffect(() => {
     if (dashboard?.widgets && mappings && fileId) {
@@ -106,6 +118,9 @@ export default function Dashboard() {
   }, [dashboard, mappings, fileId]);
 
   if (loading) return <p className="p-6">Loading...</p>;
+
+  console.log("dashbiard",dashboard)
+  console.log("widgets", widgetData)
 
   return (
     <div className="flex h-screen bg-[#020617] text-white">

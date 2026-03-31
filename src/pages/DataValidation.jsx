@@ -146,8 +146,9 @@ export default function DataValidation() {
     // ✅ Step 3: navigate to dashboard with data
     navigate("/dashboard", {
       state: {
-        fileId: fileId,
-        mappings: mappings,
+         dashboardId: location.state?.dashboardId, // ✅ ADD
+    fileId,
+    mappings,
       },
     });
 

@@ -187,8 +187,9 @@ export default function ColumnMapping() {
       setTimeout(() => {
 navigate("/data-validation", {
   state: {
-    fileId: fileId,
-    mappings: mappings, // 🔥 THIS FIXES EVERYTHING
+    dashboardId: location.state?.dashboardId, 
+    fileId,
+    mappings,
   },
 });     }, 1500);
 

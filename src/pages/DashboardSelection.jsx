@@ -140,10 +140,13 @@ function Dashboard() {
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate(
-                        `/reports/${card.dashboardId}/${encodeURIComponent(
-                          card.dashboardName.trim()
-                        )}`
-                      );
+  `/reports/${card.dashboardId}/${encodeURIComponent(card.dashboardName.trim())}`,
+  {
+    state: {
+      dashboardId: card.dashboardId, // ✅ ADD THIS
+    },
+  }
+);
                     }}
                     className="text-blue-700 text-sm font-medium cursor-pointer"
                   >
