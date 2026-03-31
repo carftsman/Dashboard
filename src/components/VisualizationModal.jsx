@@ -5,7 +5,7 @@ import {
   useDraggable,
   useDroppable,
 } from "@dnd-kit/core";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa"; // ✅ using FaTimes icon
 
 const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
   const [columns, setColumns] = useState([]);
@@ -76,7 +76,7 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
       });
 
       setPendingWidgets([]);
-      onClose(); // close popup
+      onClose();
     } catch (err) {
       console.error(err);
     }
@@ -153,9 +153,11 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
           {(selectedFields[field] || []).map((col) => (
             <span
               key={col}
-              className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-[#1e3a8a] text-xs rounded-md"
+              className="flex items-center gap-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
             >
               {col}
+
+              {/* ✅ FIXED RED X ICON */}
               <button
                 onClick={() => {
                   setSelectedFields((prev) => {
@@ -171,9 +173,9 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
                     return { ...prev, [field]: updated };
                   });
                 }}
-                className="ml-1 flex items-center justify-center w-4 h-4 rounded hover:bg-red-100"
+                className="flex items-center justify-center"
               >
-                <FaTimes size={10} className="text-red-500" />
+                <FaTimes className="text-red-500 text-sm hover:text-red-700" />
               </button>
             </span>
           ))}
@@ -197,12 +199,17 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
             </div>
 
             {/* RIGHT */}
-            <div className="flex-1 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#1e3a8a]">
+            <div
+              className="flex-1 max-h-[520px] overflow-y-auto pr-2"
+              style={{
+                scrollbarWidth: "thin",
+              }}
+            >
               <h3 className="text-gray-700 mb-2 text-sm">
                 Visualizations
               </h3>
 
-              <div className="grid grid-cols-4 gap-2 mb-3">
+              <div className="grid grid-cols-4 gap-3 mb-3 justify-items-center">
                 {graphList.map((g) => (
                   <div
                     key={g.type}
@@ -211,14 +218,14 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId }) => {
                       setFormData({});
                       setSelectedFields({});
                     }}
-                    className={`p-2 border rounded-md flex flex-col items-center cursor-pointer ${
+                    className={`w-[70px] h-[70px] border flex flex-col items-center justify-center cursor-pointer ${
                       selectedWidget?.type === g.type
                         ? "border-[#1e3a8a] bg-blue-50"
                         : "hover:border-gray-400"
                     }`}
                   >
-                    <div>{g.icon}</div>
-                    <p className="text-[10px]">{g.type}</p>
+                    <div className="text-lg">{g.icon}</div>
+                    <p className="text-[10px] mt-1">{g.type}</p>
                   </div>
                 ))}
               </div>
