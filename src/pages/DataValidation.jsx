@@ -127,7 +127,7 @@ export default function DataValidation() {
       setProcessing(true);
       setProcessError("");
       const res = await processFile(fileId);
-      
+
       if (res.status === "FAILED") {
         setProcessError(res.message || "Failed to process the file due to errors.");
       } else {
