@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import logo from "../assets/images/zest.png";
+
 import {
   FaThLarge,
   FaUserClock,
@@ -12,9 +13,11 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Sidebar = () => {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
   const [dashboards, setDashboards] = useState([]);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const isMobile = window.innerWidth < 768;
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -83,6 +86,8 @@ const Sidebar = () => {
 
             <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
           </div>
+
+          
 
           {/* MENU */}
           <div className="mt-[15px] px-3 max-h-[65vh] overflow-y-auto sidebar-scroll">
@@ -194,7 +199,7 @@ const Sidebar = () => {
               Are you sure you want to logout?
             </p>
 
-            {/* ✅ BUTTONS */}
+            {/*  BUTTONS */}
             <div className="flex justify-center items-center gap-3 mt-5">
 
               {/* CANCEL */}

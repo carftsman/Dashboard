@@ -35,7 +35,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <DashboardSelection />
-          </ProtectedRoute>
+          </ProtectedRoute> 
         }
       />
 
