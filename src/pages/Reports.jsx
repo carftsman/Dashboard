@@ -13,59 +13,57 @@ export default function Reports() {
 
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
-const role = localStorage.getItem("role"); // get role
-const [selectedDashboard, setSelectedDashboard] = useState(null);
+
+  const role = localStorage.getItem("role");
+  const [selectedDashboard, setSelectedDashboard] = useState(null);
+
+  const profileImage = localStorage.getItem("profileImage");
+
   useEffect(() => {
-     const fetchData = async () => {
-    try {
-      const response = await api.get(`/api/reports?dashboardId=${dashboardId}`);
+    const fetchData = async () => {
+      try {
+        const response = await api.get(`/api/reports?dashboardId=${dashboardId}`);
 
-      console.log(response);
-      
-      const formattedData = response.data.map((item) => ({
-        id: item.id,
-        name: item.name || item.fileName,
-        createdAt: item.createdAt,
-        fileUrl: item.fileUrl,
-      }));
+        const formattedData = response.data.map((item) => ({
+          id: item.id,
+          name: item.name || item.fileName,
+          createdAt: item.createdAt,
+          fileUrl: item.fileUrl,
+        }));
 
-      setFiles(formattedData);
+        setFiles(formattedData);
 
-    } catch (error) {
-      console.error("API error:", error.response || error.message);
-    }
-  };
-fetchData();
+      } catch (error) {
+        console.error("API error:", error.response || error.message);
+      }
+    };
+    fetchData();
   }, [dashboardId]);
 
- 
- const filteredFiles = files.filter((item) => {
-  const name = item.name?.toLowerCase() || "";
-  const dashboard = item.dashboardName?.toLowerCase() || "";
-  const searchValue = search.toLowerCase().trim();
+  const filteredFiles = files.filter((item) => {
+    const name = item.name?.toLowerCase() || "";
+    const dashboard = item.dashboardName?.toLowerCase() || "";
+    const searchValue = search.toLowerCase().trim();
 
-  const matchesSearch =
-    name.includes(searchValue) || dashboard.includes(searchValue);
+    const matchesSearch =
+      name.includes(searchValue) || dashboard.includes(searchValue);
 
-  const matchesDashboard =
-    !selectedDashboard || item.dashboardName === selectedDashboard;
+    const matchesDashboard =
+      !selectedDashboard || item.dashboardName === selectedDashboard;
 
-  return matchesSearch && matchesDashboard;
-});
+    return matchesSearch && matchesDashboard;
+  });
 
   return (
     <div className="flex min-h-screen bg-gray-100">
 
+      {role === "ADMIN" ? <AdminSidebar /> : <Sidebar />}
 
-     {role === "ADMIN" ? <AdminSidebar /> : <Sidebar />}
-
-      {/* RIGHT SECTION */}
       <div className="flex-1 flex flex-col ml-[220px]">
 
         {/* HEADER */}
         <div className="bg-white px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shadow-sm border-b">
 
-          {/* LEFT */}
           <div>
             <h1 className="text-xl font-semibold">Reports Management</h1>
             <p className="text-gray-500 text-sm">
@@ -87,22 +85,23 @@ fetchData();
           {/* RIGHT */}
           <div className="flex items-center justify-between lg:justify-end gap-4">
 
-            <button className="bg-[#18154F] hover:bg-[#18154F] text-white px-5 py-2 rounded-lg transition"
-            onClick={(e) => {
-                  e.stopPropagation();
-                  navigate("/upload-data", { state: { dashboardId: dashboardId } });
-                }}
+            <button
+              className="bg-[#18154F] hover:bg-[#23206b] text-white px-5 py-2 rounded-lg transition"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/upload-data", { state: { dashboardId: dashboardId } });
+              }}
             >
               Upload Data
             </button>
 
             <div className="flex items-center gap-3">
-                <div
-              className="w-10 h-10 min-w-[40px] min-h-[40px] cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
-              onClick={() => navigate("/profile")}
-            >
-             <FiUser className="text-gray-600 text-lg" />
-            </div>
+              <div
+                className="w-10 h-10 min-w-[40px] min-h-[40px] cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
+                onClick={() => navigate("/profile")}
+              >
+                <FiUser className="text-gray-600 text-lg" />
+              </div>
             </div>
 
           </div>
@@ -113,29 +112,30 @@ fetchData();
 
           <div className="bg-white rounded-xl shadow-sm border p-6">
 
-            <h2 className="text-lg font-semibold mb-1">
-               {dashboardName ? decodeURIComponent(dashboardName) : "Dashboard"} Reports
-            </h2>
+            {/* ✅ FIXED ALIGNMENT */}
+            <div className="flex items-center justify-between mb-2">
 
-            
+              <h2 className="text-lg font-semibold">
+                {dashboardName ? decodeURIComponent(dashboardName) : "Dashboard"} Reports
+              </h2>
 
-            {role === "ADMIN" && (
-            <button
-  onClick={() => navigate(`/dataschema/${dashboardId}`)}
-  className="shrink-0 bg-[#18154F] text-white px-4 py-2 rounded-lg hover:bg-[#18154F] transition"
->
-  Edit Schema
-</button>
-          )}
+              {role === "ADMIN" && (
+                <button
+                  onClick={() => navigate(`/dataschema/${dashboardId}`)}
+                  className="shrink-0 bg-[#18154F] text-white px-4 py-2 rounded-lg hover:bg-[#23206b] transition"
+                >
+                  Edit Schema
+                </button>
+              )}
 
-            {/* TABLE */}
+            </div>
+
             <ReportTable
-  formattedData={filteredFiles}
-  role={role}
-  selectedDashboard={selectedDashboard}
-  setSelectedDashboard={setSelectedDashboard}
-/>
-            
+              formattedData={filteredFiles}
+              role={role}
+              selectedDashboard={selectedDashboard}
+              setSelectedDashboard={setSelectedDashboard}
+            />
 
           </div>
 

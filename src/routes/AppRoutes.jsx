@@ -15,11 +15,11 @@ import AdminDashboard from "../pages/admin/adminDashboard";
 import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
 import UserLogs from "../pages/userlogs";
-
+import EditProfile from "../pages/EditProfile";
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
 import AdminReportManagement from "../pages/AdminReportManagement";
-
+import ChangePassword from "../pages/ChangePassword";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -110,16 +110,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
-      <Route
-        path="/user-logs"
-        element={
-          <ProtectedRoute>
-            <UserLogs />
-          </ProtectedRoute>
-        }
-      />
-
+      <Route path="/edit-profile" element={<EditProfile />} />
+      <Route path="/change-password" element={<ChangePassword />} />
+ 
       {/* Admin Routes */}
 
       <Route path="/admin-dashboard/*" 
