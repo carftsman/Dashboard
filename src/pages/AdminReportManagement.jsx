@@ -1,9 +1,9 @@
 import { useNavigate} from "react-router-dom";
 import ReportTable from "../components/ReportTable";
 import { useEffect, useState } from "react";
-
 import api from '../api/apiConfig';
 import AdminSidebar from "../components/AdminSidebar";
+import { FiUser } from "react-icons/fi";
 
 export default function Reports() {
     const navigate = useNavigate();
@@ -52,7 +52,7 @@ const role = localStorage.getItem("role"); // get role
       <div className="flex-1 flex flex-col ml-[220px]">
 
         {/* HEADER */}
-        <div className="bg-white px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shadow-sm border-b">
+        <div className="bg-white px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 shadow-sm border-b">
 
           {/* LEFT */}
           <div>
@@ -77,7 +77,9 @@ const role = localStorage.getItem("role"); // get role
               className="w-10 h-10 min-w-[40px] min-h-[40px] cursor-pointer flex items-center justify-center rounded-full bg-gray-200"
               onClick={() => navigate("/profile")}
             >
-              <span className="text-gray-600 text-lg font-semibold">👤</span>
+              <span className="text-gray-600 text-lg">
+  <FiUser />
+</span>
             </div>
             </div>
 
@@ -85,22 +87,31 @@ const role = localStorage.getItem("role"); // get role
         
         </div>
 
-        {/* CONTENT */}
-        <div className="p-6">
+        
+<div className="p-6">
 
-          <div className="bg-white rounded-xl shadow-sm border p-6">
+  <div className="bg-white rounded-xl shadow-sm border p-6">
 
-            <h2 className="text-lg font-semibold mb-1">
-               ALL Reports
-            </h2>
+    {/* HEADER ROW */}
+    <div className="flex items-center justify-between mb-4">
 
-            
+      {/* LEFT: Title */}
+      <h2 className="text-lg font-semibold text-gray-800">
+        All Reports
+      </h2>
 
-            {role === "ADMIN" && (
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">
-              Edit Schema
-            </button>
-          )}
+      {/* RIGHT: Button (ADMIN ONLY) */}
+      {/* {role === "ADMIN" && (
+       <button className="bg-[#18154F] text-white px-4 py-2 rounded-lg hover:bg-[#23206b] transition">
+  Edit Schema
+</button>
+      )} */}
+
+    </div>
+
+    {/* Rest of your content below */}
+
+          
 
             {/* TABLE */}
             <ReportTable formattedData={filteredFiles} />
