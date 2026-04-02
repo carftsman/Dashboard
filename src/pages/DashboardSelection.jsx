@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"; 
 import { useNavigate } from "react-router-dom";
-import { FiSearch } from "react-icons/fi";
+import axios from "axios";
+import { FiSearch, FiPlus, FiUser } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
 import AdminSidebar from "../components/AdminSidebar"; 
 import api from '../api/apiConfig';
@@ -84,7 +85,7 @@ function Dashboard() {
         <div className="flex justify-between items-center mb-6">
 
           <div>
-            <h2 className="text-xl font-semibold">Select Dashboard</h2>
+            <h2 className="">Select Dashboard</h2>
             <p className="text-sm text-gray-500 mt-2 ml-1">
               Choose a customized view to monitor your business metrics,
               track performance targets, or analyze deep insights.
@@ -109,15 +110,9 @@ function Dashboard() {
               className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-200 overflow-hidden"
               onClick={() => navigate("/profile")}
             >
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="profile"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                "👤"
-              )}
+              <span className="text-gray-600 text-lg">
+                <FiUser />
+              </span>
             </div>
 
           </div>
@@ -182,8 +177,8 @@ function Dashboard() {
                          rounded-xl bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-1
                          transition duration-300 h-[220px]"
             >
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 text-2xl text-gray-600 mb-2">
-                +
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 mb-2">
+                <FiPlus className="text-[20px]" />
               </div>
               <h4 className="text-sm font-semibold text-gray-700">
                 Create New

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useCallback, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+ 
 import { uploadSalesFile } from "../services/uploadService";
 import { AuthContext } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
-
+ 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ACCEPTED_TYPES = [
   "text/csv",
@@ -14,23 +14,23 @@ const ACCEPTED_TYPES = [
 const ACCEPTED_EXTENSIONS = [".csv", ".xls", ".xlsx"];
 const MAX_SIZE_MB = 50;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-
+ 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function isValidFileType(file) {
   const ext = "." + file.name.split(".").pop().toLowerCase();
   return ACCEPTED_TYPES.includes(file.type) || ACCEPTED_EXTENSIONS.includes(ext);
 }
-
+ 
 function isValidFileSize(file) {
   return file.size <= MAX_SIZE_BYTES;
 }
-
+ 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
+ 
 // ─── Upload Icon ──────────────────────────────────────────────────────────────
 function UploadIcon() {
   return (
@@ -52,14 +52,14 @@ function UploadIcon() {
     </div>
   );
 }
-
+ 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function UploadData() {
   const location = useLocation();
   const navigate = useNavigate();
   console.log("location.state?.dashboardId",location.state?.dashboardId);
-
-
+ 
+ 
   // Read dashboardId: try navigation state first, then context user, then localStorage fallback
   const storedUser = (() => {
     try {
@@ -68,7 +68,7 @@ export default function UploadData() {
       return {};
     }
   })();
-
+ 
   const dashboardId =location.state?.dashboardId;
   const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
@@ -76,17 +76,17 @@ export default function UploadData() {
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
-
+ 
   const inputRef = useRef(null);
-
+ 
   // ── File Validation ──────────────────────────────────────────────────────
   const validateAndSet = useCallback((selectedFile) => {
     setError("");
     setSuccess("");
     setUploadProgress(0);
-
+ 
     if (!selectedFile) return;
-
+ 
     if (!isValidFileType(selectedFile)) {
       setError("Invalid file type. Please upload a CSV, XLS, or XLSX file.");
       setFile(null);
@@ -99,20 +99,20 @@ export default function UploadData() {
     }
     setFile(selectedFile);
   }, []);
-
+ 
   // ── Drag Events ─────────────────────────────────────────────────────────
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragging(true);
   }, []);
-
+ 
   const handleDragLeave = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragging(false);
   }, []);
-
+ 
   const handleDrop = useCallback(
     (e) => {
       e.preventDefault();
@@ -123,7 +123,7 @@ export default function UploadData() {
     },
     [validateAndSet]
   );
-
+ 
   // ── Click to select ──────────────────────────────────────────────────────
   const handleInputChange = useCallback(
     (e) => {
@@ -134,40 +134,40 @@ export default function UploadData() {
     },
     [validateAndSet]
   );
-
+ 
   const openFilePicker = () => inputRef.current?.click();
-
+ 
   const removeFile = () => {
     setFile(null);
     setError("");
     setSuccess("");
     setUploadProgress(0);
   };
-
+ 
   // ── Upload ────────────────────────────────────────────────────────────────
   const handleUpload = async () => {
     if (!file) {
       setError("Please select a file before uploading.");
       return;
     }
-
+ 
     if (!dashboardId) {
       setError(
         "Dashboard ID not found. Please make sure you are logged in and have a dashboard selected."
       );
       return;
     }
-
+ 
     setUploading(true);
     setError("");
     setSuccess("");
     setUploadProgress(0);
-
+ 
     // Fake progress tick while waiting for response
     const progressInterval = setInterval(() => {
       setUploadProgress((prev) => (prev < 85 ? prev + 5 : prev));
     }, 200);
-
+ 
     try {
       const response=await uploadSalesFile(dashboardId, file);
       console.log("uploaded file",response.fileId);
@@ -177,12 +177,12 @@ export default function UploadData() {
         "File uploaded and analysis started successfully! Your data is being processed."
       );
       setFile(null);
-
+ 
       // Navigate to Column Mapping with the fileId
       setTimeout(() => {
         navigate("/column-mapping", { state: { fileId: response.fileId } });
       }, 1500); // Give user a moment to see success message
-
+ 
     } catch (err) {
       clearInterval(progressInterval);
       setUploadProgress(0);
@@ -195,13 +195,13 @@ export default function UploadData() {
       setUploading(false);
     }
   };
-
+ 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex min-h-screen bg-gray-100 ">
       {/* Sidebar — untouched */}
       <Sidebar/>
-
+ 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 ml-[220px]">
         {/* Page Body */}
@@ -216,7 +216,7 @@ export default function UploadData() {
               will automatically clean and categorize your data for the dashboard.
             </p>
           </div>
-
+ 
           <div className="max-w-2xl space-y-5">
             {/* ── Drop Zone ── */}
             <div
@@ -240,7 +240,7 @@ export default function UploadData() {
               `}
             >
               <UploadIcon />
-
+ 
               {file ? (
                 /* ── Selected File Preview ── */
                 <div
@@ -307,7 +307,7 @@ export default function UploadData() {
                   </p>
                 </>
               )}
-
+ 
               {/* Hidden input */}
               <input
                 ref={inputRef}
@@ -318,7 +318,7 @@ export default function UploadData() {
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
-
+ 
             {/* ── Progress Bar ── */}
             {uploading && (
               <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -328,7 +328,7 @@ export default function UploadData() {
                 />
               </div>
             )}
-
+ 
             {/* ── Error Message ── */}
             {error && (
               <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
@@ -348,7 +348,7 @@ export default function UploadData() {
                 <span>{error}</span>
               </div>
             )}
-
+ 
             {/* ── Success Message ── */}
             {success && (
               <div className="flex items-start gap-2 bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 text-sm">
@@ -368,7 +368,7 @@ export default function UploadData() {
                 <span>{success}</span>
               </div>
             )}
-
+ 
             {/* ── Upload Tip ── */}
             {!success && (
               <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-4">
@@ -397,7 +397,7 @@ export default function UploadData() {
                 </div>
               </div>
             )}
-
+ 
             {/* ── Upload Button ── */}
             <button
               type="button"
@@ -444,4 +444,3 @@ export default function UploadData() {
     </div>
   );
 }
-
