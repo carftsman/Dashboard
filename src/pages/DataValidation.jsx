@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { getValidationResults, processFile } from "../services/uploadService";
-
+ 
 // Icons
 const CloudUploadIcon = () => (
   <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -29,25 +29,25 @@ const WarningIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
   </svg>
 );
-
+ 
 export default function DataValidation() {
   const location = useLocation();
   const navigate = useNavigate();
   const fileId = location.state?.fileId;
-
+ 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [processError, setProcessError] = useState("");
-
+ 
   useEffect(() => {
     if (!fileId) {
       setError("No file ID provided. Please upload a file first.");
       setLoading(false);
       return;
     }
-
+ 
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -59,20 +59,20 @@ export default function DataValidation() {
         setLoading(false);
       }
     };
-
+ 
     fetchData();
   }, [fileId]);
-
+ 
   const totalRows = data?.totalRows || 0;
-  
+ 
   const missingDataCount = data?.summary?.criticalErrors?.missingData || 0;
   const dataTypeErrorsCount = data?.summary?.criticalErrors?.dataTypeErrors || 0;
   const formatErrorsCount = data?.summary?.criticalErrors?.formatErrors || 0;
   const duplicateRowsCount = data?.summary?.warnings?.duplicateRows || 0;
-
+ 
   const totalCriticalErrors = missingDataCount + dataTypeErrorsCount + formatErrorsCount;
   const totalMinorWarnings = duplicateRowsCount;
-
+ 
   // Let's create an array of checks to map over to generate the table rows exactly like the design
   const validationChecks = [
     {
@@ -115,37 +115,56 @@ export default function DataValidation() {
       actionBtn: "Remove Duplicates",
     }
   ];
-
+ 
   const handleReupload = () => {
     navigate("/upload-data");
   };
-
+ 
   const handleProcess = async () => {
-    if (totalCriticalErrors > 0) return;
-    
-    try {
-      setProcessing(true);
-      setProcessError("");
-      const res = await processFile(fileId);
-
-      if (res.status === "FAILED") {
-        setProcessError(res.message || "Failed to process the file due to errors.");
-      } else {
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      setProcessError(err?.message || err?.error || "An error occurred while processing the file.");
-    } finally {
-      setProcessing(false);
+  if (totalCriticalErrors > 0) return;
+ 
+  try {
+    setProcessing(true);
+    setProcessError("");
+ 
+    // ✅ Step 1: process file
+    const res = await processFile(fileId);
+ 
+    if (res.status === "FAILED") {
+      setProcessError(res.message || "Processing failed");
+      return;
     }
-  };
-
+ 
+    // ✅ Step 2: get mappings from previous page
+    const mappings = location.state?.mappings;
+ 
+    if (!mappings) {
+      setProcessError("Mappings missing. Please go back and map columns.");
+      return;
+    }
+ 
+    // ✅ Step 3: navigate to dashboard with data
+    navigate("/dashboard", {
+      state: {
+         dashboardId: location.state?.dashboardId, // ✅ ADD
+    fileId,
+    mappings,
+      },
+    });
+ 
+  } catch (err) {
+    setProcessError(err?.message || "Processing error");
+  } finally {
+    setProcessing(false);
+  }
+};
+ 
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 ml-0 lg:ml-[220px]">
         <main className="flex-1 p-4 sm:p-6 lg:p-12 max-w-6xl mx-auto w-full">
-          
+         
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <div>
@@ -154,16 +173,16 @@ export default function DataValidation() {
                 Review and verify data quality before final processing.
               </p>
             </div>
-            
+           
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              <button 
+              <button
                 onClick={handleReupload}
                 className="flex items-center justify-center gap-2 bg-white border border-[#cbd5e1] text-[#334155] hover:bg-gray-50 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm flex-1 sm:flex-none"
               >
                 <CloudUploadIcon />
                 <span className="whitespace-nowrap">Re-upload</span>
               </button>
-              <button 
+              <button
                 onClick={handleProcess}
                 disabled={totalCriticalErrors > 0 || processing}
                 className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all flex-1 sm:flex-none ${
@@ -189,7 +208,7 @@ export default function DataValidation() {
               </button>
             </div>
           </div>
-
+ 
           {loading && (
             <div className="flex justify-center py-20">
               <span className="flex items-center gap-2 text-gray-500 font-medium">
@@ -201,21 +220,21 @@ export default function DataValidation() {
               </span>
             </div>
           )}
-
+ 
           {!loading && error && (
             <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <ErrorIcon />
               {error}
             </div>
           )}
-
+ 
           {processError && (
             <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <ErrorIcon />
               {processError}
             </div>
           )}
-
+ 
           {!loading && !error && data && (
             <>
               {/* Summary Cards */}
@@ -230,7 +249,7 @@ export default function DataValidation() {
                     <DatabaseIcon />
                   </div>
                 </div>
-
+ 
                 {/* Critical Errors */}
                 <div className="bg-white border border-[#e2e8f0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                   <span className="text-xs sm:text-[14px] font-semibold text-[#64748b] mb-2 tracking-wide">Critical Errors</span>
@@ -241,7 +260,7 @@ export default function DataValidation() {
                     {totalCriticalErrors > 0 && <ErrorIcon />}
                   </div>
                 </div>
-
+ 
                 {/* Minor Warnings */}
                 <div className="bg-white border border-[#e2e8f0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between sm:col-span-2 md:col-span-1">
                   <span className="text-xs sm:text-[14px] font-semibold text-[#64748b] mb-2 tracking-wide">Minor Warnings</span>
@@ -257,10 +276,10 @@ export default function DataValidation() {
                   </div>
                 </div>
               </div>
-
+ 
               {/* Validation Checks Table (Desktop) / Cards (Mobile) */}
               <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden mb-6">
-                
+               
                 {/* Table Header - Only visible on sm and above */}
                 <div className="hidden sm:grid grid-cols-[3fr_1.5fr_4fr_1fr] gap-4 bg-[#f8fafc] border-b border-[#e2e8f0] px-6 py-4">
                   <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Validation Check</div>
@@ -268,16 +287,16 @@ export default function DataValidation() {
                   <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Details</div>
                   <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest text-right">Actions</div>
                 </div>
-
+ 
                 {/* Table Body */}
                 <div className="flex flex-col">
                   {validationChecks.map((check, index) => {
                     const hasIssue = check.count > 0;
-                    
+                   
                     let statusLabel = "PASSED";
                     let statusStyles = "bg-[#eafbf0] text-[#1aa454] border-[#bbf3d0]/30";
                     let StatusIcon = () => <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
-
+ 
                     if (hasIssue) {
                       if (check.isCritical && check.title === "Missing Columns") {
                         statusLabel = "FAILED";
@@ -293,7 +312,7 @@ export default function DataValidation() {
                         StatusIcon = () => <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
                       }
                     }
-
+ 
                     return (
                       <div
                         key={check.title}
@@ -306,7 +325,7 @@ export default function DataValidation() {
                           <h3 className="text-[15px] font-[800] text-[#1e293b] mb-1">{check.title}</h3>
                           <p className="text-[13px] text-[#64748b] leading-relaxed pr-0 sm:pr-4">{check.desc}</p>
                         </div>
-
+ 
                         {/* Status */}
                         <div className="flex pt-1 mt-2 sm:mt-0">
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1 pb-1.5 rounded-full text-[11px] font-[800] tracking-wider uppercase border shadow-sm ${statusStyles}`}>
@@ -314,7 +333,7 @@ export default function DataValidation() {
                             {statusLabel}
                           </span>
                         </div>
-
+ 
                         {/* Details */}
                         <div className="pt-1 pr-0 sm:pr-6 mt-2 sm:mt-0 w-full">
                           {hasIssue ? (
@@ -331,7 +350,7 @@ export default function DataValidation() {
                             </p>
                           )}
                         </div>
-
+ 
                         {/* Actions */}
                         <div className="flex sm:justify-end pt-1 mt-3 sm:mt-0 w-full sm:w-auto">
                           <button className="text-[13px] font-[800] text-[#1e293b] hover:text-[#4f46e5] text-left sm:text-right transition-colors whitespace-nowrap">
@@ -345,9 +364,11 @@ export default function DataValidation() {
               </div>
             </>
           )}
-
+ 
         </main>
       </div>
     </div>
   );
 }
+ 
+ 

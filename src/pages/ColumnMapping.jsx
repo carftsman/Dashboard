@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { getMappingData, postManualMapping } from "../services/uploadService";
-
+ 
 // ─── Icons ────────────────────────────────────────────────────────────────
 const SpeakerIcon = () => (
   <svg className="w-[18px] h-[18px] text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -50,7 +50,7 @@ const MinusCircleIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
-
+ 
 const getSystemIcon = (name) => {
   const n = (name || "").toLowerCase();
   if (n.includes("campaign")) return <SpeakerIcon />;
@@ -59,29 +59,29 @@ const getSystemIcon = (name) => {
   if (n.includes("click")) return <CursorIcon />;
   return <DocumentIcon />;
 };
-
+ 
 export default function ColumnMapping() {
   const location = useLocation();
   const navigate = useNavigate();
   const fileId = location.state?.fileId;
   console.log("fileId",fileId);
-
+ 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [mappingData, setMappingData] = useState(null);
-  
+ 
   // Custom mappings state: { [systemKey]: fileColumnName }
   const [mappings, setMappings] = useState({});
   const [submitting, setSubmitting] = useState(false);
-
+ 
   useEffect(() => {
     if (!fileId) {
       setError("No file ID provided. Please upload a file first.");
       setLoading(false);
       return;
     }
-
+ 
     const fetchData = async () => {
       try {
         console.log("fetchData entered....",fileId);
@@ -89,37 +89,63 @@ export default function ColumnMapping() {
         const data = await getMappingData(fileId);
         console.log("mapping data",data);
         setMappingData(data);
-
+ 
         // Auto-match system columns with file columns
         const sysCols = data.dashboardColumns || [];
         const fileCols = data.fileColumns || [];
         console.log("sysCols",sysCols,"fileCols",fileCols);
         const initialMappings = {};
-
-        sysCols.forEach((sysCol) => {
-          console.log("one sys col",sysCol);
-          const sysNameClean = (sysCol.displayName || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-
-          // 1. Try exact match loosely
-          let match = fileCols.find((fc) => {
-            const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
-            return fcClean === sysNameClean;
-          });
-          
-          // 2. Try partial match if no exact
-          if (!match) {
-            match = fileCols.find((fc) => {
-              const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
-              return fcClean.includes(sysNameClean);
-            });
-          }
-
-          if (match) {
-            // we use the templateField as key, assuming it's sysCol.columnKey or sysCol.displayName
-            initialMappings[sysCol.columnKey || sysCol.displayName] = match;
-          }
-        });
-
+ 
+       sysCols.forEach((sysCol) => {
+ 
+  const sysKey = sysCol.columnKey; // ✅ FIX
+ 
+  const sysNameClean = sysKey
+ 
+    .toLowerCase()
+ 
+    .replace(/[^a-z0-9]/g, "");
+ 
+  //////////////////////////////////////////////////////
+ 
+  // 🔍 MATCH FILE COLUMN
+ 
+  //////////////////////////////////////////////////////
+ 
+  let match = fileCols.find((fc) => {
+ 
+    const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
+ 
+    return fcClean === sysNameClean;
+ 
+  });
+ 
+  if (!match) {
+ 
+    match = fileCols.find((fc) => {
+ 
+      const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
+ 
+      return fcClean.includes(sysNameClean);
+ 
+    });
+ 
+  }
+ 
+  //////////////////////////////////////////////////////
+ 
+  // ✅ STORE MAPPING (IMPORTANT FIX)
+ 
+  //////////////////////////////////////////////////////
+ 
+  if (match) {
+ 
+    initialMappings[sysKey] = match; // ✅ ONLY columnKey
+ 
+  }
+ 
+});
+ 
         setMappings(initialMappings);
       } catch (err) {
         setError(err?.message || err?.error || "Failed to fetch mapping data.");
@@ -127,10 +153,10 @@ export default function ColumnMapping() {
         setLoading(false);
       }
     };
-
+ 
     fetchData();
   }, [fileId]);
-
+ 
   const handleSelectChange = (sysColKey, value) => {
     setMappings((prev) => {
       const newMappings = { ...prev };
@@ -142,70 +168,75 @@ export default function ColumnMapping() {
       return newMappings;
     });
   };
-
+ 
   const handleReviewData = async () => {
     try {
       setSubmitting(true);
       setError("");
       setSuccess("");
-
+ 
       const sysCols = mappingData?.dashboardColumns || [];
       const totalCols = sysCols.length;
       const mappedCols = Object.keys(mappings).length;
-
+ 
       // 1. Edge Case: Check if ALL columns are mapped
       if (mappedCols < totalCols) {
         setError(`Please map all ${totalCols} system columns before proceeding. You have only mapped ${mappedCols}.`);
         setSubmitting(false);
         return;
       }
-
+ 
       const dashboardId = mappingData?.dashboardId || mappingData?.dashboardColumns?.[0]?.dashboardId || 1;
-
+ 
       // Formatting payload to hit postManualMapping
       const payloadMappings = Object.entries(mappings).map(([templateField, fileColumn]) => ({
         dashboardId,
         templateField,
         fileColumn,
       }));
-
+ 
       // 2. Edge Case: Safety check for empty mappings
       if (payloadMappings.length === 0) {
         setError("No mappings found to submit.");
         setSubmitting(false);
         return;
       }
-
+ 
       await postManualMapping({
         fileId,
         mappings: payloadMappings,
       });
-
+ 
       setSuccess("Mappings successfully saved! Redirecting to validation...");
-      
+     
       // 3. Navigate to Data Validation screen
       setTimeout(() => {
-        navigate("/data-validation", { state: { fileId } });
-      }, 1500);
-
+navigate("/data-validation", {
+  state: {
+    dashboardId: location.state?.dashboardId,
+    fileId,
+    mappings,
+  },
+});     }, 1500);
+ 
     } catch (err) {
       setError(err?.message || err?.error || "Failed to submit column mappings.");
       setSubmitting(false);
     }
   };
-
+ 
   // Safe checks
   const sysCols = mappingData?.dashboardColumns || [];
   const fileCols = mappingData?.fileColumns || [];
   const totalCols = sysCols.length;
   const mappedCols = Object.keys(mappings).length;
-
+ 
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 ml-[220px]">
         <main className="flex-1 p-6 lg:p-12 max-w-6xl mx-auto w-full">
-          
+         
           {/* Back Button */}
           <button
             onClick={() => navigate(-1)}
@@ -214,7 +245,7 @@ export default function ColumnMapping() {
             <BackIcon />
             Back to Upload
           </button>
-
+ 
           {/* Header section */}
           <div className="mb-8">
             <h1 className="text-3xl font-[800] text-[#1e293b] tracking-tight mb-2">Map your columns</h1>
@@ -222,7 +253,7 @@ export default function ColumnMapping() {
               Match your uploaded dataset columns to the required system fields to ensure data accuracy and reporting consistency across your marketing campaigns.
             </p>
           </div>
-
+ 
           {/* Loading / Error / Success States */}
           {loading && (
             <div className="flex justify-center py-20">
@@ -235,7 +266,7 @@ export default function ColumnMapping() {
               </span>
             </div>
           )}
-
+ 
           {!loading && error && (
             <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -244,33 +275,33 @@ export default function ColumnMapping() {
               {error}
             </div>
           )}
-
+ 
           {!loading && success && (
             <div className="bg-green-50 text-green-700 border border-green-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <CheckCircleIcon />
               {success}
             </div>
           )}
-
+ 
           {!loading && sysCols.length > 0 && (
             <>
               {/* Mapping Table Component */}
               <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden mb-6">
-                
+               
                 {/* Table Header */}
                 <div className="grid grid-cols-[1fr_1fr_160px] gap-6 bg-[#4e74ca] px-8 py-4">
                   <div className="text-white text-sm font-semibold tracking-wide">System Column</div>
                   <div className="text-white text-sm font-semibold tracking-wide">Uploaded Column</div>
                   <div className="text-white text-sm font-semibold tracking-wide">Mapping Status</div>
                 </div>
-
+ 
                 {/* Table Body */}
                 <div className="flex flex-col">
                   {sysCols.map((sysCol, index) => {
-                    const colKey = sysCol.columnKey || sysCol.displayName;
+                    const colKey = sysCol.columnKey ;
                     const isMapped = !!mappings[colKey];
                     const selectedValue = mappings[colKey] || "";
-
+ 
                     return (
                       <div
                         key={colKey}
@@ -285,7 +316,7 @@ export default function ColumnMapping() {
                             {sysCol.displayName}
                           </span>
                         </div>
-
+ 
                         {/* Uploaded Column Selector */}
                         <div>
                           <select
@@ -312,7 +343,7 @@ export default function ColumnMapping() {
                             ))}
                           </select>
                         </div>
-
+ 
                         {/* Status Pill */}
                         <div className="flex items-center">
                           {isMapped ? (
@@ -332,13 +363,13 @@ export default function ColumnMapping() {
                   })}
                 </div>
               </div>
-
+ 
               {/* Action Footer */}
               <div className="flex items-center justify-between mb-8">
                 <span className="text-[14px] font-medium text-[#64748b]">
                   {mappedCols} of {totalCols} columns mapped
                 </span>
-
+ 
                 <button
                   onClick={handleReviewData}
                   disabled={submitting}
@@ -356,7 +387,7 @@ export default function ColumnMapping() {
                   )}
                 </button>
               </div>
-
+ 
               {/* Informational Tip */}
               <div className="bg-[#f0f4ff] border border-[#e2e8f6] rounded-2xl p-5 flex items-start gap-4 shadow-sm">
                 <div className="mt-0.5"><InfoIcon /></div>
@@ -369,9 +400,10 @@ export default function ColumnMapping() {
               </div>
             </>
           )}
-
+ 
         </main>
       </div>
     </div>
   );
 }
+ 

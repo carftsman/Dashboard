@@ -180,7 +180,7 @@ export default function UploadData() {
  
       // Navigate to Column Mapping with the fileId
       setTimeout(() => {
-        navigate("/column-mapping", { state: { fileId: response.fileId } });
+        navigate("/column-mapping", { state: {dashboardId: location.state?.dashboardId, fileId: response.fileId } });
       }, 1500); // Give user a moment to see success message
  
     } catch (err) {
@@ -444,3 +444,4 @@ export default function UploadData() {
     </div>
   );
 }
+ 
