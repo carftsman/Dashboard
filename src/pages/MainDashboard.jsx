@@ -57,69 +57,83 @@ export default function Dashboard() {
 
   // --- UPDATED EXPORT LOGIC ---
   const handleExportPDF = async () => {
-    try {
-      setIsExporting(true);
+  try {
+    setIsExporting(true);
 
-      // 1. Capture the dashboard element
-      const element = document.getElementById("dashboard-content");
-      
-      // 2. Setup html2canvas with explicit background color to match theme
-      const canvas = await html2canvas(element, { 
-        scale: 2,
-        useCORS: true,
-        // This ensures Dark Mode stays Dark in the PDF
-        backgroundColor: darkMode ? "#020617" : "#f3f4f6", 
-        logging: false
-      });
-      
-      const imgData = canvas.toDataURL("image/png");
+    // 1. Select the element
+    const element = document.getElementById("dashboard-content");
+    
+    // 2. Capture with specific dark mode overrides
+    const canvas = await html2canvas(element, { 
+      scale: 2,
+      useCORS: true,
+      // Force the canvas to use your specific dark background hex
+      backgroundColor: darkMode ? "#020617" : "#f3f4f6", 
+      logging: false,
+      // Ensure it captures the full scrollable height/width
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
+      onclone: (clonedDoc) => {
+        // This ensures that even inside the "cloned" version for the screenshot, 
+        // the background is forced to dark.
+        const clonedElement = clonedDoc.getElementById("dashboard-content");
+        if (clonedElement) {
+          clonedElement.style.backgroundColor = darkMode ? "#020617" : "#f3f4f6";
+          clonedElement.style.color = darkMode ? "#ffffff" : "#000000";
+        }
+      }
+    });
+    
+    const imgData = canvas.toDataURL("image/png");
 
-      // 3. Setup jsPDF (Portrait, Millimeters, A4)
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      // Calculate dimensions to fit image to A4 width
-      const imgProps = pdf.getImageProperties(imgData);
-      const ratio = imgProps.width / imgProps.height;
-      const finalHeight = pdfWidth / ratio;
+    // 3. Setup jsPDF
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    const imgProps = pdf.getImageProperties(imgData);
+    const ratio = imgProps.width / imgProps.height;
+    const finalWidth = pdfWidth;
+    const finalHeight = pdfWidth / ratio;
 
-      // Add image to PDF
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, finalHeight);
-
-      // 4. Generate Blob
-      const pdfBlob = pdf.output("blob");
-
-      // --- TRIGGER BROWSER DOWNLOAD ---
-      const url = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${fileName}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      // 5. Create FormData and Upload to Backend
-      const formData = new FormData();
-      formData.append("file", pdfBlob, `${fileName}.pdf`);
-      formData.append("name", fileName);
-      formData.append("dashboardId", dashboardId);
-      formData.append("fileId", fileId);
-
-      await api.post("/api/reports/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      showToast("Report generated and uploaded successfully! ✅");
-      setShowSaveModal(false);
-    } catch (err) {
-      console.error("PDF Export/Upload Error:", err);
-      showToast("Failed to generate report ❌", "error");
-    } finally {
-      setIsExporting(false);
+    // --- NEW: Fill the PDF background color before adding the image ---
+    // This prevents white borders if the image doesn't perfectly fill the A4 page
+    if (darkMode) {
+      pdf.setFillColor(2, 6, 23); // Matches #020617
+      pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
     }
-  };
+
+    pdf.addImage(imgData, "PNG", 0, 0, finalWidth, finalHeight);
+
+    // 4. Download and Upload
+    const pdfBlob = pdf.output("blob");
+    const url = window.URL.createObjectURL(pdfBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${fileName}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    const formData = new FormData();
+    formData.append("file", pdfBlob, `${fileName}.pdf`);
+    formData.append("name", fileName);
+    formData.append("dashboardId", dashboardId);
+    formData.append("fileId", fileId);
+
+    await api.post("/api/reports/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    showToast("Report generated and uploaded successfully! ✅");
+    setShowSaveModal(false);
+  } catch (err) {
+    console.error("PDF Export/Upload Error:", err);
+    showToast("Failed to generate report ❌", "error");
+  } finally {
+    setIsExporting(false);
+  }
+};
 
   const fetchDashboard = async () => {
     try {
