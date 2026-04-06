@@ -12,6 +12,9 @@ function Topbar() {
  
   const [user, setUser] = useState(null);
  
+  // ✅ ADDED (only this line)
+  const profileImage = localStorage.getItem("profileImage");
+ 
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -51,8 +54,17 @@ function Topbar() {
           </span>
         </div>
  
-        <div className="w-[36px] h-[36px] bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition">
-          <FiUser />
+        {/* ✅ UPDATED PROFILE IMAGE DISPLAY */}
+        <div className="w-[36px] h-[36px] rounded-full overflow-hidden bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition">
+          {profileImage ? (
+            <img
+              src={profileImage}
+              alt="profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <FiUser className="text-indigo-600" />
+          )}
         </div>
       </div>
     </div>
@@ -118,7 +130,6 @@ function Card({ title, description, icon, onClick, active }) {
           {title}
         </h3>
  
-        {/* ✅ HOVER EXPAND TEXT */}
         <p
           className="
             text-[12px] text-gray-600 mt-1 leading-relaxed
@@ -212,5 +223,4 @@ function AdminDashboard() {
 }
  
 export default AdminDashboard;
- 
  

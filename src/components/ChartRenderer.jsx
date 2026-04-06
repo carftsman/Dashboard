@@ -162,14 +162,14 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
           layout={isHorizontal ? "vertical" : "horizontal"}
           data={safeData} 
           barCategoryGap={chartType === "histogram" ? 0 : "10%"}
-          margin={{ top: 25, right: 30, left: 10, bottom: 40 }}
+          margin={{ top: 40, right: 30, left: 10, bottom: 40 }}
         >
           <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={isHorizontal} />
           {isHorizontal ? <XAxis type="number" stroke={axisColor} tickFormatter={formatYAxis} /> : renderXAxis()}
           {isHorizontal ? <YAxis type="category" dataKey="displayX" stroke={axisColor} width={80} tick={{fontSize: 10}} /> : renderYAxis()}
           <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
           <Bar dataKey="value" fill="#00C49F" stackId={chartType === "stacked_bar" ? "a" : undefined} radius={isHorizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]}>
-            {!isHorizontal && <LabelList dataKey="value" position="top" fill={textColor} fontSize={10} formatter={formatYAxis} />}
+            {!isHorizontal }
           </Bar>
         </BarChart>
       </ResponsiveContainer>
