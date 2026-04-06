@@ -96,30 +96,56 @@ export default function ColumnMapping() {
         console.log("sysCols",sysCols,"fileCols",fileCols);
         const initialMappings = {};
 
-        sysCols.forEach((sysCol) => {
-          console.log("one sys col",sysCol);
-          const sysNameClean = (sysCol.displayName || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+       sysCols.forEach((sysCol) => {
 
-          // 1. Try exact match loosely
-          let match = fileCols.find((fc) => {
-            const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
-            return fcClean === sysNameClean;
-          });
-          
-          // 2. Try partial match if no exact
-          if (!match) {
-            match = fileCols.find((fc) => {
-              const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
-              return fcClean.includes(sysNameClean);
-            });
-          }
+  const sysKey = sysCol.columnKey; // ✅ FIX
+ 
+  const sysNameClean = sysKey
 
-          if (match) {
-            // we use the templateField as key, assuming it's sysCol.columnKey or sysCol.displayName
-            initialMappings[sysCol.columnKey || sysCol.displayName] = match;
-          }
-        });
+    .toLowerCase()
 
+    .replace(/[^a-z0-9]/g, "");
+ 
+  //////////////////////////////////////////////////////
+
+  // 🔍 MATCH FILE COLUMN
+
+  //////////////////////////////////////////////////////
+
+  let match = fileCols.find((fc) => {
+
+    const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    return fcClean === sysNameClean;
+
+  });
+ 
+  if (!match) {
+
+    match = fileCols.find((fc) => {
+
+      const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+      return fcClean.includes(sysNameClean);
+
+    });
+
+  }
+ 
+  //////////////////////////////////////////////////////
+
+  // ✅ STORE MAPPING (IMPORTANT FIX)
+
+  //////////////////////////////////////////////////////
+
+  if (match) {
+
+    initialMappings[sysKey] = match; // ✅ ONLY columnKey
+
+  }
+
+});
+ 
         setMappings(initialMappings);
       } catch (err) {
         setError(err?.message || err?.error || "Failed to fetch mapping data.");
@@ -272,7 +298,7 @@ navigate("/data-validation", {
                 {/* Table Body */}
                 <div className="flex flex-col">
                   {sysCols.map((sysCol, index) => {
-                    const colKey = sysCol.columnKey || sysCol.displayName;
+                    const colKey = sysCol.columnKey ;
                     const isMapped = !!mappings[colKey];
                     const selectedValue = mappings[colKey] || "";
 

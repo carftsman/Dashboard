@@ -4,19 +4,15 @@ const api = axios.create({
   baseURL: "https://dashboard-backend-cyrd.onrender.com",
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
+// ✅ ADD THIS INTERCEPTOR
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+
+  return config;
+});
 
 export default api;

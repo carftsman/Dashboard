@@ -43,8 +43,8 @@ input, select, textarea {
 /* Buttons */
 button {
   padding: 10px 16px;
-  background-color: #2f80ed;
-  color: white;
+  /* background-color: #2f80ed; */
+  /* color: white; */
   border: none;
   border-radius: 5px;
   cursor: pointer;

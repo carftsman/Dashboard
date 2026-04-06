@@ -1,287 +1,300 @@
 import React, { useEffect, useState } from "react";
-
-import { useLocation } from "react-router-dom";
-
-import Sidebar from "../components/Sidebar";
-
+import { useLocation, useNavigate } from "react-router-dom";
 import ChartRenderer from "../components/ChartRenderer";
-
+import ChartOverlay from "../components/ChartOverLay";
 import api from "../api/apiConfig";
- 
+// --- NEW IMPORTS FOR PDF GENERATION ---
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
 export default function Dashboard() {
-
   const location = useLocation();
- 
+  const navigate = useNavigate();
+
+  const [darkMode, setDarkMode] = useState(true);
   const fileId = location.state?.fileId;
-
-  const mappings = location.state?.mappings;
-
   const dashboardId = location.state?.dashboardId;
- 
+
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+
+  // --- Notification State ---
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
+  };
+
+  const cardBg = darkMode ? "bg-[#0f172a]" : "bg-white";
+  const textMain = darkMode ? "text-white" : "text-black";
+  const textSub = darkMode ? "text-gray-400" : "text-gray-600";
+  const buttonBg = darkMode
+    ? "bg-gray-700 hover:bg-gray-600 text-white"
+    : "bg-gray-200 hover:bg-gray-300 text-black";
+
   const [dashboard, setDashboard] = useState(null);
-
-  const [widgetData, setWidgetData] = useState({});
-
+  const [charts, setCharts] = useState([]);
   const [loading, setLoading] = useState(true);
- 
-  const fetchDashboard = async () => {
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [fileName, setFileName] = useState("Dashboard_Report");
+  const [isExporting, setIsExporting] = useState(false);
 
-    try {
-
-      const res = await api.get(`/api/dashboards/${dashboardId}`);
-
-      setDashboard(res.data);
-
-    } catch (err) {
-
-      console.error(err.response?.data);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
- 
-  //////////////////////////////////////////////////////
-
-  // ✅ FINAL FIXED FUNCTION
-
-  //////////////////////////////////////////////////////
-
-  const fetchWidgetData = async (widget) => {
-
-    try {
-
-      let mappedConfig =
-
-        widget.config?.config || widget.config || {};
- 
-      const normalizeArray = (val) =>
-
-        Array.isArray(val) ? val : val ? [val] : [];
- 
-      const rawGroupBy = normalizeArray(
-
-        mappedConfig?.xAxis ||
-
-        mappedConfig?.groupBy ||
-
-        []
-
-      );
- 
-      const rawMetric = normalizeArray(
-
-        mappedConfig?.yAxis ||
-
-        mappedConfig?.metrics ||
-
-        mappedConfig?.metric ||
-
-        []
-
-      );
- 
-      //////////////////////////////////////////////////////
-
-      // 🔥 IMPORTANT FIX: displayName → columnKey
-
-      //////////////////////////////////////////////////////
-
-      const getColumnKeyFromMapping = (key) => {
-
-        const fileColumn = mappings?.[key];
- 
-        if (!fileColumn) return null;
- 
-        const col = dashboard?.columns?.find(
-
-          (c) =>
-
-            c.displayName?.toLowerCase().trim() ===
-
-            fileColumn.toLowerCase().trim()
-
+  const handleChartUpdated = (updatedChart) => {
+    setCharts((prev) => {
+      const exists = prev.find((c) => c.id === updatedChart.id);
+      if (exists) {
+        return prev.map((c) =>
+          c.id === updatedChart.id ? { ...c, ...updatedChart } : c
         );
- 
-        return col?.columnKey || null;
-
-      };
- 
-      const mappedGroupBy = rawGroupBy
-
-        .map((g) => getColumnKeyFromMapping(g))
-
-        .filter(Boolean);
- 
-      const mappedMetric = rawMetric
-
-        .map((m) => getColumnKeyFromMapping(m))
-
-        .filter(Boolean);
- 
-      console.log("✅ FINAL groupBy:", mappedGroupBy);
-
-      console.log("✅ FINAL metric:", mappedMetric);
- 
-      //////////////////////////////////////////////////////
-
-      // 🚨 VALIDATION
-
-      //////////////////////////////////////////////////////
-
-      if (mappedGroupBy.length === 0 || mappedMetric.length === 0) {
-
-        console.warn(
-
-          "❌ Skipping widget (mapping missing):",
-
-          widget.name
-
-        );
-
-        return;
-
       }
- 
-      //////////////////////////////////////////////////////
-
-      // FORMAT MAPPINGS
-
-      //////////////////////////////////////////////////////
-
-      const formattedMappings = Object.entries(mappings || {}).map(
-
-        ([templateField, fileColumn]) => ({
-
-          templateField,
-
-          fileColumn,
-
-        })
-
-      );
- 
-      //////////////////////////////////////////////////////
-
-      // FINAL PAYLOAD
-
-      //////////////////////////////////////////////////////
-
-      const payload = {
-
-        dashboardId: widget.dashboardId,
-
-        fileId,
-
-        chartType: widget.type,
-
-        groupBy: mappedGroupBy,   // ✅ FIXED
-
-        metric: mappedMetric,     // ✅ FIXED
-
-        aggregation: "COUNT",
-
-        mappings: formattedMappings,
-
-      };
- 
-      console.log("🚀 FINAL PAYLOAD:", payload);
- 
-      //////////////////////////////////////////////////////
-
-      // API CALL
-
-      //////////////////////////////////////////////////////
-
-      const res = await api.post(`/api/upload/analyze`, payload);
- 
-      setWidgetData((prev) => ({
-
-        ...prev,
-
-        [widget.id]: res.data?.data || [],
-
-      }));
- 
-    } catch (err) {
-
-      console.error(
-
-        "❌ Widget error:",
-
-        err.response?.data || err.message
-
-      );
-
-    }
-
+      return [...prev, updatedChart];
+    });
+    fetchDashboardData();
+    setIsOverlayOpen(false);
+    showToast("Chart updated successfully!");
   };
- 
-  //////////////////////////////////////////////////////
- 
-  useEffect(() => {
 
-    if (!dashboardId) return;
+  // --- UPDATED EXPORT LOGIC ---
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
 
-    fetchDashboard();
+      // 1. Capture the dashboard element
+      const element = document.getElementById("dashboard-content");
+      
+      // 2. Setup html2canvas with explicit background color to match theme
+      const canvas = await html2canvas(element, { 
+        scale: 2,
+        useCORS: true,
+        // This ensures Dark Mode stays Dark in the PDF
+        backgroundColor: darkMode ? "#020617" : "#f3f4f6", 
+        logging: false
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
 
-  }, [dashboardId]);
- 
-  useEffect(() => {
+      // 3. Setup jsPDF (Portrait, Millimeters, A4)
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate dimensions to fit image to A4 width
+      const imgProps = pdf.getImageProperties(imgData);
+      const ratio = imgProps.width / imgProps.height;
+      const finalHeight = pdfWidth / ratio;
 
-    if (dashboard?.widgets && mappings && fileId) {
+      // Add image to PDF
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, finalHeight);
 
-      dashboard.widgets.forEach((widget) => {
+      // 4. Generate Blob
+      const pdfBlob = pdf.output("blob");
 
-        fetchWidgetData(widget);
+      // --- TRIGGER BROWSER DOWNLOAD ---
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${fileName}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
+      // 5. Create FormData and Upload to Backend
+      const formData = new FormData();
+      formData.append("file", pdfBlob, `${fileName}.pdf`);
+      formData.append("name", fileName);
+      formData.append("dashboardId", dashboardId);
+      formData.append("fileId", fileId);
+
+      await api.post("/api/reports/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
+      showToast("Report generated and uploaded successfully! ✅");
+      setShowSaveModal(false);
+    } catch (err) {
+      console.error("PDF Export/Upload Error:", err);
+      showToast("Failed to generate report ❌", "error");
+    } finally {
+      setIsExporting(false);
     }
+  };
 
-  }, [dashboard, mappings, fileId]);
- 
+  const fetchDashboard = async () => {
+    try {
+      const res = await api.get(`/api/dashboards/${dashboardId}`);
+      // This maps "ROI Dashboard" and "Marketing performance dashboard"
+      setDashboard(res.data);
+    } catch (err) {
+      setDashboard({ name: "ROI Dashboard", description: "Marketing performance dashboard" });
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await api.get(`/api/dashboard-data/${dashboardId}`, {
+        params: { fileId },
+      });
+      setCharts(res.data?.charts || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!dashboardId) return;
+    fetchDashboard();
+    fetchDashboardData();
+  }, [dashboardId, fileId]);
+
   if (loading) return <p className="p-6">Loading...</p>;
- 
+
   return (
-<div className="flex h-screen bg-[#020617] text-white">
-<Sidebar />
- 
-      <div className="ml-[220px] w-full p-6">
-<h1 className="text-xl font-bold mb-6">
+    <div className={`flex min-h-screen ${darkMode ? "bg-[#020617]" : "bg-gray-100"} transition-all duration-300 relative`}>
+      
+      {/* --- TOAST POPUP --- */}
+      {toast.show && (
+        <div className="fixed top-5 right-5 z-[100] animate-bounce-in">
+          <div className={`px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border ${
+            toast.type === "success" 
+            ? "bg-green-600 border-green-400 text-white" 
+            : "bg-red-600 border-red-400 text-white"
+          }`}>
+            <span>{toast.message}</span>
+            <button onClick={() => setToast({ ...toast, show: false })} className="text-white/70 hover:text-white">✕</button>
+          </div>
+        </div>
+      )}
 
-          📊 {dashboard?.name}
-</h1>
- 
-        <div className="grid grid-cols-2 gap-6">
+      <div className="w-full p-6 flex flex-col">
+        {/* IMPORTANT: This ID captures the content with the background color applied */}
+        <div id="dashboard-content" className={`${darkMode ? "bg-[#020617]" : "bg-gray-100"} p-2`}>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className={`text-2xl font-bold ${textMain}`}>{dashboard?.name || "ROI Dashboard"}</h1>
+              <p className={`text-sm ${textSub}`}>{dashboard?.description || "Marketing performance dashboard"}</p>
+            </div>
 
-          {dashboard?.widgets?.map((widget) => (
-<div
+            <div className="flex items-center gap-4">
+              {/* --- THEME TOGGLE --- */}
+              <div 
+                onClick={() => setDarkMode(!darkMode)}
+                className="relative w-[76px] h-[34px] bg-[#717171] rounded-xl cursor-pointer p-[3px] transition-all duration-300 flex items-center shadow-inner"
+              >
+                <div className="absolute inset-0 flex justify-between items-center px-2.5 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                </div>
+                <div 
+                  className={`relative w-[34px] h-[28px] bg-white rounded-lg shadow-md transform transition-transform duration-300 flex items-center justify-center ${
+                    darkMode ? "translate-x-0" : "translate-x-[36px]"
+                  }`}
+                >
+                  {darkMode ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#717171" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#717171" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                  )}
+                </div>
+              </div>
 
-              key={widget.id}
+              {/* <button
+                onClick={() => {
+                  setEditIndex(null);
+                  setIsOverlayOpen(true);
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
+              >
+                + Add Chart
+              </button> */}
 
-              className="bg-[#0f172a] p-4 rounded-xl"
->
-<h2 className="text-sm mb-3">{widget.name}</h2>
- 
-              <ChartRenderer
+              <button 
+                onClick={() => setShowSaveModal(true)} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-all"
+              >
+                Export PDF
+              </button>
+            </div>
+          </div>
 
-                type={widget.type}
+          <div className="grid grid-cols-4 gap-6">
+            <div className="col-span-4 flex gap-4 overflow-x-auto pb-2">
+              {charts
+                .filter((c) => c.type?.toLowerCase() === "kpi")
+                .flatMap((chart) =>
+                  Object.entries(chart.data || {}).map(([key, value], i) => (
+                    <div key={i} className={`${cardBg} p-4 rounded-xl shadow min-w-[150px] transition-all border border-transparent hover:border-gray-500`}>
+                      <p className={`text-xs ${textSub}`}>{key}</p>
+                      <p className={`text-lg font-bold ${textMain}`}>{value}</p>
+                    </div>
+                  ))
+                )}
+            </div>
 
-                data={widgetData[widget.id]}
+            {charts
+              .filter((c) => c.type?.toLowerCase() !== "kpi")
+              .map((chart, index) => (
+                <div
+                  key={index}
+                  className={`${cardBg} p-4 rounded-xl shadow transition-all cursor-pointer border border-transparent hover:border-blue-500`}
+                  onClick={() => {
+                    setEditIndex(index);
+                    setIsOverlayOpen(true);
+                  }}
+                >
+                  <h2 className={`text-sm mb-3 ${textMain}`}>{chart.name || chart.type}</h2>
+                  <ChartRenderer type={chart.type} data={chart.data} config={chart.config} darkMode={darkMode} />
+                </div>
+              ))}
+          </div>
+        </div>
 
-              />
-</div>
+        <ChartOverlay
+          open={isOverlayOpen}
+          chart={editIndex !== null ? charts[editIndex] : null}
+          dashboardId={dashboardId}
+          onClose={() => setIsOverlayOpen(false)}
+          onChartSaved={handleChartUpdated}
+        />
+      </div>
 
-          ))}
-</div>
-</div>
-</div>
-
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className={`${cardBg} p-6 rounded-xl shadow-2xl w-full max-w-sm border border-gray-700`}>
+            <h2 className={`text-xl font-semibold mb-2 ${textMain}`}>Export Report</h2>
+            <p className={`text-sm mb-4 ${textSub}`}>Enter a name for your PDF report.</p>
+            
+            <input 
+              value={fileName} 
+              onChange={(e) => setFileName(e.target.value)} 
+              placeholder="Report Name"
+              className={`w-full p-3 rounded-lg border mb-6 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                darkMode ? "border-gray-600 text-white" : "border-gray-300 text-black"
+              }`} 
+            />
+            
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setShowSaveModal(false)} 
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${buttonBg}`}
+                disabled={isExporting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleExportPDF} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg transition-all flex items-center gap-2"
+                disabled={isExporting}
+              >
+                {isExporting ? "Exporting..." : "Generate PDF"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
-
 }
- 
