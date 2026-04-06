@@ -17,11 +17,13 @@ import {
   FiSlash,
   FiCheckCircle,
   FiMinusCircle,
+  FiBarChart2
 } from "react-icons/fi";
 
 /* ✅ ADDED */
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import VisualizationModal from "../../components/VisualizationModal";
 
 export default function DataSchema() {
   const [columns, setColumns] = useState([]);
@@ -33,6 +35,8 @@ export default function DataSchema() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  const [selectedChart, setSelectedChart] = useState(null);
 
   const [form, setForm] = useState({
     columnKey: "",
@@ -142,13 +146,26 @@ export default function DataSchema() {
               </p>
             </div>
 
-            <button
-              onClick={handleAdd}
-              className="flex items-center justify-center gap-2 bg-[#18154F] text-white px-4 py-2 rounded-md text-sm w-full sm:w-auto hover:bg-[#23206b] transition"
-            >
-              <FiEdit3 size={16} />
-              Add Column
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleAdd}
+                className="flex items-center justify-center gap-2 bg-[#18154F] text-white px-4 py-2 rounded-md text-sm hover:bg-[#23206b] transition"
+              >
+                <FiEdit3 size={16} />
+                Add Column
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedChart(null);
+                  setOverlayOpen(true);
+                }}
+                className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 transition"
+              >
+                <FiBarChart2 size={16} />
+                Add Chart
+              </button>
+            </div>
           </div>
 
           {/* ✅ BLUR OVERLAY */}
@@ -255,28 +272,25 @@ export default function DataSchema() {
                       </div>
 
                       <div className="mt-2 flex justify-between items-center text-xs text-gray-600">
+                        <span className="bg-gray-100 px-2 py-1 rounded-md font-medium">
+                          {col.dataType}
+                        </span>
 
-                      <span className="bg-gray-100 px-2 py-1 rounded-md font-medium">
-                        {col.dataType}
-                      </span>
-
-                      <span className="flex items-center gap-1.5 font-medium">
-                        {col.required ? (
-                          <>
-                            <FiCheckCircle className="text-green-600" size={14} />
-                            <span className="text-green-600">Required</span>
-                          </>
-                        ) : (
-                          <>
-                            <FiMinusCircle className="text-gray-400" size={14} />
-                            <span className="text-gray-500">Optional</span>
-                          </>
-                        )}
-                      </span>
-
-</div>
+                        <span className="flex items-center gap-1.5 font-medium">
+                          {col.required ? (
+                            <>
+                              <FiCheckCircle className="text-green-600" size={14} />
+                              <span className="text-green-600">Required</span>
+                            </>
+                          ) : (
+                            <>
+                              <FiMinusCircle className="text-gray-400" size={14} />
+                              <span className="text-gray-500">Optional</span>
+                            </>
+                          )}
+                        </span>
+                      </div>
                     </div>
-
                   ))}
                 </div>
               </>
@@ -285,8 +299,14 @@ export default function DataSchema() {
 
           {/* Modal */}
           {isModalOpen && (
-            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center px-4 z-50">
-              <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
+            <div 
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center px-4 z-50"
+              onClick={() => setIsModalOpen(false)} // ✅ Closes when clicking background
+            >
+              <div 
+                className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg"
+                onClick={(e) => e.stopPropagation()} // ✅ Prevents close when clicking inside form
+              >
                 <h2 className="text-lg font-semibold mb-4">
                   {isEditMode ? "Edit Column" : "Add Column"}
                 </h2>
@@ -318,11 +338,13 @@ export default function DataSchema() {
                 >
                   <option>STRING</option>
                   <option>NUMBER</option>
-                  <option>DATETIME</option>
+                  <option>DATE</option>
                   <option>FLOAT</option>
+                  <option>BOOLEAN</option>
+                  <option>INT</option>
+                  <option>CHAR</option>
                 </select>
 
-                {/* ✅ Improved Required UI */}
                 <label className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg mb-5">
                   <span className="text-sm font-medium text-gray-700">
                     Required Field
@@ -339,17 +361,14 @@ export default function DataSchema() {
                 </label>
 
                 <div className="flex flex-col sm:flex-row justify-end gap-2">
-                  {/* ✅ Styled Cancel */}
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg w-full sm:w-auto 
-bg-red-600 text-white hover:bg-red-700 transition"
+                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg w-full sm:w-auto bg-red-600 text-white hover:bg-red-700 transition"
                   >
                     <FiSlash size={16} />
                     Cancel
                   </button>
 
-                  {/* Create / Update */}
                   <button
                     onClick={handleSubmit}
                     className="flex items-center justify-center gap-2 bg-[#18154F] text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-[#23206b] transition"
@@ -364,7 +383,12 @@ bg-red-600 text-white hover:bg-red-700 transition"
         </div>
       </div>
 
-      {/* Toast */}
+      <VisualizationModal
+        isOpen={overlayOpen}
+        onClose={() => setOverlayOpen(false)}
+        dashboardId={id}
+      />
+
       <ToastContainer
         position="top-right"
         autoClose={2000}

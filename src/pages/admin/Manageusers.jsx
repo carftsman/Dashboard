@@ -13,17 +13,8 @@ import { MdDeleteOutline } from "react-icons/md";
 import api from "../../api/apiConfig";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../../components/AdminSidebar";
-import {
-  FiChevronDown,
-  FiSlash,
-  FiTrash2,
-  FiXCircle,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiInfo,
-  FiX,
-} from "react-icons/fi";
-
+import {FiChevronDown,FiSlash,FiTrash2,FiXCircle,FiCheckCircle,FiAlertCircle,FiInfo,FiX,} from "react-icons/fi";
+ 
 const ManageUsers = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -32,7 +23,7 @@ const ManageUsers = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [deleteUserId, setDeleteUserId] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-
+ 
   const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState({
     name: "",
@@ -41,19 +32,19 @@ const ManageUsers = () => {
     password: "",
   });
   const [toasts, setToasts] = useState([]);
-
+ 
   const showAlert = (type, message) => {
     const id = Date.now();
-
+ 
     const newToast = { id, type, message };
-
+ 
     setToasts((prev) => [...prev, newToast]);
-
+ 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3000);
   };
-
+ 
   //  Fetch Users
   const fetchUsers = async () => {
     try {
@@ -63,23 +54,23 @@ const ManageUsers = () => {
       console.error(err);
     }
   };
-
+ 
   useEffect(() => {
     fetchUsers();
   }, []);
-
+ 
   //  Handle Input
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
+ 
   //  Open Create
   const openCreate = () => {
     setEditingUser(null);
     setForm({ name: "", email: "", role: "", password: "" });
     setShowModal(true);
   };
-
+ 
   //  Open Edit
   const openEdit = (user) => {
     setEditingUser(user);
@@ -93,24 +84,24 @@ const ManageUsers = () => {
   };
   const validateForm = () => {
     let newErrors = {};
-
+ 
     // Name validation (only characters)
     if (!/^[A-Za-z ]+$/.test(form.name)) {
       newErrors.name = "Name should contain only letters";
     }
-
+ 
     // Email validation (@dhatvibs.com only)
     if (!/^[a-zA-Z0-9._%+-]+@dhatvibs\.com$/.test(form.email)) {
       newErrors.email = "Only @dhatvibs.com emails allowed";
     }
-
+ 
     // Password validation (only for create)
     if (!editingUser) {
       if (!/^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*\d).{8,12}$/.test(form.password)) {
         newErrors.password = "Enter Valid Password";
       }
     }
-
+ 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -129,7 +120,7 @@ const ManageUsers = () => {
             ...form,
             parentId: null,
           };
-
+ 
       if (editingUser) {
         await api.put(`/api/users/${editingUser.id}`, payload);
         fetchUsers();
@@ -137,40 +128,40 @@ const ManageUsers = () => {
       } else {
         const res = await api.post("/api/users", payload);
         setUsers((prev) => [...prev, res.data.user]);
-        showAlert("error", "User created successfully");
+        showAlert("success", "User created successfully");
       }
-
+ 
       setShowModal(false);
       setForm({ name: "", email: "", role: "", password: "" });
     } catch (err) {
       showAlert("error", "Something went wrong. Please try again.");
     }
   };
-
+ 
   //  Delete
   const handleDelete = async () => {
     try {
       await api.delete(`/api/users/${deleteUserId}`);
       fetchUsers();
       setDeleteUserId(null);
-      showAlert("error", "User deleted successfully");
+      showAlert("success", "User marked as inactive");
     } catch (err) {
       console.error(err);
     }
   };
-
+ 
   //  Role Style
   const ROLE_STYLES = {
     SUBUSER: "bg-blue-100 text-blue-600",
     MANAGER: "bg-indigo-100 text-indigo-600",
     ANALYST: "bg-purple-100 text-purple-600",
   };
-
+ 
   const roleStyle = (role) => ROLE_STYLES[role] || "bg-gray-100 text-gray-600";
-
+ 
   const filteredUsers = users.filter((user) => {
     const search = searchTerm.toLowerCase();
-
+ 
     return (
       user.name.toLowerCase().includes(search) ||
       user.email.toLowerCase().includes(search) ||
@@ -198,13 +189,13 @@ const ManageUsers = () => {
             <FiUser />
           </div>
         </div>
-
+ 
         {/* Title */}
         <div className="px-6 py-5 flex justify-between">
           <h1 className="text-2xl font-semibold text-[#18154F]">
             List Of Users
           </h1>
-
+ 
           <div className="relative w-80">
             <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
             <input
@@ -215,7 +206,7 @@ const ManageUsers = () => {
             />
           </div>
         </div>
-
+ 
         {/* Table */}
         <div className="px-6">
           <table className="w-full bg-white rounded-lg border-collapse">
@@ -224,49 +215,68 @@ const ManageUsers = () => {
                 <th className="p-3 text-center">SNO</th>
                 <th className="p-3 text-center">NAME</th>
                 <th className="p-3 text-center">ROLE</th>
-
+ 
                 <th className="p-3 text-center">EDIT</th>
                 <th className="p-3 text-center">DELETE</th>
               </tr>
             </thead>
-
+ 
             <tbody>
               {filteredUsers.map((user, i) => (
-                <tr key={user.id} className="border-b border-gray-200">
+                <tr
+  key={user.id}
+  className={`border-b border-gray-200 ${
+    user.status === "INACTIVE" ? "bg-gray-100 opacity-60" : ""
+  }`}
+>
                   <td className="p-3 text-center">{i + 1}</td>
-
+ 
                   <td className="p-3">
                     <p className="font-medium">{user.name}</p>
                     <p className="text-sm text-gray-500">{user.email}</p>
                   </td>
-
+ 
                   <td className="p-3 text-center">
                     <span
-                      className={`px-3 py-1 rounded-full ${roleStyle(user.role)}`}
-                    >
-                      {user.role}
-                    </span>
+  className={`px-3 py-1 rounded-full ${
+    user.status === "INACTIVE"
+      ? "bg-gray-200 text-gray-400"
+      : roleStyle(user.role)
+  }`}
+>
+  {user.role}
+</span>
                   </td>
                   <td className="p-3 text-center">
                     <div className="flex justify-center items-center">
-                      <FiEdit
-                        onClick={() => user.role !== "ADMIN" && openEdit(user)}
-                        className={`text-lg ${
-                          user.role === "ADMIN"
-                            ? "text-gray-300 cursor-not-allowed"
-                            : "text-blue-500 cursor-pointer"
-                        }`}
-                      />
+                     <FiEdit
+  onClick={() =>
+    user.role !== "ADMIN" &&
+    user.status !== "INACTIVE" &&
+    openEdit(user)
+  }
+  className={`text-lg ${
+    user.role === "ADMIN" || user.status === "INACTIVE"
+      ? "text-gray-300 cursor-not-allowed"
+      : "text-blue-500 cursor-pointer"
+  }`}
+/>
                     </div>
                   </td>
-
+ 
                   {/* Delete */}
                   <td className="p-3 text-center">
                     <div className="flex justify-center items-center">
                       <MdDeleteOutline
-                        onClick={() => setDeleteUserId(user.id)}
-                        className="cursor-pointer text-red-500 text-lg"
-                      />
+  onClick={() =>
+    user.status !== "INACTIVE" && setDeleteUserId(user.id)
+  }
+  className={`text-lg ${
+    user.status === "INACTIVE"
+      ? "text-gray-300 cursor-not-allowed"
+      : "text-red-500 cursor-pointer"
+  }`}
+/>
                     </div>
                   </td>
                 </tr>
@@ -274,7 +284,7 @@ const ManageUsers = () => {
             </tbody>
           </table>
         </div>
-
+ 
         <div className="fixed top-5 right-5 z-50 flex flex-col gap-3">
   {toasts.map((toast) => (
     <div
@@ -294,7 +304,7 @@ const ManageUsers = () => {
             : "bg-blue-500"
         }`}
       />
-
+ 
       {/* ICON */}
       <div className="mt-0.5">
         {toast.type === "success" && (
@@ -307,20 +317,20 @@ const ManageUsers = () => {
           <FiInfo className="text-blue-500" size={20} />
         )}
       </div>
-
+ 
       {/* TEXT */}
       <div className="flex-1">
         <p className="text-sm font-semibold text-gray-800">
           {toast.type === "success" && "Success"}
-          {toast.type === "error" && "Action Completed"}
+          {toast.type === "error" && "Error"}
           {toast.type === "info" && "Info"}
         </p>
-
+ 
         <p className="text-sm text-gray-600 mt-0.5">
           {toast.message}
         </p>
       </div>
-
+ 
       {/* CLOSE */}
       <FiX
         size={16}
@@ -332,21 +342,11 @@ const ManageUsers = () => {
     </div>
   ))}
 </div>
-
+ 
 {toasts.length > 0 && (
   <div className="fixed inset-0 z-40 backdrop-blur-[2px] bg-black/10"></div>
 )}
-
-{/* BLUR BACKGROUND */}
-{toasts.length > 0 && (
-  <div className="fixed inset-0 z-40 backdrop-blur-[2px] bg-black/10"></div>
-)}
-
-{/* TOAST */}
-<div className="fixed top-5 right-5 z-50 flex flex-col gap-3">
-  ...
-</div>
-
+ 
         {/* Add/Edit Modal */}
         {showModal && (
           <div
@@ -363,7 +363,7 @@ const ManageUsers = () => {
                   {editingUser ? "Edit User" : "Add New User"}
                 </h2>
               </div>
-
+ 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Name */}
                 <div>
@@ -384,23 +384,23 @@ const ManageUsers = () => {
                     <p className="text-red-500 text-xs mt-1">{errors.name}</p>
                   )}
                 </div>
-
+ 
                 {/* Email */}
                 <div>
                   <label className="text-sm font-semibold text-gray-500">
                     EMAIL ADDRESS
                   </label>
-
+ 
                   <div className="relative mt-2">
                     <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-
+ 
                     <input
                       name="email"
                       value={form.email}
                       onChange={handleChange}
                       placeholder="Enter Email"
                       readOnly={!!editingUser}
-                      className={`w-full pl-10 py-3 border rounded-xl 
+                      className={`w-full pl-10 py-3 border rounded-xl
         ${editingUser ? "bg-gray-200 cursor-not-allowed" : "bg-gray-50"}`}
                     />
                   </div>
@@ -408,13 +408,13 @@ const ManageUsers = () => {
                     <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                   )}
                 </div>
-
+ 
                 {/* Role */}
                 <div>
                   <label className="text-sm font-semibold text-gray-500">
                     ROLE
                   </label>
-
+ 
                   <div className="relative mt-2">
                     <select
                       name="role"
@@ -429,22 +429,22 @@ const ManageUsers = () => {
                       <option value="MANAGER">MANAGER</option>
                       <option value="ANALYST">ANALYST</option>
                     </select>
-
+ 
                     {/* Custom Dropdown Icon */}
                     <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                   </div>
                 </div>
-
+ 
                 {/* Password  */}
                 {!editingUser && (
                   <div>
                     <label className="text-sm font-semibold text-gray-500">
                       PASSWORD
                     </label>
-
+ 
                     <div className="relative mt-2">
                       <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-
+ 
                       <input
                         type={showPassword ? "text" : "password"}
                         name="password"
@@ -453,7 +453,7 @@ const ManageUsers = () => {
                         placeholder="Enter Password"
                         className="w-full pl-10 pr-10 py-3 border rounded-xl bg-gray-50"
                       />
-
+ 
                       {/* Eye Icon */}
                       <span
                         onClick={() => setShowPassword(!showPassword)}
@@ -470,7 +470,7 @@ const ManageUsers = () => {
                   </div>
                 )}
               </div>
-
+ 
               <div className="mt-6 space-y-4">
                 {/* Primary Button */}
                 <button
@@ -496,7 +496,7 @@ const ManageUsers = () => {
                     </>
                   )}
                 </button>
-
+ 
                 {/* Secondary Button */}
                 <button
                   onClick={() => setShowModal(false)}
@@ -516,7 +516,7 @@ const ManageUsers = () => {
             </div>
           </div>
         )}
-
+ 
         {/* Delete Modal */}
         {deleteUserId && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center">
@@ -524,11 +524,11 @@ const ManageUsers = () => {
               <h2 className="text-lg  text-center font-semibold text-[#18154F] mb-2">
                 Confirm Delete
               </h2>
-
+ 
               <p className="text-gray-600 mb-5 text-center">
                 Are you sure you want to delete this user?
               </p>
-
+ 
               <div className="flex justify-center items-center gap-4 mt-4">
                 <button
                   onClick={() => setDeleteUserId(null)}
@@ -537,7 +537,7 @@ const ManageUsers = () => {
                   <FiSlash className="text-[16px]" />
                   Cancel
                 </button>
-
+ 
                 <button
                   onClick={handleDelete}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all duration-200"
@@ -553,5 +553,7 @@ const ManageUsers = () => {
     </div>
   );
 };
-
+ 
 export default ManageUsers;
+ 
+ 

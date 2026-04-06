@@ -10,7 +10,7 @@ export default function Reports() {
   const navigate = useNavigate();
   const { dashboardName, dashboardId } = useParams();
   console.log("dashboardId",dashboardId);
-
+  
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
 
@@ -85,15 +85,17 @@ export default function Reports() {
           {/* RIGHT */}
           <div className="flex items-center justify-between lg:justify-end gap-4">
 
-            <button
-              className="bg-[#18154F] hover:bg-[#23206b] text-white px-5 py-2 rounded-lg transition"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate("/upload-data", { state: { dashboardId: dashboardId } });
-              }}
-            >
-              Upload Data
-            </button>
+            {role !== "ADMIN" && (
+  <button
+    className="bg-[#18154F] hover:bg-[#23206b] text-white px-5 py-2 rounded-lg transition"
+    onClick={(e) => {
+      e.stopPropagation();
+      navigate("/upload-data", { state: { dashboardId: dashboardId } });
+    }}
+  >
+    Upload Data
+  </button>
+)}
 
             <div className="flex items-center gap-3">
               <div

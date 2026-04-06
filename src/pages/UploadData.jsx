@@ -1,8 +1,7 @@
-import React, { useState, useRef, useCallback, useContext } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react"; // Added useEffect
 import { useLocation, useNavigate } from "react-router-dom";
  
 import { uploadSalesFile } from "../services/uploadService";
-import { AuthContext } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
  
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -57,19 +56,22 @@ function UploadIcon() {
 export default function UploadData() {
   const location = useLocation();
   const navigate = useNavigate();
-  console.log("location.state?.dashboardId",location.state?.dashboardId);
  
- 
-  // Read dashboardId: try navigation state first, then context user, then localStorage fallback
-  const storedUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
-    } catch {
-      return {};
+  // ─── UPDATED DASHBOARD ID LOGIC ───
+  // We initialize the ID from state or localStorage
+  const [dashboardId, setDashboardId] = useState(
+    location.state?.dashboardId || localStorage.getItem("lastDashboardId")
+  );
+
+  // If a new ID comes in via navigation state, we update our state and save to localStorage
+  useEffect(() => {
+    if (location.state?.dashboardId) {
+      setDashboardId(location.state.dashboardId);
+      localStorage.setItem("lastDashboardId", location.state.dashboardId);
     }
-  })();
- 
-  const dashboardId =location.state?.dashboardId;
+  }, [location.state?.dashboardId]);
+  // ──────────────────────────────────
+
   const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
@@ -129,7 +131,6 @@ export default function UploadData() {
     (e) => {
       const selected = e.target.files?.[0];
       if (selected) validateAndSet(selected);
-      // Reset so same file can be re-selected
       e.target.value = "";
     },
     [validateAndSet]
@@ -163,14 +164,12 @@ export default function UploadData() {
     setSuccess("");
     setUploadProgress(0);
  
-    // Fake progress tick while waiting for response
     const progressInterval = setInterval(() => {
       setUploadProgress((prev) => (prev < 85 ? prev + 5 : prev));
     }, 200);
  
     try {
-      const response=await uploadSalesFile(dashboardId, file);
-      console.log("uploaded file",response.fileId);
+      const response = await uploadSalesFile(dashboardId, file);
       clearInterval(progressInterval);
       setUploadProgress(100);
       setSuccess(
@@ -178,10 +177,10 @@ export default function UploadData() {
       );
       setFile(null);
  
-      // Navigate to Column Mapping with the fileId
       setTimeout(() => {
-        navigate("/column-mapping", { state: { fileId: response.fileId } });
-      }, 1500); // Give user a moment to see success message
+        // Use the local dashboardId variable for navigation
+        navigate("/column-mapping", { state: { dashboardId: dashboardId, fileId: response.fileId } });
+      }, 1500);
  
     } catch (err) {
       clearInterval(progressInterval);
@@ -199,14 +198,10 @@ export default function UploadData() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex min-h-screen bg-gray-100 ">
-      {/* Sidebar — untouched */}
       <Sidebar/>
  
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 ml-[220px]">
-        {/* Page Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-10">
-          {/* Title */}
           <div className="mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Upload data
@@ -218,7 +213,6 @@ export default function UploadData() {
           </div>
  
           <div className="max-w-2xl space-y-5">
-            {/* ── Drop Zone ── */}
             <div
               role="button"
               tabIndex={0}
@@ -242,7 +236,6 @@ export default function UploadData() {
               <UploadIcon />
  
               {file ? (
-                /* ── Selected File Preview ── */
                 <div
                   className="flex items-center justify-between gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mt-2 mx-auto max-w-sm"
                   onClick={(e) => e.stopPropagation()}
@@ -308,7 +301,6 @@ export default function UploadData() {
                 </>
               )}
  
-              {/* Hidden input */}
               <input
                 ref={inputRef}
                 type="file"
@@ -319,7 +311,6 @@ export default function UploadData() {
               />
             </div>
  
-            {/* ── Progress Bar ── */}
             {uploading && (
               <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                 <div
@@ -329,7 +320,6 @@ export default function UploadData() {
               </div>
             )}
  
-            {/* ── Error Message ── */}
             {error && (
               <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
                 <svg
@@ -349,7 +339,6 @@ export default function UploadData() {
               </div>
             )}
  
-            {/* ── Success Message ── */}
             {success && (
               <div className="flex items-start gap-2 bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 text-sm">
                 <svg
@@ -369,7 +358,6 @@ export default function UploadData() {
               </div>
             )}
  
-            {/* ── Upload Tip ── */}
             {!success && (
               <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-4">
                 <svg
@@ -398,7 +386,6 @@ export default function UploadData() {
               </div>
             )}
  
-            {/* ── Upload Button ── */}
             <button
               type="button"
               onClick={handleUpload}

@@ -1,342 +1,300 @@
-import React from "react";
-import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  BarChart, Bar, CartesianGrid, Cell
-} from "recharts";
-import Sidebar from "../components/Sidebar.jsx"; 
-import ChartOverLay from "../components/ChartOverLay.jsx";
-import { useState } from "react";
-import {  useEffect } from "react";
-
-
-/* ---------------- DATA ---------------- */
-
-const trendData = [
-  { name: "Jan", value: 20000 },
-  { name: "Feb", value: 80000 },
-  { name: "Mar", value: 150000 },
-  { name: "Apr", value: 120000 },
-  { name: "May", value: 200000 },
-  { name: "Jun", value: 270000 },
-];
-
-const platformData = [
-  { name: "Facebook", value: 420 },
-  { name: "Google", value: 350 },
-  { name: "Instagram", value: 280 },
-  { name: "Other", value: 150 },
-];
-
-const revenueData = [
-  { name: "Jan", revenue: 540, spend: 500 },
-  { name: "Feb", revenue: 520, spend: 480 },
-  { name: "Mar", revenue: 530, spend: 470 },
-  { name: "Apr", revenue: 510, spend: 460 },
-  { name: "May", revenue: 520, spend: 480 },
-  { name: "Jun", revenue: 530, spend: 490 },
-];
-
-const conversionData = [
-  { name: "A", value: 90 },
-  { name: "B", value: 75 },
-  { name: "C", value: 60 },
-  { name: "D", value: 50 },
-  { name: "E", value: 40 },
-];
-
-/* ---------------- UI CARD ---------------- */
-
-const Card = ({ children }) => (
-  <div className="rounded-xl border border-white/10 bg-gradient-to-br from-[#0f172a] to-[#020617] shadow-[0_0_30px_rgba(0,0,0,0.6)] p-3">
-    {children}
-  </div>
-);
-
-/* ---------------- TOOLTIP ---------------- */
-
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length > 0) {
-    return (
-      <div className="bg-[#020617] border border-white/20 px-2 py-1 text-xs rounded text-white">
-        {payload[0]?.value ?? "No data"}
-      </div>
-    );
-  }
-  return null;
-};
-
-/* ---------------- MAIN ---------------- */
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import ChartRenderer from "../components/ChartRenderer";
+import ChartOverlay from "../components/ChartOverLay";
+import api from "../api/apiConfig";
+// --- NEW IMPORTS FOR PDF GENERATION ---
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export default function Dashboard() {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [openOverlay, setOpenOverlay] = useState(false);
-  const [chartConfig, setChartConfig] = useState(null);
+  const [darkMode, setDarkMode] = useState(true);
+  const fileId = location.state?.fileId;
+  const dashboardId = location.state?.dashboardId;
 
-  
-  const [apiData, setApiData] = useState(null);
-  const [loading, setLoading] = useState(false);
- 
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
 
-const fetchChartData = async () => {
-  setLoading(true);
-  try {
-    
-    const token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("accessToken") ||
-      localStorage.getItem("authToken") ||
-      localStorage.getItem("jwt");
+  // --- Notification State ---
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
-    console.log("TOKEN USED:", token);
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
+  };
 
-    if (!token) {
-      alert("No token found. Please login.");
-      setLoading(false);
-      return;
-    }
+  const cardBg = darkMode ? "bg-[#0f172a]" : "bg-white";
+  const textMain = darkMode ? "text-white" : "text-black";
+  const textSub = darkMode ? "text-gray-400" : "text-gray-600";
+  const buttonBg = darkMode
+    ? "bg-gray-700 hover:bg-gray-600 text-white"
+    : "bg-gray-200 hover:bg-gray-300 text-black";
 
-    const response = await fetch("https://dashboard-backend-cyrd.onrender.com/api/upload/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+  const [dashboard, setDashboard] = useState(null);
+  const [charts, setCharts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [fileName, setFileName] = useState("Dashboard_Report");
+  const [isExporting, setIsExporting] = useState(false);
 
-        // ✅ TRY BEARER FIRST
-        "Authorization": `Bearer ${token}`,
-
-        // ❗ If still 401 → comment above & use below:
-        // "Authorization": token,
-      },
-      body: JSON.stringify({
-        dashboardId: 1,
-        fileId: "uuid-file-id",
-        chartType: "BAR",
-        xAxis: "campaign_name",
-        yAxis: "revenue",
-        filters: {
-          platform: "Google"
-        }
-      })
-    });
-
-    // ✅ HANDLE 401 CLEARLY
-    if (response.status === 401) {
-      console.error("Unauthorized - Invalid or expired token");
-      alert("Session expired. Please login again.");
-      setLoading(false);
-      return;
-    }
-
-    const result = await response.json();
-    console.log("API RESPONSE:", result);
-
-    setApiData(result?.data || []);
-
-  } catch (error) {
-    console.error("API ERROR:", error);
-  } finally {
-    setLoading(false);
-  }
-};
-const fetchChartConfig = async () => {
-  try {
-    const token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("accessToken") ||
-      localStorage.getItem("authToken") ||
-      localStorage.getItem("jwt");
-
-    console.log("CONFIG TOKEN:", token);
-
-    const response = await fetch("https://dashboard-backend-cyrd.onrender.com/api/chart-types/config", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+  const handleChartUpdated = (updatedChart) => {
+    setCharts((prev) => {
+      const exists = prev.find((c) => c.id === updatedChart.id);
+      if (exists) {
+        return prev.map((c) =>
+          c.id === updatedChart.id ? { ...c, ...updatedChart } : c
+        );
       }
+      return [...prev, updatedChart];
     });
+    fetchDashboardData();
+    setIsOverlayOpen(false);
+    showToast("Chart updated successfully!");
+  };
 
-    if (response.status === 401) {
-      console.error("Unauthorized config API");
-      return;
+  // --- UPDATED EXPORT LOGIC ---
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+
+      // 1. Capture the dashboard element
+      const element = document.getElementById("dashboard-content");
+      
+      // 2. Setup html2canvas with explicit background color to match theme
+      const canvas = await html2canvas(element, { 
+        scale: 2,
+        useCORS: true,
+        // This ensures Dark Mode stays Dark in the PDF
+        backgroundColor: darkMode ? "#020617" : "#f3f4f6", 
+        logging: false
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+
+      // 3. Setup jsPDF (Portrait, Millimeters, A4)
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate dimensions to fit image to A4 width
+      const imgProps = pdf.getImageProperties(imgData);
+      const ratio = imgProps.width / imgProps.height;
+      const finalHeight = pdfWidth / ratio;
+
+      // Add image to PDF
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, finalHeight);
+
+      // 4. Generate Blob
+      const pdfBlob = pdf.output("blob");
+
+      // --- TRIGGER BROWSER DOWNLOAD ---
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${fileName}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // 5. Create FormData and Upload to Backend
+      const formData = new FormData();
+      formData.append("file", pdfBlob, `${fileName}.pdf`);
+      formData.append("name", fileName);
+      formData.append("dashboardId", dashboardId);
+      formData.append("fileId", fileId);
+
+      await api.post("/api/reports/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      showToast("Report generated and uploaded successfully! ✅");
+      setShowSaveModal(false);
+    } catch (err) {
+      console.error("PDF Export/Upload Error:", err);
+      showToast("Failed to generate report ❌", "error");
+    } finally {
+      setIsExporting(false);
     }
+  };
 
-    const result = await response.json();
-    console.log("CHART CONFIG:", result);
+  const fetchDashboard = async () => {
+    try {
+      const res = await api.get(`/api/dashboards/${dashboardId}`);
+      // This maps "ROI Dashboard" and "Marketing performance dashboard"
+      setDashboard(res.data);
+    } catch (err) {
+      setDashboard({ name: "ROI Dashboard", description: "Marketing performance dashboard" });
+    }
+  };
 
-    setChartConfig(result);
+  const fetchDashboardData = async () => {
+    try {
+      const res = await api.get(`/api/dashboard-data/${dashboardId}`, {
+        params: { fileId },
+      });
+      setCharts(res.data?.charts || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  } catch (error) {
-    console.error("CONFIG API ERROR:", error);
-  }
-};
-useEffect(() => {
-  fetchChartConfig();
-}, []);
+  useEffect(() => {
+    if (!dashboardId) return;
+    fetchDashboard();
+    fetchDashboardData();
+  }, [dashboardId, fileId]);
+
+  if (loading) return <p className="p-6">Loading...</p>;
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-[#020617] via-[#0b1120] to-[#020617] text-white p-3 overflow-hidden flex flex-col">
+    <div className={`flex min-h-screen ${darkMode ? "bg-[#020617]" : "bg-gray-100"} transition-all duration-300 relative`}>
       
-      <Sidebar />
-
-      <div className="ml-[220px] w-[calc(100%-220px)] h-full p-3 text-white flex flex-col overflow-hidden">
-
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-lg font-semibold">Marketing ROI Dashboard</h1>
-
-        <div className="flex items-center gap-2">
-
-          <button 
-            onClick={fetchChartData}
-            className="text-xs px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/10"
-          >
-            {loading ? "Loading..." : "Upload Data"}
-          </button>
-
-          <button className="text-xs px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/10">
-            Export Data
-          </button>
-
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold">
-            U
+      {/* --- TOAST POPUP --- */}
+      {toast.show && (
+        <div className="fixed top-5 right-5 z-[100] animate-bounce-in">
+          <div className={`px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border ${
+            toast.type === "success" 
+            ? "bg-green-600 border-green-400 text-white" 
+            : "bg-red-600 border-red-400 text-white"
+          }`}>
+            <span>{toast.message}</span>
+            <button onClick={() => setToast({ ...toast, show: false })} className="text-white/70 hover:text-white">✕</button>
           </div>
-
         </div>
-      </div>
+      )}
 
-      {/* KPI */}
-      <div className="flex gap-1.5 mb-2 flex-wrap">
-        {[
-          { label: "Total Impressions", value: "1.5M" },
-          { label: "Total Clicks", value: "230K" },
-          { label: "Total Orders", value: "8,450" },
-          { label: "Total Revenue", value: "$125,800" },
-          { label: "Total Ad Spends", value: "$135,800" },
-          { label: "ROAS", value: "4.12" }
-        ].map((item, i) => (
-          <div key={i} className="px-2 py-1.5 rounded-lg border border-white/10 bg-gradient-to-br from-[#0f172a] to-[#020617] w-fit min-w-[90px]">
-            <p className="text-[9px] text-gray-400">{item.label}</p>
-            <h2 className="text-sm font-semibold mt-1">{item.value}</h2>
+      <div className="w-full p-6 flex flex-col">
+        {/* IMPORTANT: This ID captures the content with the background color applied */}
+        <div id="dashboard-content" className={`${darkMode ? "bg-[#020617]" : "bg-gray-100"} p-2`}>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className={`text-2xl font-bold ${textMain}`}>{dashboard?.name || "ROI Dashboard"}</h1>
+              <p className={`text-sm ${textSub}`}>{dashboard?.description || "Marketing performance dashboard"}</p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {/* --- THEME TOGGLE --- */}
+              <div 
+                onClick={() => setDarkMode(!darkMode)}
+                className="relative w-[76px] h-[34px] bg-[#717171] rounded-xl cursor-pointer p-[3px] transition-all duration-300 flex items-center shadow-inner"
+              >
+                <div className="absolute inset-0 flex justify-between items-center px-2.5 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                </div>
+                <div 
+                  className={`relative w-[34px] h-[28px] bg-white rounded-lg shadow-md transform transition-transform duration-300 flex items-center justify-center ${
+                    darkMode ? "translate-x-0" : "translate-x-[36px]"
+                  }`}
+                >
+                  {darkMode ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#717171" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#717171" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                  )}
+                </div>
+              </div>
+
+              {/* <button
+                onClick={() => {
+                  setEditIndex(null);
+                  setIsOverlayOpen(true);
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
+              >
+                + Add Chart
+              </button> */}
+
+              <button 
+                onClick={() => setShowSaveModal(true)} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-all"
+              >
+                Export PDF
+              </button>
+            </div>
           </div>
-        ))}
+
+          <div className="grid grid-cols-4 gap-6">
+            <div className="col-span-4 flex gap-4 overflow-x-auto pb-2">
+              {charts
+                .filter((c) => c.type?.toLowerCase() === "kpi")
+                .flatMap((chart) =>
+                  Object.entries(chart.data || {}).map(([key, value], i) => (
+                    <div key={i} className={`${cardBg} p-4 rounded-xl shadow min-w-[150px] transition-all border border-transparent hover:border-gray-500`}>
+                      <p className={`text-xs ${textSub}`}>{key}</p>
+                      <p className={`text-lg font-bold ${textMain}`}>{value}</p>
+                    </div>
+                  ))
+                )}
+            </div>
+
+            {charts
+              .filter((c) => c.type?.toLowerCase() !== "kpi")
+              .map((chart, index) => (
+                <div
+                  key={index}
+                  className={`${cardBg} p-4 rounded-xl shadow transition-all cursor-pointer border border-transparent hover:border-blue-500`}
+                  onClick={() => {
+                    setEditIndex(index);
+                    setIsOverlayOpen(true);
+                  }}
+                >
+                  <h2 className={`text-sm mb-3 ${textMain}`}>{chart.name || chart.type}</h2>
+                  <ChartRenderer type={chart.type} data={chart.data} config={chart.config} darkMode={darkMode} />
+                </div>
+              ))}
+          </div>
+        </div>
+
+        <ChartOverlay
+          open={isOverlayOpen}
+          chart={editIndex !== null ? charts[editIndex] : null}
+          dashboardId={dashboardId}
+          onClose={() => setIsOverlayOpen(false)}
+          onChartSaved={handleChartUpdated}
+        />
       </div>
 
-      {/* ROW 1 */}
-      <div className="grid grid-cols-2 gap-2 flex-1 mb-2">
-
-        {/* LINE */}
-        <Card>
-          <p className="text-xs text-gray-400 mb-1">Impressions Trend</p>
-          <ResponsiveContainer width="100%" height="92%">
-            <LineChart data={trendData} onClick={() => setOpenOverlay(true)}>
-              <CartesianGrid stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3"/>
-              <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <Tooltip content={<CustomTooltip/>}/>
-              <Line type="monotone" dataKey="value" stroke="#ffffff" strokeWidth={2.5}/>
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-
-        {/* PLATFORM */}
-        <Card>
-          <p className="text-xs text-gray-400 mb-1">Platform Performance</p>
-          <ResponsiveContainer width="100%" height="92%">
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className={`${cardBg} p-6 rounded-xl shadow-2xl w-full max-w-sm border border-gray-700`}>
+            <h2 className={`text-xl font-semibold mb-2 ${textMain}`}>Export Report</h2>
+            <p className={`text-sm mb-4 ${textSub}`}>Enter a name for your PDF report.</p>
             
-            <BarChart 
-              data={(apiData && apiData.length > 0) ? apiData : platformData} 
-              onClick={() => setOpenOverlay(true)}
-            >
-              <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <Tooltip content={<CustomTooltip/>}/>
-              <Bar dataKey="value" radius={[5,5,0,0]} fill="#ffffff">
-                {((apiData && apiData.length > 0) ? apiData : platformData).map((_, i)=>(
-                  <Cell key={i} fill="#ffffff" />
-                ))}
-              </Bar>
-            </BarChart>
-
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
-      {/* ROW 2 */}
-      <div className="grid grid-cols-2 gap-2 flex-1 mb-2">
-
-        {/* REVENUE */}
-        <Card>
-          <p className="text-xs text-gray-400 mb-1">Revenue vs Ad Spend</p>
-          <ResponsiveContainer width="100%" height="92%">
-            <BarChart data={revenueData} onClick={() => setOpenOverlay(true)}>
-              <CartesianGrid stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3"/>
-              <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <Tooltip content={<CustomTooltip/>}/>
-              <Bar dataKey="revenue" fill="#ffffff" radius={[4,4,0,0]} />
-              <Bar dataKey="spend" fill="rgba(255,255,255,0.5)" radius={[4,4,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        {/* CONVERSION */}
-        <Card>
-          <p className="text-xs text-gray-400 mb-1">Conversion Rate</p>
-          <ResponsiveContainer width="100%" height="92%">
-            <BarChart data={conversionData} onClick={() => setOpenOverlay(true)}>
-              <XAxis dataKey="name" stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <YAxis stroke="#e2e8f0" tick={{fontSize:10}}/>
-              <Tooltip content={<CustomTooltip/>}/>
-              <Bar dataKey="value" fill="#ffffff" radius={[4,4,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
-      {/* FUNNEL */}
-      <div className="h-[200px]">
-        <Card>
-          <p className="text-xs text-gray-400 mb-3">Campaign Funnel</p>
-
-          <div className="relative w-full flex flex-col items-center gap-2 text-xs">
-
-            <div className="relative w-[95%] h-[32px] flex items-center justify-between px-4 text-white font-medium
-              bg-gradient-to-r from-white/90 to-white/60
-              clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
-              <span>1.5M Impressions</span>
-              <span>230K Clicks</span>
-              <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-black">15%</div>
+            <input 
+              value={fileName} 
+              onChange={(e) => setFileName(e.target.value)} 
+              placeholder="Report Name"
+              className={`w-full p-3 rounded-lg border mb-6 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                darkMode ? "border-gray-600 text-white" : "border-gray-300 text-black"
+              }`} 
+            />
+            
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setShowSaveModal(false)} 
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${buttonBg}`}
+                disabled={isExporting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleExportPDF} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg transition-all flex items-center gap-2"
+                disabled={isExporting}
+              >
+                {isExporting ? "Exporting..." : "Generate PDF"}
+              </button>
             </div>
-
-            <div className="relative w-[80%] h-[32px] flex items-center justify-between px-4 text-white font-medium
-              bg-gradient-to-r from-white/80 to-white/50
-              clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
-              <span></span>
-              <span>45K Leads</span>
-              <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-black">19%</div>
-            </div>
-
-            <div className="relative w-[65%] h-[32px] flex items-center justify-between px-4 text-white font-medium
-              bg-gradient-to-r from-white/70 to-white/40
-              clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
-              <span></span>
-              <span>19% Lead Conversion</span>
-              <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-black">18%</div>
-            </div>
-
-            <div className="relative w-[50%] h-[32px] flex items-center justify-between px-4 text-white font-medium
-              bg-gradient-to-r from-white/60 to-white/30
-              clip-path-[polygon(5%_0,95%_0,100%_50%,95%_100%,5%_100%,0_50%)]">
-              <span></span>
-              <span>8,450 Orders</span>
-              <div className="absolute left-1/2 -translate-x-1/2 text-[11px] text-black">18%</div>
-            </div>
-
           </div>
-        </Card>
-      </div>
-       <ChartOverLay open={openOverlay} onClose={() => setOpenOverlay(false)} />
-      </div>
+        </div>
+      )}
     </div>
   );
 }

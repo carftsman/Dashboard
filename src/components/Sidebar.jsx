@@ -118,7 +118,7 @@ const Sidebar = () => {
             {/* SUBMENU */}
             {openDashboard && (
               <div className="pl-[35px] mt-[8px]">
-                <div className="max-h-[160px] overflow-y-auto pr-1 space-y-1 sidebar-scroll">
+                <div className="max-h-[250px] overflow-y-auto pr-1 space-y-1 sidebar-scroll">
                   {dashboards.length > 0 ? (
                     dashboards.map((item) => (
                       <NavLink

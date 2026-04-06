@@ -18,6 +18,7 @@ export const updateColumn = async (dashboardId, columnId, payload) => {
   return response.data;
 };
 
+// ✅ ONLY CHANGE HERE
 export const createColumn = async (dashboardId, payload) => {
   const response = await api.post(
     `/api/dashboards/${dashboardId}/columns`,
@@ -25,7 +26,7 @@ export const createColumn = async (dashboardId, payload) => {
       columns: [payload],
     }
   );
-  return response.data;
+  return response; // ✅ changed
 };
 
 export const deleteColumn = async (dashboardId, columnId) => {

@@ -20,7 +20,7 @@ export const loginUser = async (data) => {
 // Get logged-in user profile
 export const getProfile = async () => {
   try {
-    const response = await api.get("/auth/getprofile");
+    const response = await api.get('/api/users/profile');
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
