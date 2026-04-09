@@ -69,16 +69,16 @@ function Profile() {
         {/* HEADER */}
         <div className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
 
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 text-gray-600 font-medium bg-transparent p-0 
-                       hover:text-gray-600 hover:bg-transparent 
-                       focus:outline-none focus:ring-0 
-                       active:bg-transparent active:text-gray-600"
-          >
-            <FaArrowLeft />
-            Back
-          </button>
+        <button
+  onClick={() => navigate(-1)}
+  className="flex items-center gap-2 text-gray-600 font-medium bg-transparent p-0 
+             hover:text-gray-600 hover:bg-transparent 
+             focus:outline-none focus:ring-0 
+             active:bg-transparent active:text-gray-600"
+>
+  <FaArrowLeft />
+  Back
+</button>
 
           <div className="flex-1"></div>
           <div></div>

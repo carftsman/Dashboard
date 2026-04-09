@@ -122,27 +122,26 @@ export default function DataValidation() {
  
   const handleProcess = async () => {
   if (totalCriticalErrors > 0) return;
- 
+
   try {
     setProcessing(true);
     setProcessError("");
- 
+
     // ✅ Step 1: process file
     const res = await processFile(fileId);
- 
+
     if (res.status === "FAILED") {
       setProcessError(res.message || "Processing failed");
       return;
     }
- 
+
     // ✅ Step 2: get mappings from previous page
     const mappings = location.state?.mappings;
- 
+
     if (!mappings) {
       setProcessError("Mappings missing. Please go back and map columns.");
       return;
     }
- 
     // ✅ Step 3: navigate to dashboard with data
     navigate("/dashboard", {
       state: {
@@ -151,14 +150,12 @@ export default function DataValidation() {
     mappings,
       },
     });
- 
   } catch (err) {
     setProcessError(err?.message || "Processing error");
   } finally {
     setProcessing(false);
   }
 };
- 
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans">
       <Sidebar />
@@ -281,12 +278,11 @@ export default function DataValidation() {
               <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden mb-6">
                
                 {/* Table Header - Only visible on sm and above */}
-                <div className="hidden sm:grid grid-cols-[3fr_1.5fr_4fr_1fr] gap-4 bg-[#f8fafc] border-b border-[#e2e8f0] px-6 py-4">
-                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Validation Check</div>
-                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Status</div>
-                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Details</div>
-                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest text-right">Actions</div>
-                </div>
+               <div className="hidden sm:grid grid-cols-[3fr_1.5fr_5fr] gap-4 bg-[#f8fafc] border-b border-[#e2e8f0] px-6 py-4">
+  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Validation Check</div>
+  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Status</div>
+  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Details</div>
+</div>
  
                 {/* Table Body */}
                 <div className="flex flex-col">
@@ -316,7 +312,7 @@ export default function DataValidation() {
                     return (
                       <div
                         key={check.title}
-                        className={`flex flex-col sm:grid sm:grid-cols-[3fr_1.5fr_4fr_1fr] gap-4 sm:gap-4 px-5 sm:px-6 py-5 sm:py-6 items-start border-b border-[#f1f5f9] hover:bg-[#f8fafc]/50 transition-colors ${
+                        className={`flex flex-col sm:grid sm:grid-cols-[3fr_1.5fr_5fr] gap-4 px-5 sm:px-6 py-5 sm:py-6 items-start border-b border-[#f1f5f9] hover:bg-[#f8fafc]/50 transition-colors ${
                           index === validationChecks.length - 1 ? "border-0" : ""
                         }`}
                       >
@@ -351,12 +347,8 @@ export default function DataValidation() {
                           )}
                         </div>
  
-                        {/* Actions */}
-                        <div className="flex sm:justify-end pt-1 mt-3 sm:mt-0 w-full sm:w-auto">
-                          <button className="text-[13px] font-[800] text-[#1e293b] hover:text-[#4f46e5] text-left sm:text-right transition-colors whitespace-nowrap">
-                            {check.actionBtn}
-                          </button>
-                        </div>
+                      
+                 
                       </div>
                     );
                   })}

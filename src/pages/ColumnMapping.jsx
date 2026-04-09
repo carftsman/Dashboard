@@ -95,55 +95,55 @@ export default function ColumnMapping() {
         const fileCols = data.fileColumns || [];
         console.log("sysCols",sysCols,"fileCols",fileCols);
         const initialMappings = {};
- 
+
        sysCols.forEach((sysCol) => {
- 
+
   const sysKey = sysCol.columnKey; // ✅ FIX
  
   const sysNameClean = sysKey
- 
+
     .toLowerCase()
- 
+
     .replace(/[^a-z0-9]/g, "");
  
   //////////////////////////////////////////////////////
- 
+
   // 🔍 MATCH FILE COLUMN
- 
+
   //////////////////////////////////////////////////////
- 
+
   let match = fileCols.find((fc) => {
- 
+
     const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
- 
+
     return fcClean === sysNameClean;
- 
+
   });
  
   if (!match) {
- 
+
     match = fileCols.find((fc) => {
- 
+
       const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
- 
+
       return fcClean.includes(sysNameClean);
- 
+
     });
- 
+
   }
  
   //////////////////////////////////////////////////////
- 
+
   // ✅ STORE MAPPING (IMPORTANT FIX)
- 
+
   //////////////////////////////////////////////////////
- 
+
   if (match) {
- 
+
     initialMappings[sysKey] = match; // ✅ ONLY columnKey
- 
+
   }
- 
+
 });
  
         setMappings(initialMappings);
@@ -213,12 +213,11 @@ export default function ColumnMapping() {
       setTimeout(() => {
 navigate("/data-validation", {
   state: {
-    dashboardId: location.state?.dashboardId,
+    dashboardId: location.state?.dashboardId, 
     fileId,
     mappings,
   },
 });     }, 1500);
- 
     } catch (err) {
       setError(err?.message || err?.error || "Failed to submit column mappings.");
       setSubmitting(false);

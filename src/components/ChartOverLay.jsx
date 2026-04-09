@@ -1,3 +1,4 @@
+ 
 import React, { useState, useEffect } from "react";
  
 export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved, chart }) {
@@ -11,46 +12,47 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fileId, setFileId] = useState(null);
- 
- 
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
- 
-  const showToast = (message, type = "success") => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
-  };
  
   const token = localStorage.getItem("token");
  
-  const chartOptions = [
-    { type: "BAR", icon: "📊" },
-    { type: "LINE", icon: "📈" },
-    { type: "PIE", icon: "🥧" },
-    { type: "AREA", icon: "📉" },
-    { type: "SCATTER", icon: "🔵" },
-  ];
- 
+  // --- 1. Comprehensive Icon Mapping ---
   const getChartIcon = (type) => {
-    switch (type) {
+    switch (type?.toUpperCase()) {
       case "BAR": return "📊";
+      case "HORIZONTAL_BAR": return "📋"; // Horizontal icon
       case "LINE": return "📈";
+      case "MULTI_LINE": return "📉";
       case "PIE": return "🥧";
-      case "AREA": return "📉";
-      case "SCATTER": return "🔵";
       case "DONUT": return "🍩";
-      case "STACKED_BAR": return "📚";
+      case "AREA": return "🏔️";
+      case "STACKED_AREA": return "🥞";
+      case "STACKED_BAR": return "🧱";
+      case "SCATTER": return "🔵";
+      case "BUBBLE": return "🧼";
+      case "HEATMAP": return "🔥";
+      case "TREEMAP": return "🌳";
+      case "RADAR": return "🕸️";
       case "FUNNEL": return "🔻";
+      case "GAUGE": return "⏲️";
+      case "HISTOGRAM": return "🏛️";
+      case "WATERFALL": return "🌊";
       case "TABLE": return "📋";
       case "KPI": return "📌";
       default: return "📊";
     }
   };
  
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
+  };
+ 
   useEffect(() => {
     if (chart) {
       const cfg = chart.config || {};
-      setXAxis(cfg.xAxis?.[0] || cfg.groupBy || null);
-      setYAxis(cfg.yAxis?.[0] || cfg.metrics?.[0] || null);
+      setXAxis(cfg.xAxis?.[0] || cfg.groupBy || cfg.columns?.[0] || cfg.steps?.[0] || null);
+      setYAxis(cfg.yAxis?.[0] || cfg.metrics?.[0] || cfg.columns?.[1] || cfg.steps?.[1] || null);
       setChartType(chart.type?.toUpperCase() || "BAR");
       setTitle(chart.name || "");
     } else {
@@ -91,32 +93,45 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
     }
   }, [open]);
  
+  // --- 2. Complete Mapping Logic for Backend ---
   const handleSaveChart = async () => {
     if (!fileId) return showToast("File not loaded yet ", "error");
-    if (!xAxis || !yAxis) return showToast("Please drag and drop fields ❌", "error");
+    if (!xAxis && chartType !== "KPI" && chartType !== "GAUGE") {
+        return showToast("Please drag and drop fields ❌", "error");
+    }
  
     try {
       setLoading(true);
       const typeUpper = chartType.toUpperCase();
       let config = {};
  
-      if (["LINE", "AREA", "STACKED_BAR", "SCATTER"].includes(typeUpper)) {
+      // Proper logic for all 20 chart types
+      if (["LINE", "AREA", "STACKED_BAR", "STACKED_AREA", "MULTI_LINE"].includes(typeUpper)) {
         config = { xAxis: [xAxis], metrics: [yAxis], yAxis: [yAxis] };
-      } else if (["PIE", "DONUT", "BAR"].includes(typeUpper)) {
+      } else if (["PIE", "DONUT", "BAR", "HORIZONTAL_BAR", "TREEMAP", "RADAR"].includes(typeUpper)) {
         config = { groupBy: xAxis, metrics: [yAxis] };
+      } else if (["SCATTER", "BUBBLE", "HEATMAP"].includes(typeUpper)) {
+        config = { xAxis: xAxis, yAxis: yAxis, metrics: [yAxis] };
       } else if (typeUpper === "FUNNEL") {
-        config = { steps: [xAxis, yAxis] };
+  config = {
+    groupBy: xAxis,
+    metrics: [yAxis],
+    steps: [xAxis, yAxis] 
+  };
+
       } else if (typeUpper === "TABLE") {
         config = { columns: [xAxis, yAxis] };
-      } else if (typeUpper === "KPI") {
-        config = { metrics: [yAxis] };
+      } else if (["KPI", "GAUGE", "WATERFALL"].includes(typeUpper)) {
+        config = { metrics: [yAxis || xAxis] };
+      } else if (typeUpper === "HISTOGRAM") {
+        config = { xAxis: xAxis };
       }
  
       const payload = {
         dashboardId: Number(dashboardId),
         fileId: fileId,
         name: title || `${xAxis} by ${yAxis}`,
-        type: typeUpper === "DONUT" ? "PIE" : typeUpper,
+        type: typeUpper,
         config: config,
         replaceWidgetId: chart?.id ? Number(chart.id) : 0,
       };
@@ -133,8 +148,11 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       const result = await response.json();
  
       if (response.ok) {
-       
-        onChartSaved({ ...result.widget, type: chartType });
+        onChartSaved({
+  ...result.widget,
+  name: title || result.widget?.name,
+  type: chartType,
+});
         onClose();
       } else {
         showToast(result.message || "Failed to save chart ", "error");
@@ -150,7 +168,6 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
  
   return (
     <div className="fixed inset-0 z-50 flex">
-     
       {toast.show && (
         <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300">
           <div className={`px-6 py-2 rounded-full shadow-lg text-sm font-medium border flex items-center gap-2 ${
@@ -163,55 +180,56 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
  
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
       <div className="ml-auto h-full bg-[#f8fafc] text-black shadow-xl relative z-10 p-3 flex transition-all duration-300">
-     
-        <div className={`transition-all duration-300 border-r p-2 ${showVisuals ? "w-1/3" : "w-[40px]"} overflow-hidden`}>
+       
+        {/* Left Side: Configuration */}
+        <div className={`transition-all duration-300 border-r p-2 ${showVisuals ? "w-[260px]" : "w-[40px]"} overflow-hidden`}>
           <div className="flex justify-between items-center mb-2">
             {showVisuals && <h3 className="text-xs font-semibold">{chartType}</h3>}
-            <button onClick={() => setShowVisuals(!showVisuals)} className="text-xs">{showVisuals ? "‹" : "›"}</button>
+            <button onClick={() => setShowVisuals(!showVisuals)} className="text-xs p-1 hover:bg-gray-200 rounded">{showVisuals ? "‹" : "›"}</button>
           </div>
           {showVisuals && (
-            <>
-              <div className="grid grid-cols-3 gap-2">
-                {(chartConfigs.length ? chartConfigs : chartOptions).map((c, i) => (
-                  <div key={i} onClick={() => setChartType(c.type)} className={`h-10 rounded flex items-center justify-center text-lg cursor-pointer border ${chartType === c.type ? "bg-blue-500 text-white" : "bg-gray-200"}`}>
+            <div className="overflow-y-auto h-full pb-10 pr-1">
+              <div className="grid grid-cols-4 gap-2">
+                {chartConfigs.map((c, i) => (
+                  <div key={i} onClick={() => setChartType(c.type)} className={`h-10 rounded-md flex items-center justify-center text-lg cursor-pointer border transition-all ${chartType === c.type ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 hover:border-blue-300"}`}>
                     {getChartIcon(c.type)}
                   </div>
                 ))}
               </div>
               <div className="mt-3 text-xs">
                 <p className="font-semibold">Chart Title</p>
-                <input className="w-full border p-1 mt-1 rounded outline-none focus:ring-1 focus:ring-blue-500" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter title" />
+                <input className="w-full border p-1.5 mt-1 rounded outline-none focus:ring-1 focus:ring-blue-500" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter title" />
               </div>
               <div className="mt-3 text-xs">
-                {(chartConfigs.find(c => c.type === chartType) || { requiredFields: ["xAxis", "yAxis"] }).requiredFields.map((field) => (
+                {(chartConfigs.find(c => c.type === chartType)?.requiredFields || ["xAxis", "metrics"]).map((field) => (
                   <div key={field} className="mt-2">
                     <p className="capitalize font-medium text-gray-600">{field}</p>
                     <div
                       onDrop={(e) => {
                         e.preventDefault();
                         const data = e.dataTransfer.getData("text/plain");
-                        if (field === "xAxis" || field === "groupBy") setXAxis(data);
+                        if (["xAxis", "groupBy", "steps", "columns"].includes(field)) setXAxis(data);
                         else setYAxis(data);
                       }}
                       onDragOver={(e) => e.preventDefault()}
-                      className={`border-2 border-dashed p-2 min-h-[40px] rounded mt-1 flex items-center justify-center ${
-                        ((field === "xAxis" || field === "groupBy") ? xAxis : yAxis) ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-gray-50 border-gray-200 text-gray-400"
+                      className={`border-2 border-dashed p-2 min-h-[40px] rounded mt-1 flex items-center justify-center transition-colors ${
+                        ((["xAxis", "groupBy", "steps", "columns"].includes(field)) ? xAxis : yAxis) ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : "bg-gray-50 border-gray-200 text-gray-400"
                       }`}
                     >
-                      {((field === "xAxis" || field === "groupBy") ? xAxis : yAxis) || "Drop here"}
+                      {((["xAxis", "groupBy", "steps", "columns"].includes(field)) ? xAxis : yAxis) || "Drop here"}
                     </div>
                   </div>
                 ))}
               </div>
-            </>
+            </div>
           )}
         </div>
  
-       
-        <div className="flex-1 p-3 flex flex-col overflow-hidden w-74">
+        {/* Center Side: Column List */}
+        <div className={`transition-all duration-300 p-3 flex flex-col overflow-hidden ${showData ? "w-64" : "w-[40px]"}`}>
           <div className="flex justify-between items-center mb-2">
             {showData && <h3 className="text-[12px] font-semibold">Data Columns</h3>}
-            <button onClick={() => setShowData(!showData)} className="text-xs">{showData ? "‹" : "›"}</button>
+            <button onClick={() => setShowData(!showData)} className="text-xs p-1 hover:bg-gray-200 rounded">{showData ? "‹" : "›"}</button>
           </div>
           {showData && (
             <div className="flex-1 overflow-y-auto space-y-1 pr-1">
@@ -230,9 +248,9 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
           )}
         </div>
  
-   
+        {/* Header Actions */}
         <div className="absolute top-2 right-2 flex gap-2">
-          <button onClick={handleSaveChart} disabled={loading} className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded font-medium transition-colors shadow-sm">
+          <button onClick={handleSaveChart} disabled={loading} className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded font-medium transition-colors shadow-sm disabled:bg-gray-400">
             {loading ? "Saving..." : "Save Chart"}
           </button>
           <button onClick={onClose} className="text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-1.5 rounded font-medium transition-colors">Close</button>
