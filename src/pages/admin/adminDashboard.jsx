@@ -6,13 +6,13 @@ import { useLocation } from "react-router-dom";
 import { FiUsers, FiGrid, FiFileText, FiCornerDownRight } from "react-icons/fi";
 import api from "../../api/apiConfig";
  
-/* Top navigation bar (header) */
+
 function Topbar() {
   const navigate = useNavigate();
  
   const [user, setUser] = useState(null);
  
-  // ✅ ADDED (only this line)
+
   const profileImage = localStorage.getItem("profileImage");
  
   useEffect(() => {
@@ -53,8 +53,7 @@ function Topbar() {
             {user?.role || "..."}
           </span>
         </div>
- 
-        {/* ✅ UPDATED PROFILE IMAGE DISPLAY */}
+
         <div className="w-[36px] h-[36px] rounded-full overflow-hidden bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition">
           {profileImage ? (
             <img
@@ -71,7 +70,7 @@ function Topbar() {
   );
 }
  
-/* Reusable card component */
+
 function Card({ title, description, icon, onClick, active }) {
  
   const themes = {
@@ -146,7 +145,7 @@ function Card({ title, description, icon, onClick, active }) {
   );
 }
  
-/* Main dashboard page */
+
 function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -195,7 +194,7 @@ function AdminDashboard() {
               icon={<FiUsers />}
               title="Manage Users"
               active={hoveredItem === "users"}
-              description="Complete control over user authentication, access levels, and organizational hierarchy. Review active sessions and audit user activities across the platform. Monitor active sessions, manage permissions, and audit user activity across the entire platform to ensure security and compliance."
+              description="Complete control over user authentication,  and organizational hierarchy.Manage permissions, and audit user activity across the entire platform to ensure security and compliance."
               onClick={() => navigate("/manage-users")}
             />
  
@@ -203,7 +202,7 @@ function AdminDashboard() {
               icon={<FiGrid />}
               title="Dashboards"
               active={hoveredItem === "dashboard"}
-              description="Visualize real-time system performance, user engagement metrics, and operational KPIs. Customize your view with modular widgets, interactive charts, and automated data refresh cycles for better decision-making."
+              description="Visualize real-time system performance, user engagement metrics, and operational KPIs. Customize your view with modular widgets, interactive charts."
               onClick={() => navigate("/dashboard-selection")}
             />
  
@@ -211,7 +210,7 @@ function AdminDashboard() {
               icon={<FiFileText />}
               title="Reports"
               active={hoveredItem === "reports"}
-              description="Generate comprehensive PDF and CSV exports for stakeholder review. Schedule automated report generation, track historical data, and configure alerts for critical insights and anomalies."
+              description="Generate comprehensive PDF and CSV exports for stakeholder review.Track historical data."
               onClick={() => navigate("/reports/all")}
             />
  

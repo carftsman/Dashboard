@@ -207,8 +207,7 @@ export default function UploadData() {
               Upload data
             </h1>
             <p className="text-sm text-gray-500 mt-1 max-w-2xl">
-              Import your marketing data to generate advanced insights. NexusFlow
-              will automatically clean and categorize your data for the dashboard.
+              Import your data to generate advanced insights. 
             </p>
           </div>
  

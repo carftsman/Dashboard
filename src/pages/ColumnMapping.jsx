@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { getMappingData, postManualMapping } from "../services/uploadService";
 
-// ─── Icons ────────────────────────────────────────────────────────────────
 const SpeakerIcon = () => (
   <svg className="w-[18px] h-[18px] text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
@@ -64,14 +63,13 @@ export default function ColumnMapping() {
   const location = useLocation();
   const navigate = useNavigate();
   const fileId = location.state?.fileId;
-  console.log("fileId",fileId);
+  console.log("fileId", fileId);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [mappingData, setMappingData] = useState(null);
-  
-  // Custom mappings state: { [systemKey]: fileColumnName }
+
   const [mappings, setMappings] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -84,68 +82,68 @@ export default function ColumnMapping() {
 
     const fetchData = async () => {
       try {
-        console.log("fetchData entered....",fileId);
+        console.log("fetchData entered....", fileId);
         setLoading(true);
         const data = await getMappingData(fileId);
-        console.log("mapping data",data);
+        console.log("mapping data", data);
         setMappingData(data);
 
-        // Auto-match system columns with file columns
+
         const sysCols = data.dashboardColumns || [];
         const fileCols = data.fileColumns || [];
-        console.log("sysCols",sysCols,"fileCols",fileCols);
+        console.log("sysCols", sysCols, "fileCols", fileCols);
         const initialMappings = {};
 
-       sysCols.forEach((sysCol) => {
+        sysCols.forEach((sysCol) => {
 
-  const sysKey = sysCol.columnKey; // ✅ FIX
- 
-  const sysNameClean = sysKey
+          const sysKey = sysCol.columnKey; // ✅ FIX
 
-    .toLowerCase()
+          const sysNameClean = sysKey
 
-    .replace(/[^a-z0-9]/g, "");
- 
-  //////////////////////////////////////////////////////
+            .toLowerCase()
 
-  // 🔍 MATCH FILE COLUMN
+            .replace(/[^a-z0-9]/g, "");
 
-  //////////////////////////////////////////////////////
+          //////////////////////////////////////////////////////
 
-  let match = fileCols.find((fc) => {
+          // 🔍 MATCH FILE COLUMN
 
-    const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
+          //////////////////////////////////////////////////////
 
-    return fcClean === sysNameClean;
+          let match = fileCols.find((fc) => {
 
-  });
- 
-  if (!match) {
+            const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
 
-    match = fileCols.find((fc) => {
+            return fcClean === sysNameClean;
 
-      const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
+          });
 
-      return fcClean.includes(sysNameClean);
+          if (!match) {
 
-    });
+            match = fileCols.find((fc) => {
 
-  }
- 
-  //////////////////////////////////////////////////////
+              const fcClean = fc.toLowerCase().replace(/[^a-z0-9]/g, "");
 
-  // ✅ STORE MAPPING (IMPORTANT FIX)
+              return fcClean.includes(sysNameClean);
 
-  //////////////////////////////////////////////////////
+            });
 
-  if (match) {
+          }
 
-    initialMappings[sysKey] = match; // ✅ ONLY columnKey
+          //////////////////////////////////////////////////////
 
-  }
+          // ✅ STORE MAPPING (IMPORTANT FIX)
 
-});
- 
+          //////////////////////////////////////////////////////
+
+          if (match) {
+
+            initialMappings[sysKey] = match; // ✅ ONLY columnKey
+
+          }
+
+        });
+
         setMappings(initialMappings);
       } catch (err) {
         setError(err?.message || err?.error || "Failed to fetch mapping data.");
@@ -179,7 +177,7 @@ export default function ColumnMapping() {
       const totalCols = sysCols.length;
       const mappedCols = Object.keys(mappings).length;
 
-      // 1. Edge Case: Check if ALL columns are mapped
+
       if (mappedCols < totalCols) {
         setError(`Please map all ${totalCols} system columns before proceeding. You have only mapped ${mappedCols}.`);
         setSubmitting(false);
@@ -188,14 +186,12 @@ export default function ColumnMapping() {
 
       const dashboardId = mappingData?.dashboardId || mappingData?.dashboardColumns?.[0]?.dashboardId || 1;
 
-      // Formatting payload to hit postManualMapping
       const payloadMappings = Object.entries(mappings).map(([templateField, fileColumn]) => ({
         dashboardId,
         templateField,
         fileColumn,
       }));
 
-      // 2. Edge Case: Safety check for empty mappings
       if (payloadMappings.length === 0) {
         setError("No mappings found to submit.");
         setSubmitting(false);
@@ -208,16 +204,17 @@ export default function ColumnMapping() {
       });
 
       setSuccess("Mappings successfully saved! Redirecting to validation...");
-      
-      // 3. Navigate to Data Validation screen
+
+
       setTimeout(() => {
-navigate("/data-validation", {
-  state: {
-    dashboardId: location.state?.dashboardId, 
-    fileId,
-    mappings,
-  },
-});     }, 1500);
+        navigate("/data-validation", {
+          state: {
+            dashboardId: location.state?.dashboardId,
+            fileId,
+            mappings,
+          },
+        });
+      }, 1500);
 
     } catch (err) {
       setError(err?.message || err?.error || "Failed to submit column mappings.");
@@ -225,7 +222,6 @@ navigate("/data-validation", {
     }
   };
 
-  // Safe checks
   const sysCols = mappingData?.dashboardColumns || [];
   const fileCols = mappingData?.fileColumns || [];
   const totalCols = sysCols.length;
@@ -236,8 +232,8 @@ navigate("/data-validation", {
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 ml-[220px]">
         <main className="flex-1 p-6 lg:p-12 max-w-6xl mx-auto w-full">
-          
-          {/* Back Button */}
+
+      
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 bg-[#eef2f6] text-[#475569] hover:bg-[#e2e8f0] px-4 py-2.5 rounded-xl text-sm font-semibold mb-8 transition-colors"
@@ -246,7 +242,7 @@ navigate("/data-validation", {
             Back to Upload
           </button>
 
-          {/* Header section */}
+         
           <div className="mb-8">
             <h1 className="text-3xl font-[800] text-[#1e293b] tracking-tight mb-2">Map your columns</h1>
             <p className="text-[15px] text-[#64748b] max-w-4xl tracking-wide leading-relaxed">
@@ -254,7 +250,7 @@ navigate("/data-validation", {
             </p>
           </div>
 
-          {/* Loading / Error / Success States */}
+       
           {loading && (
             <div className="flex justify-center py-20">
               <span className="flex items-center gap-2 text-gray-500 font-medium">
@@ -270,7 +266,7 @@ navigate("/data-validation", {
           {!loading && error && (
             <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               {error}
             </div>
@@ -285,31 +281,30 @@ navigate("/data-validation", {
 
           {!loading && sysCols.length > 0 && (
             <>
-              {/* Mapping Table Component */}
+          
               <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden mb-6">
-                
-                {/* Table Header */}
+
+             
                 <div className="grid grid-cols-[1fr_1fr_160px] gap-6 bg-[#4e74ca] px-8 py-4">
                   <div className="text-white text-sm font-semibold tracking-wide">System Column</div>
                   <div className="text-white text-sm font-semibold tracking-wide">Uploaded Column</div>
                   <div className="text-white text-sm font-semibold tracking-wide">Mapping Status</div>
                 </div>
 
-                {/* Table Body */}
+     
                 <div className="flex flex-col">
                   {sysCols.map((sysCol, index) => {
-                    const colKey = sysCol.columnKey ;
+                    const colKey = sysCol.columnKey;
                     const isMapped = !!mappings[colKey];
                     const selectedValue = mappings[colKey] || "";
 
                     return (
                       <div
                         key={colKey}
-                        className={`grid grid-cols-[1fr_1fr_160px] gap-6 px-8 py-5 items-center border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors ${
-                          index === sysCols.length - 1 ? "border-0" : ""
-                        }`}
+                        className={`grid grid-cols-[1fr_1fr_160px] gap-6 px-8 py-5 items-center border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors ${index === sysCols.length - 1 ? "border-0" : ""
+                          }`}
                       >
-                        {/* System Column Name */}
+                        
                         <div className="flex items-center gap-3">
                           {getSystemIcon(sysCol.displayName)}
                           <span className="text-[14px] font-medium text-[#334155]">
@@ -317,16 +312,14 @@ navigate("/data-validation", {
                           </span>
                         </div>
 
-                        {/* Uploaded Column Selector */}
                         <div>
                           <select
                             value={selectedValue}
                             onChange={(e) => handleSelectChange(colKey, e.target.value)}
-                            className={`w-full appearance-none px-4 py-2.5 rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#4e74ca]/40 focus:border-[#4e74ca] cursor-pointer bg-no-repeat ${
-                              isMapped
+                            className={`w-full appearance-none px-4 py-2.5 rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#4e74ca]/40 focus:border-[#4e74ca] cursor-pointer bg-no-repeat ${isMapped
                                 ? "bg-white border border-[#cbd5e1] text-[#0f172a]"
                                 : "bg-[#f8fafc] border border-dashed border-[#b6c2d1] text-[#94a3b8]"
-                            }`}
+                              }`}
                             style={{
                               backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")',
                               backgroundPosition: 'right 1rem center',
@@ -344,7 +337,7 @@ navigate("/data-validation", {
                           </select>
                         </div>
 
-                        {/* Status Pill */}
+                    
                         <div className="flex items-center">
                           {isMapped ? (
                             <span className="inline-flex items-center gap-1.5 bg-[#eafbf0] text-[#1aa454] px-3 py-1 pb-1.5 rounded-full text-[11px] font-[800] tracking-wider uppercase border border-[#bbf3d0]/30 shadow-sm">
@@ -364,7 +357,7 @@ navigate("/data-validation", {
                 </div>
               </div>
 
-              {/* Action Footer */}
+       
               <div className="flex items-center justify-between mb-8">
                 <span className="text-[14px] font-medium text-[#64748b]">
                   {mappedCols} of {totalCols} columns mapped
@@ -373,11 +366,10 @@ navigate("/data-validation", {
                 <button
                   onClick={handleReviewData}
                   disabled={submitting}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all ${
-                    submitting
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all ${submitting
                       ? "bg-[#94a3b8] text-white cursor-not-allowed opacity-70"
                       : "bg-[#1e293b] hover:bg-[#0f172a] text-white shadow-md active:scale-[0.98]"
-                  }`}
+                    }`}
                 >
                   {submitting ? "Submitting..." : "Review Data"}
                   {!submitting && (
@@ -388,13 +380,13 @@ navigate("/data-validation", {
                 </button>
               </div>
 
-              {/* Informational Tip */}
+       
               <div className="bg-[#f0f4ff] border border-[#e2e8f6] rounded-2xl p-5 flex items-start gap-4 shadow-sm">
                 <div className="mt-0.5"><InfoIcon /></div>
                 <div>
                   <h4 className="text-[14px] font-[800] text-[#1e293b] mb-1">Mapping Tip</h4>
                   <p className="text-[13px] text-[#64748b] leading-relaxed">
-                    NexusFlow uses smart-detection to automatically match common column names. Review each row to ensure the values are being assigned to the correct destination fields.
+                    Review each row to ensure the values are being assigned to the correct destination fields.
                   </p>
                 </div>
               </div>

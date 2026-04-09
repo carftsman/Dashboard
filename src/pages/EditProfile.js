@@ -12,13 +12,12 @@ import api from '../api/apiConfig';
 function EditProfile() {
 
   const navigate = useNavigate();
-
-  //  Get role
+  const [currentRole, setCurrentRole] = useState("");
   const role = localStorage.getItem("role")?.toLowerCase();
 
   //  Form states
-  const [name, setName] = useState("Tulasi");
-  const [phone, setPhone] = useState("9988776655");
+  const [name, setName] = useState(null);
+
   const [profileImage, setProfileImage] = useState(null);
   const [department, setDepartment] = useState("Engineering");
 
@@ -30,6 +29,29 @@ function EditProfile() {
     const img = localStorage.getItem("profileImage");
     if (img) setProfileImage(img);
   }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await api.get("/api/users/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.data) {
+          setName(res.data.name || "");
+          setCurrentRole(res.data.role || "");
+        }
+
+      } catch (err) {
+        console.error("Error fetching profile", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   //  SAVE PROFILE FUNCTION
   const handleSave = async () => {
@@ -39,7 +61,7 @@ function EditProfile() {
 
       const res = await api.put(
         "/api/users/profile",
-        { name, phone, department },
+        { name },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -51,7 +73,7 @@ function EditProfile() {
       }
 
       //  Update username in localStorage
-      localStorage.setItem("userName", res.data.user.name);
+      localStorage.setItem("userName", res.data.name);
 
       // Success message
       toast.success("Profile updated successfully ");
@@ -88,144 +110,124 @@ function EditProfile() {
   };
 
   //  Department icons
-  const departmentIcons = {
-    Engineering: <FaLaptopCode className="absolute left-3 top-3 text-gray-400" />,
-    Marketing: <FaBullhorn className="absolute left-3 top-3 text-gray-400" />,
-    HR: <FaUserTie className="absolute left-3 top-3 text-gray-400" />,
-  };
+
 
   return (
-    <div className="flex bg-gray-100 min-h-screen">
+  <div className="flex bg-gray-100 min-h-screen">
 
-      {/* Sidebar */}
-      {role === "admin" ? <AdminSidebar /> : <Sidebar />}
+    {/* Sidebar */}
+    {role === "admin" ? <AdminSidebar /> : <Sidebar />}
 
-      <div className="flex-1 ml-[220px]">
+    <div className="flex-1 ml-[220px]">
 
-        {/*  HEADER */}
-        <div className="fixed top-0 left-[220px] right-0 z-50 bg-white shadow-sm px-8 py-4 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 text-gray-600 font-medium bg-transparent p-0 
-               hover:text-gray-600 hover:bg-transparent 
-               focus:outline-none focus:ring-0 
-               active:bg-transparent active:text-gray-600"
-          >
-            <FaArrowLeft />
-            Back
-          </button>
-        </div>
+      {/*  HEADER */}
+      <div className="fixed top-0 left-[220px] right-0 z-50 bg-white shadow-sm px-8 py-4 flex items-center justify-between">
+        <button
+          onClick={() => navigate("/profile")}
+          className="flex items-center gap-2 text-gray-600 font-medium bg-transparent p-0 
+             hover:text-gray-600 hover:bg-transparent 
+             focus:outline-none focus:ring-0 
+             active:bg-transparent active:text-gray-600"
+        >
+          <FaArrowLeft />
+          Back
+        </button>
+      </div>
 
-        {/*  MAIN CONTENT */}
-        <div className="flex justify-center items-start py-6 mt-16">
+      {/*  MAIN CONTENT */}
+      <div className="flex justify-center items-start py-6 mt-16">
 
-          {/*  CARD */}
-          <div className="bg-white rounded-xl shadow-md w-[650px] overflow-hidden">
+        {/*  CARD */}
+        <div className="bg-white rounded-xl shadow-md w-[650px] overflow-hidden">
 
-            {/*  HEADER GRADIENT */}
-            <div className="h-28 bg-gradient-to-r from-[#8FAFD1] to-[#1F2A44]"></div>
+          {/*  HEADER GRADIENT */}
+          <div className="h-28 bg-gradient-to-r from-[#8FAFD1] to-[#1F2A44]"></div>
 
-            {/*  PROFILE IMAGE SECTION */}
-            <div className="flex items-center gap-6 px-6 -mt-10 border-b pb-6">
+          {/*  PROFILE IMAGE SECTION */}
+          <div className="flex items-center gap-6 px-6 -mt-10 border-b pb-6">
 
-              <div className="relative">
+            <div className="relative">
 
-                {/*  Profile Image */}
-                <div className="w-24 h-24 rounded-full border-4 border-white shadow bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {profileImage ? (
-                    <img src={profileImage} alt="profile" className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    <FiUser size={40} className="text-gray-500" />
-                  )}
-                </div>
-
-                {/*  Camera button */}
-                <div
-                  onClick={() => fileInputRef.current.click()}
-                  className="absolute bottom-0 right-0 bg-[#1f2a44] text-white p-2 rounded-full cursor-pointer flex items-center justify-center"
-                >
-                  <FaCamera size={12} />
-                </div>
-
-                {/*  Hidden file input */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageChange}
-                  className="hidden"
-                  accept="image/*"
-                />
+              {/*  Profile Image */}
+              <div className="w-24 h-24 rounded-full border-4 border-white shadow bg-gray-200 flex items-center justify-center overflow-hidden">
+                {profileImage ? (
+                  <img src={profileImage} alt="profile" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <FiUser size={40} className="text-gray-500" />
+                )}
               </div>
 
-              {/*  Buttons */}
-              <div>
-                <h2 className="font-semibold text-lg">Profile Photo</h2>
-
-                <div className="flex gap-3 mt-3">
-                  <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="px-4 py-1 bg-[#1f2a44] text-white rounded-md text-sm"
-                  >
-                    Upload New
-                  </button>
-
-                  <button
-                    onClick={handleRemove}
-                    className="px-4 py-1 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
-                  >
-                    Remove
-                  </button>
-                </div>
+              {/*  Camera button */}
+              <div
+                onClick={() => fileInputRef.current.click()}
+                className="absolute bottom-0 right-0 bg-[#1f2a44] text-white p-2 rounded-full cursor-pointer flex items-center justify-center"
+              >
+                <FaCamera size={12} />
               </div>
+
+              {/*  Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                className="hidden"
+                accept="image/*"
+              />
             </div>
 
-            {/*  FORM SECTION */}
-            <div className="p-6 space-y-5">
+            {/*  Buttons */}
+            <div>
+              <h2 className="font-semibold text-lg">Profile Photo</h2>
 
-              {/*  Name & Phone */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex gap-3 mt-3">
+                <button
+                  onClick={() => fileInputRef.current.click()}
+                  className="px-4 py-1 bg-[#1f2a44] text-white rounded-md text-sm"
+                >
+                  Upload New
+                </button>
 
-                <div>
-                  <label className="text-sm text-gray-500">Full Name</label>
-                  <div className="relative mt-1">
-                    <FiUser className="absolute left-3 top-3 text-gray-400" />
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2 border rounded-md bg-gray-50 outline-none"
-                    />
-                  </div>
+                <button
+                  onClick={handleRemove}
+                  className="px-4 py-1 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/*  FORM SECTION */}
+          <div className="p-6 space-y-5">
+
+            {/* NAME + ROLE */}
+            <div className="grid grid-cols-2 gap-4">
+
+              {/* NAME */}
+              <div>
+                <label className="text-sm text-gray-500">Full Name</label>
+                <div className="relative mt-1">
+                  <FiUser className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 border rounded-md bg-gray-50 outline-none"
+                  />
                 </div>
-
-                <div>
-                  <label className="text-sm text-gray-500">Phone Number</label>
-                  <div className="relative mt-1">
-                    <FiPhone className="absolute left-3 top-3 text-gray-400" />
-                    <input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2 border rounded-md bg-gray-50 outline-none"
-                    />
-                  </div>
-                </div>
-
               </div>
 
-              {/*  Department */}
+              {/* ROLE (READ ONLY) */}
               <div>
-                <label className="text-sm text-gray-500">Department</label>
+                <label className="text-sm text-gray-500">Current Role</label>
                 <div className="relative mt-1">
-                  {departmentIcons[department]}
-                  <select
-                    value={department}
-                    onChange={(e) => setDepartment(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border rounded-md bg-gray-50 outline-none"
-                  >
-                    <option>Engineering</option>
-                    <option>Marketing</option>
-                    <option>HR</option>
-                  </select>
+                  <FiUser className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    value={currentRole}
+                    readOnly
+                    className="w-full pl-10 pr-3 py-2 border rounded-md bg-gray-100 text-gray-500 cursor-not-allowed outline-none"
+                  />
                 </div>
               </div>
 
@@ -235,26 +237,28 @@ function EditProfile() {
 
         </div>
 
-        {/*  FIXED BUTTONS */}
-        <div className="fixed bottom-6 right-10 flex gap-4">
-          <button
-            onClick={() => navigate("/profile")}
-            className="px-4 py-1 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
-          >
-            Cancel
-          </button>
-
-          <button
-            onClick={handleSave}
-            className="px-6 py-2 bg-[#1f2a44] text-white rounded-md"
-          >
-            Save Changes
-          </button>
-        </div>
-
       </div>
+
+      {/*  FIXED BUTTONS */}
+      <div className="fixed bottom-6 right-10 flex gap-4">
+        <button
+          onClick={() => navigate("/profile")}
+          className="px-4 py-1 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleSave}
+          className="px-6 py-2 bg-[#1f2a44] text-white rounded-md"
+        >
+          Save Changes
+        </button>
+      </div>
+
     </div>
-  );
+  </div>
+);
 }
 
 export default EditProfile;

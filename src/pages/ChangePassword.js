@@ -18,10 +18,10 @@ function ChangePassword() {
 
   const navigate = useNavigate();
 
-  //  Get user role from localStorage
+ 
   const role = localStorage.getItem("role")?.toLowerCase();
 
-  //  State for password fields
+ 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
