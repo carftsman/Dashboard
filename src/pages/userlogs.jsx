@@ -3,12 +3,13 @@ import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
 import axios from "axios";
-
+import AdminSidebar from "../components/AdminSidebar";
 const UserLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const profileImage = localStorage.getItem("profileImage");
+  const role = localStorage.getItem("role")?.toLowerCase();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +18,6 @@ const UserLogs = () => {
 
       console.log("TOKEN:", token);
 
-      // 🚨 If no token → go to login
       if (!token) {
         setError("Session expired. Please login again.");
         navigate("/");
@@ -29,7 +29,7 @@ const UserLogs = () => {
           "https://dashboard-backend-cyrd.onrender.com/api/logs",
           {
             headers: {
-              Authorization: `Bearer ${token}`, // ✅ correct format
+              Authorization: `Bearer ${token}`,
             },
           },
         );
@@ -43,7 +43,6 @@ const UserLogs = () => {
       } catch (err) {
         console.log("ERROR:", err.response?.data);
 
-        // 🚨 DO NOT remove token blindly
         if (err.response?.status === 401) {
           setError("You are not authorized to view logs");
         } else {
@@ -74,6 +73,19 @@ const UserLogs = () => {
     }
   };
 
+  const formatTime = (iso) => {
+    if (!iso) return "-";
+
+    return new Date(iso).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   // ✅ Loading
   if (loading) return <p className="p-5">Loading...</p>;
 
@@ -82,16 +94,28 @@ const UserLogs = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+      {(role === "admin" || role === "super_admin") ? (
+        <AdminSidebar />
+      ) : (
+        <Sidebar />
+      )}
 
       <div className="flex-1 ml-[220px] flex flex-col">
         {/* Header */}
         <div className="h-[60px] bg-white flex items-center px-5 border-b border-[#eee]">
           <div
+            className="ml-auto w-[40px] h-[40px] bg-[#eee] rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition"
             onClick={() => navigate("/profile")}
-            className="ml-auto w-[35px] h-[35px] bg-[#eee] rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition"
           >
-            <FiUser />
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="profile"
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <FiUser />
+            )}
           </div>
         </div>
 
@@ -147,7 +171,7 @@ const UserLogs = () => {
                           {log.description}
                         </td>
                         <td className="px-3 md:px-6 py-3 text-gray-400 text-xs md:text-sm">
-                          {log.time}
+                          {formatTime(log.time)}
                         </td>
                       </tr>
                     ))
@@ -172,3 +196,5 @@ const UserLogs = () => {
 };
 
 export default UserLogs;
+
+

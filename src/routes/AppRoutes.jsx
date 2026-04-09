@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-
+import { Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import DashboardSelection from "../pages/DashboardSelection";
@@ -25,6 +25,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Login />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/loginOtp" element={<LoginOtp />} />
 
