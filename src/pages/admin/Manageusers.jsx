@@ -93,21 +93,34 @@ const ManageUsers = () => {
   };
 
   const validateForm = () => {
-    let newErrors = {};
-    if (!/^[A-Za-z ]+$/.test(form.name)) {
-      newErrors.name = "Name should contain only letters";
+  let newErrors = {};
+
+  // Name validation
+  if (!/^[A-Za-z ]+$/.test(form.name)) {
+    newErrors.name = "Name should contain only letters";
+  }
+
+  // Email validation
+  if (!/^[a-zA-Z0-9._%+-]+@dhatvibs\.com$/.test(form.email)) {
+    newErrors.email = "Enter valid email";
+  }
+
+  // Password validation 
+  if (!editingUser) {
+    if (form.password.length < 12 || form.password.length > 16) {
+      newErrors.password = "Password must be 12 to 16 characters";
+    } else if (!/[A-Z]/.test(form.password)) {
+      newErrors.password = "Include at least one uppercase letter";
+    } else if (!/[0-9]/.test(form.password)) {
+      newErrors.password = "Include at least one number";
+    } else if (!/[!@#$%^&*]/.test(form.password)) {
+      newErrors.password = "Include at least one special character";
     }
-    if (!/^[a-zA-Z0-9._%+-]+@dhatvibs\.com$/.test(form.email)) {
-      newErrors.email = "Enter valid emails";
-    }
-    if (!editingUser) {
-      if (!/^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*\d).{8,12}$/.test(form.password)) {
-        newErrors.password = "Enter Valid Password";
-      }
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   const handleSubmit = async () => {
     if (!validateForm()) return;

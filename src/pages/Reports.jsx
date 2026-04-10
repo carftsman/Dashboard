@@ -22,9 +22,9 @@ export default function Reports() {
 
   // STATES
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
   const [sortOrder, setSortOrder] = useState("desc");
-  
+
   // DATE RANGE STATES
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -47,6 +47,9 @@ export default function Reports() {
     };
     fetchData();
   }, [dashboardId]);
+  useEffect(() => {
+  setCurrentPage(1);
+}, [search, startDate, endDate, selectedDashboard]);
 
   const filteredFiles = files.filter((item) => {
     const name = item.name?.toLowerCase() || "";
@@ -84,12 +87,12 @@ export default function Reports() {
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans">
       {role === "ADMIN" || role === "SUPER_ADMIN" ? <AdminSidebar /> : <Sidebar />}
-      
+
       <div className="flex-1 flex flex-col ml-[220px]">
-        
+
         {/* HEADER - UPDATED FOR WRAPPING */}
         <div className="bg-white px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 shadow-sm border-b sticky top-0 z-10">
-          
+
           {/* TITLE SECTION */}
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-gray-800 whitespace-normal break-words max-w-[450px] leading-tight">
@@ -131,7 +134,7 @@ export default function Reports() {
         {/* CONTENT */}
         <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            
+
             {/* SUB-TITLE WRAPPING LOGIC */}
             <div className="flex flex-wrap items-start justify-between mb-5 gap-4">
               <div className="flex-1 min-w-0">
@@ -139,7 +142,7 @@ export default function Reports() {
                   {dashboardName ? decodeURIComponent(dashboardName) : "Dashboard"} Reports
                 </h2>
               </div>
-              
+
               <div className="flex items-center gap-3 flex-wrap flex-shrink-0">
                 <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 hover:border-indigo-300 transition">
                   <FiCalendar className="text-gray-400 text-sm" />
@@ -156,6 +159,7 @@ export default function Reports() {
                     isClearable={true}
                     placeholderText="Select Date Range"
                     className="bg-transparent outline-none text-sm w-48 cursor-pointer"
+                    maxDate={new Date()}
                   />
                 </div>
 
@@ -170,7 +174,7 @@ export default function Reports() {
                     <option value="asc">Oldest First</option>
                   </select>
                 </div>
-                    
+
                 {(role === "ADMIN" || role === "SUPER_ADMIN") && (
                   <button onClick={() => navigate(`/dataschema/${dashboardId}`)} className="bg-[#18154F] text-white px-5 py-2 rounded-xl shadow hover:bg-[#23206b] transition font-medium">
                     Edit Schema

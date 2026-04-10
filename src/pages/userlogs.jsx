@@ -4,13 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
 import axios from "axios";
 import AdminSidebar from "../components/AdminSidebar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const UserLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ NEW STATES
+  const [query, setQuery] = useState("");
+  const [limit] = useState("");
+
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -18,6 +25,7 @@ const UserLogs = () => {
   const role = localStorage.getItem("role")?.toLowerCase();
   const navigate = useNavigate();
 
+  // 🔥 FETCH LOGS (UNCHANGED)
   useEffect(() => {
     const fetchLogs = async () => {
       const token = localStorage.getItem("token");
@@ -30,7 +38,7 @@ const UserLogs = () => {
 
       try {
         const response = await axios.get(
-          `https://dashboard-backend-cyrd.onrender.com/api/logs?page=${page}&limit=10`,
+          `https://dashboard-backend-cyrd.onrender.com/api/logs`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -39,9 +47,8 @@ const UserLogs = () => {
         );
 
         const logsData = response.data.data || [];
-
         setLogs(logsData);
-        setTotalPages(response.data.totalPages || 1); // ✅ NEW
+        
       } catch (err) {
         if (err.response?.status === 401) {
           setError("You are not authorized to view logs");
@@ -54,7 +61,54 @@ const UserLogs = () => {
     };
 
     fetchLogs();
-  }, [navigate, page]); // ✅ depend on page
+  }, [navigate]);
+
+  // 🔥 FILTER LOGIC
+  const filteredLogs = logs.filter((log) => {
+    const searchValue = query.toLowerCase().trim();
+
+    const matchesSearch =
+      !query ||
+      log.user?.toLowerCase().includes(searchValue) ||
+      log.email?.toLowerCase().includes(searchValue);
+
+    if (!startDate && !endDate) return matchesSearch;
+
+    const logDate = new Date(log.time);
+    logDate.setHours(0, 0, 0, 0);
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      return matchesSearch && logDate >= start && logDate <= end;
+    } else if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+
+      return matchesSearch && logDate >= start;
+    }
+
+    return matchesSearch;
+  });
+
+  // 🔥 PAGINATION BASED ON FILTER
+  const itemsPerPage = 10;
+
+  const paginatedLogs = filteredLogs.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  const filteredTotalPages =
+    Math.ceil(filteredLogs.length / itemsPerPage) || 1;
+
+  // 🔥 RESET PAGE ON FILTER CHANGE
+  useEffect(() => {
+    setPage(1);
+  }, [query, startDate, endDate]);
 
   const badgeClass = (action) => {
     switch (action) {
@@ -127,6 +181,33 @@ const UserLogs = () => {
             </p>
           </div>
 
+          {/* 🔥 SEARCH + DATE FILTER */}
+          <div className="flex flex-wrap gap-3 mb-4">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by user or email..."
+              className="px-4 py-2 border rounded-lg w-[250px]"
+            />
+
+            <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 bg-gray-50">
+              <DatePicker
+                selectsRange
+                startDate={startDate}
+                endDate={endDate}
+                onChange={(update) => {
+                  const [start, end] = update;
+                  setStartDate(start);
+                  setEndDate(end);
+                }}
+                isClearable
+                placeholderText="Select Date Range"
+                className="bg-transparent outline-none text-sm w-40"
+                maxDate={new Date()}
+              />
+            </div>
+          </div>
+
           {/* Table */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
@@ -135,10 +216,7 @@ const UserLogs = () => {
                   <tr>
                     <th className="px-3 md:px-6 py-3 text-left">S.NO</th>
                     <th className="px-3 md:px-6 py-3 text-left">USER</th>
-
-                    {/* ✅ NEW EMAIL COLUMN */}
                     <th className="px-3 md:px-6 py-3 text-left">EMAIL</th>
-
                     <th className="px-3 md:px-6 py-3 text-left">ACTION</th>
                     <th className="px-3 md:px-6 py-3 text-left">DESCRIPTION</th>
                     <th className="px-3 md:px-6 py-3 text-left">TIME</th>
@@ -146,31 +224,18 @@ const UserLogs = () => {
                 </thead>
 
                 <tbody className="divide-y divide-gray-200">
-                  {logs.length > 0 ? (
-                    logs.map((log, index) => (
+                  {paginatedLogs.length > 0 ? (
+                    paginatedLogs.map((log, index) => (
                       <tr key={log.sNo || index}>
                         <td className="px-3 md:px-6 py-3">{log.sNo}</td>
-                        <td className="px-3 md:px-6 py-3 font-medium">
-                          {log.user}
-                        </td>
-
-                        {/* ✅ EMAIL DATA */}
-                        <td className="px-3 md:px-6 py-3 text-gray-600">
-                          {log.email || "-"}
-                        </td>
-
+                        <td className="px-3 md:px-6 py-3 font-medium">{log.user}</td>
+                        <td className="px-3 md:px-6 py-3 text-gray-600">{log.email || "-"}</td>
                         <td className="px-3 md:px-6 py-3">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeClass(
-                              log.action
-                            )}`}
-                          >
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeClass(log.action)}`}>
                             {log.action}
                           </span>
                         </td>
-                        <td className="px-3 md:px-6 py-3 text-gray-600">
-                          {log.description}
-                        </td>
+                        <td className="px-3 md:px-6 py-3 text-gray-600">{log.description}</td>
                         <td className="px-3 md:px-6 py-3 text-gray-400 text-xs">
                           {formatTime(log.time)}
                         </td>
@@ -179,7 +244,7 @@ const UserLogs = () => {
                   ) : (
                     <tr>
                       <td colSpan="6" className="text-center py-6">
-                        No logs available
+                        No logs found
                       </td>
                     </tr>
                   )}
@@ -187,7 +252,7 @@ const UserLogs = () => {
               </table>
             </div>
 
-            {/* ✅ PAGINATION */}
+            {/* Pagination */}
             <div className="flex justify-between items-center p-4">
               <button
                 onClick={() => setPage((p) => p - 1)}
@@ -198,12 +263,12 @@ const UserLogs = () => {
               </button>
 
               <span className="text-sm text-gray-600">
-                Page {page} of {totalPages}
+                Page {page} of {filteredTotalPages}
               </span>
 
               <button
                 onClick={() => setPage((p) => p + 1)}
-                disabled={page === totalPages}
+                disabled={page === filteredTotalPages}
                 className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
               >
                 Next
