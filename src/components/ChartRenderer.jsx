@@ -5,15 +5,15 @@ import {
   Legend, LabelList, Radar, RadialBarChart, RadarChart, RadialBar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   Treemap, Funnel, FunnelChart, ZAxis
 } from "recharts";
- 
+
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
- 
+
 const parseNumber = (val) => {
   if (val === null || val === undefined) return 0;
   const num = Number(String(val).replace(/,/g, ""));
   return isNaN(num) ? 0 : num;
 };
- 
+
 export default function ChartRenderer({ type, data, config, darkMode }) {
   const gridColor = darkMode ? "rgba(255, 255, 255, 0.1)" : "#e5e7eb";
   const axisColor = darkMode ? "#f8fafc" : "#111827";
@@ -21,29 +21,29 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   const textColor = darkMode ? "#ffffff" : "#000000";
   const FONT_SIZE = 10;
   // ✅ SAFETY FIX (prevents crash if bad data comes)
-if (typeof data === "object" && !Array.isArray(data)) {
-  data = Object.entries(data).map(([key, value]) => ({
-    name: key,
-    value: Number(value) || 0
-  }));
-}
+  if (typeof data === "object" && !Array.isArray(data)) {
+    data = Object.entries(data).map(([key, value]) => ({
+      name: key,
+      value: Number(value) || 0
+    }));
+  }
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return <p className="text-gray-400 text-center py-10">No data available</p>;
   }
- 
+
   const chartType = type?.toLowerCase();
   const metrics = config?.metrics || ["value"];
   const activeMetric = metrics[0];
- 
+
   let safeData = [];
- 
+
   if (Array.isArray(data)) {
     safeData = data.map((item, i) => {
       const xLabel = item.displayX || item.name || item.x || item.range || item.group || `Item ${i + 1}`;
       const rawValue = item[activeMetric] ?? item.value ?? item.cumulative ?? 0;
       const yValue = parseNumber(rawValue);
       const startValue = item.cumulative !== undefined ? parseNumber(item.cumulative) - yValue : 0;
- 
+
       return {
         ...item,
         displayX: xLabel,
@@ -54,40 +54,40 @@ if (typeof data === "object" && !Array.isArray(data)) {
       };
     });
   }
- const buildFunnelData = (data, config) => {
-  if (!Array.isArray(data)) return [];
- 
-  const groupKey = config?.groupBy || config?.steps?.[0];
-  const metricKey = config?.metrics?.[0] || config?.steps?.[1];
- 
-  if (!groupKey) return [];
- 
-  const grouped = {};
- 
-  data.forEach((item) => {
-    const key =
-      item[groupKey] ||
-      item.displayX ||
-      item.name;
- 
-    const value =
-      parseNumber(item[metricKey]) ||
-      item.value ||
-      0;
- 
-    if (!key) return;
- 
-    if (!grouped[key]) grouped[key] = 0;
-    grouped[key] += value;
-  });
- 
-  return Object.entries(grouped)
-    .map(([key, val]) => ({
-      displayX: key,
-      value: val
-    }))
-    .sort((a, b) => b.value - a.value); // 🔥 REQUIRED for funnel
-};
+  const buildFunnelData = (data, config) => {
+    if (!Array.isArray(data)) return [];
+
+    const groupKey = config?.groupBy || config?.steps?.[0];
+    const metricKey = config?.metrics?.[0] || config?.steps?.[1];
+
+    if (!groupKey) return [];
+
+    const grouped = {};
+
+    data.forEach((item) => {
+      const key =
+        item[groupKey] ||
+        item.displayX ||
+        item.name;
+
+      const value =
+        parseNumber(item[metricKey]) ||
+        item.value ||
+        0;
+
+      if (!key) return;
+
+      if (!grouped[key]) grouped[key] = 0;
+      grouped[key] += value;
+    });
+
+    return Object.entries(grouped)
+      .map(([key, val]) => ({
+        displayX: key,
+        value: val
+      }))
+      .sort((a, b) => b.value - a.value); // 🔥 REQUIRED for funnel
+  };
   const formatYAxis = (value) => {
     if (typeof value !== 'number') return value;
     const absValue = Math.abs(value);
@@ -95,13 +95,13 @@ if (typeof data === "object" && !Array.isArray(data)) {
     if (absValue >= 1000) return (value / 1000).toFixed(1).replace(/\.0$/, '') + "K";
     return value;
   };
- 
+
   const getHeatmapColor = (value) => {
     const max = Math.max(...safeData.map(d => d.value), 1);
     const ratio = value / max;
     return `rgba(0, 196, 159, ${0.2 + ratio * 0.8})`;
   };
- 
+
   const renderXAxis = () => (
     <XAxis
       dataKey="displayX"
@@ -115,7 +115,7 @@ if (typeof data === "object" && !Array.isArray(data)) {
       tickFormatter={(value) => (value?.toString().length > 12 ? value.slice(0, 12) + "..." : value)}
     />
   );
- 
+
   const renderYAxis = () => (
     <YAxis
       stroke={axisColor}
@@ -124,13 +124,13 @@ if (typeof data === "object" && !Array.isArray(data)) {
       tickFormatter={formatYAxis}
     />
   );
- 
+
   const ScrollWrapper = ({ children }) => (
     <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar">
       {children}
     </div>
   );
- 
+
   if (chartType === "heatmap") {
     return (
       <ScrollWrapper>
@@ -151,7 +151,7 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "pie" || chartType === "donut") {
     return (
       <ScrollWrapper>
@@ -177,7 +177,7 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   if (["bar", "stacked_bar", "horizontal_bar", "histogram"].includes(chartType)) {
     const isHorizontal = chartType === "horizontal_bar";
     return (
@@ -199,7 +199,7 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "line" || chartType === "multi_line") {
     return (
       <ScrollWrapper>
@@ -210,14 +210,14 @@ if (typeof data === "object" && !Array.isArray(data)) {
             {renderYAxis()}
             <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
             {metrics.map((m, i) => (
-               <Line key={m} type="monotone" dataKey={m} stroke={COLORS[i % COLORS.length]} strokeWidth={2} dot={safeData.length < 40} />
+              <Line key={m} type="monotone" dataKey={m} stroke={COLORS[i % COLORS.length]} strokeWidth={2} dot={safeData.length < 40} />
             ))}
           </LineChart>
         </ResponsiveContainer>
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "area" || chartType === "stacked_area") {
     return (
       <ScrollWrapper>
@@ -233,29 +233,30 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "scatter" || chartType === "bubble") {
     return (
       <ScrollWrapper>
         <ResponsiveContainer width="100%" height={300}>
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid stroke={gridColor} />
-            <XAxis type="number" dataKey="x" stroke={axisColor} tick={{ fill: axisColor,fontSize: FONT_SIZE }} tickFormatter={formatYAxis} />
+            <XAxis type="number" dataKey="x" stroke={axisColor} tick={{ fill: axisColor, fontSize: FONT_SIZE }} tickFormatter={formatYAxis} />
             <YAxis type="number" dataKey="y" stroke={axisColor} tick={{ fill: axisColor, fontSize: FONT_SIZE }} tickFormatter={formatYAxis} />
             {chartType === "bubble" && <ZAxis type="number" dataKey="size" range={[5, 60]} />}
-<Tooltip
-  contentStyle={{
-    backgroundColor: tooltipBg,
-    color: textColor,
-    fontSize: FONT_SIZE
-  }}
-/>            <Scatter data={safeData} fill={chartType === "bubble" ? "#8884d8" : "#00C49F"} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: tooltipBg,
+                color: textColor,
+                fontSize: FONT_SIZE
+              }}
+            />
+            <Scatter data={safeData} fill={chartType === "bubble" ? "#8884d8" : "#00C49F"} />
           </ScatterChart>
         </ResponsiveContainer>
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "treemap") {
     return (
       <ScrollWrapper>
@@ -273,79 +274,79 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "funnel") {
- 
-  const funnelData = buildFunnelData(safeData, config);
- 
-  if (!funnelData.length) {
-    return <p className="text-gray-400 text-center py-10">No data available</p>;
+
+    const funnelData = buildFunnelData(safeData, config);
+
+    if (!funnelData.length) {
+      return <p className="text-gray-400 text-center py-10">No data available</p>;
+    }
+
+    return (
+      <ScrollWrapper>
+        <ResponsiveContainer width="100%" height={300}>
+          <FunnelChart margin={{ top: 10, right: 50, left: 50, bottom: 10 }}>
+            <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
+
+            <Funnel dataKey="value" data={funnelData} isAnimationActive>
+              <LabelList
+                position="right"
+                fill={textColor}
+                dataKey="displayX"
+                style={{ fontSize: 10 }}
+              />
+              {funnelData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Funnel>
+
+          </FunnelChart>
+        </ResponsiveContainer>
+      </ScrollWrapper>
+    );
   }
- 
-  return (
-    <ScrollWrapper>
-      <ResponsiveContainer width="100%" height={300}>
-        <FunnelChart margin={{ top: 10, right: 50, left: 50, bottom: 10 }}>
-          <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
-         
-          <Funnel dataKey="value" data={funnelData} isAnimationActive>
-            <LabelList
-              position="right"
-              fill={textColor}
-              dataKey="displayX"
-              style={{ fontSize: 10 }}
-            />
-            {funnelData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Funnel>
- 
-        </FunnelChart>
-      </ResponsiveContainer>
-    </ScrollWrapper>
-  );
-}
- 
+
   if (chartType === "table") {
-  const tableData = safeData; // ✅ use cleaned data
- 
-  const columns = tableData.length
-    ? Object.keys(
+    const tableData = safeData; // ✅ use cleaned data
+
+    const columns = tableData.length
+      ? Object.keys(
         tableData.reduce((acc, obj) => ({ ...acc, ...obj }), {})
       )
-    : [];
- 
-  return (
-    <div className="overflow-auto max-h-[300px] w-full border border-gray-700 rounded custom-scrollbar">
-      <table className="w-full text-xs text-left">
-        <thead className={darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-700"}>
-          <tr>
-            {columns.map((col) => (
-              <th key={col} className="p-2 border-b border-gray-700 uppercase">
-                {col}
-              </th>
-            ))}
-          </tr>
-        </thead>
- 
-        <tbody className={darkMode ? "text-white" : "text-black"}>
-          {tableData.map((row, i) => (
-            <tr key={i} className="border-b border-gray-800">
-              {columns.map((col, j) => (
-                <td key={j} className="p-2">
-                  {row[col] !== undefined && row[col] !== null
-                    ? row[col].toString()
-                    : "-"}
-                </td>
+      : [];
+
+    return (
+      <div className="overflow-auto max-h-[300px] w-full border border-gray-700 rounded custom-scrollbar">
+        <table className="w-full text-xs text-left">
+          <thead className={darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-700"}>
+            <tr>
+              {columns.map((col) => (
+                <th key={col} className="p-2 border-b border-gray-700 uppercase">
+                  {col}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
- 
+          </thead>
+
+          <tbody className={darkMode ? "text-white" : "text-black"}>
+            {tableData.map((row, i) => (
+              <tr key={i} className="border-b border-gray-800">
+                {columns.map((col, j) => (
+                  <td key={j} className="p-2">
+                    {row[col] !== undefined && row[col] !== null
+                      ? row[col].toString()
+                      : "-"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   if (chartType === "gauge") {
     const value = safeData?.[0]?.value || 0;
     return (
@@ -361,23 +362,47 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "radar") {
-    return (
-      <ScrollWrapper>
-        <ResponsiveContainer width="100%" height={300}>
-          <RadarChart data={safeData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+  return (
+    <div className="w-full overflow-x-auto overflow-y-hidden">
+      <div className="min-w-[700px] h-[350px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart
+            data={safeData}
+            margin={{ top: 20, right: 80, bottom: 20, left: 80 }} // ✅ extra space
+          >
             <PolarGrid stroke={gridColor} />
-            <PolarAngleAxis dataKey="displayX" stroke={axisColor} tick={{ fill: axisColor, fontSize: 8 }} />
-            <PolarRadiusAxis stroke={axisColor} angle={90} tick={{ fill: axisColor, fontSize: 8 }} tickFormatter={formatYAxis} />
-            <Radar name={activeMetric} dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+
+            <PolarAngleAxis
+              dataKey="displayX"
+              stroke={axisColor}
+              tick={{ fill: axisColor, fontSize: 10 }} // slightly bigger
+            />
+
+            <PolarRadiusAxis
+              stroke={axisColor}
+              angle={90}
+              tick={{ fill: axisColor, fontSize: 10 }}
+              tickFormatter={formatYAxis}
+            />
+
+            <Radar
+              name={activeMetric}
+              dataKey="value"
+              stroke="#8884d8"
+              fill="#8884d8"
+              fillOpacity={0.6}
+            />
+
             <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
           </RadarChart>
         </ResponsiveContainer>
-      </ScrollWrapper>
-    );
-  }
- 
+      </div>
+    </div>
+  );
+}
+
   if (chartType === "waterfall") {
     return (
       <ScrollWrapper>
@@ -394,11 +419,11 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "kpi") {
     return (
       <ScrollWrapper>
-        <div className="flex flex-col items-center justify-center h-full py-6 min-h-[150px]">
+        <div className="flex flex-col items-center justify-center py-1">
           <p className="text-sm text-gray-400 mb-1">{activeMetric || "Total"}</p>
           <p className="text-4xl font-bold" style={{ color: textColor }}>
             {formatYAxis(safeData[0]?.value || 0)}
@@ -407,8 +432,7 @@ if (typeof data === "object" && !Array.isArray(data)) {
       </ScrollWrapper>
     );
   }
- 
+
   return <p className="text-red-400 p-4">Unsupported chart type: {chartType}</p>;
 }
- 
- 
+

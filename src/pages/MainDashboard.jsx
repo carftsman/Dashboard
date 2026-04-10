@@ -29,10 +29,16 @@ export default function Dashboard() {
  
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
  
-  const [editIndex, setEditIndex] = useState(null);
+  const [editChartId, setEditChartId] = useState(null);
  
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [width, setWidth] = useState(window.innerWidth);
  
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const showToast = (message, type = "success") => {
  
     setToast({ show: true, message, type });
@@ -64,50 +70,67 @@ export default function Dashboard() {
   const [fileName, setFileName] = useState("Dashboard_Report");
  
   const [isExporting, setIsExporting] = useState(false);
-  const [width, setWidth] = useState(window.innerWidth);
   const handleChartUpdated = async (updatedChart) => {
-  // ✅ 1. Update UI instantly (optional but good)
-  setCharts((prevCharts) =>
-    prevCharts.map((c) =>
-      c.id === updatedChart.id
-        ? { ...c, ...updatedChart }
-        : c
-    )
-  );
+    // ✅ 1. Update UI instantly (optional but good)
+    setCharts((prevCharts) =>
+      prevCharts.map((c) =>
+        c.id === updatedChart.id
+          ? { ...c, ...updatedChart }
+          : c
  
-  // ✅ 2. REFETCH FROM BACKEND (IMPORTANT)
-  await fetchDashboardData();
+      )
  
-  setIsOverlayOpen(false);
-  showToast("Chart updated successfully!");
-};
+    );
+ 
+    // ✅ 2. REFETCH FROM BACKEND (IMPORTANT)
+    await fetchDashboardData();
+ 
+    setIsOverlayOpen(false);
+    setEditChartId(null);
+    showToast("Chart updated successfully!");
+  };
  
   const handleExportPDF = async () => {
  
     try {
  
-setIsExporting(true);
+      setIsExporting(true);
  
-// ✅ GET ELEMENT
-const element = document.getElementById("dashboard-content");
+      const element = document.getElementById("dashboard-content");
  
-// ✅ REMOVE SCROLL (CLEAN WAY)
-document.body.classList.add("pdf-export");
+      const canvas = await html2canvas(element, {
  
-// ✅ OPTIONAL HEIGHT FIX
-element.style.height = "auto";
+        scale: 2,
  
-const canvas = await html2canvas(element, {
-  scale: 2,
-  useCORS: true,
-  backgroundColor: darkMode ? "#020617" : "#f3f4f6",
-  windowWidth: element.scrollWidth,
-  windowHeight: element.scrollHeight,
-});
+        useCORS: true,
  
-// ✅ RESTORE UI
-document.body.classList.remove("pdf-export");
-element.style.height = "";
+        backgroundColor: darkMode ? "#020617" : "#f3f4f6",
+ 
+        logging: false,
+ 
+        windowWidth: element.scrollWidth,
+ 
+        windowHeight: element.scrollHeight,
+ 
+        onclone: (clonedDoc) => {
+ 
+          const clonedElement = clonedDoc.getElementById("dashboard-content");
+ 
+          if (clonedElement) {
+ 
+            clonedElement.style.backgroundColor = darkMode ? "#020617" : "#f3f4f6";
+ 
+            clonedElement.style.color = darkMode ? "#ffffff" : "#000000";
+ 
+            const toIgnore = clonedElement.querySelectorAll('[data-html2canvas-ignore]');
+ 
+            toIgnore.forEach(el => el.style.display = 'none');
+ 
+          }
+ 
+        }
+ 
+      });
  
       const imgData = canvas.toDataURL("image/png");
  
@@ -134,9 +157,7 @@ element.style.height = "";
       }
  
       pdf.addImage(imgData, "PNG", 0, 0, finalWidth, finalHeight);
-
  
-element.style.height = "";
       const pdfBlob = pdf.output("blob");
  
       // Automatic download for the user immediately
@@ -300,16 +321,8 @@ element.style.height = "";
     fetchDashboardData();
  
   }, [dashboardId, fileId]);
-  useEffect(() => {
-  const handleResize = () => setWidth(window.innerWidth);
- 
-  window.addEventListener("resize", handleResize);
- 
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
  
   if (loading) return <p className="p-6">Loading...</p>;
-  const savedLayout = JSON.parse(localStorage.getItem("dashboardLayout"));
  
   return (
     <div className={`flex min-h-screen ${darkMode ? "bg-[#020617]" : "bg-gray-100"} transition-all duration-300 relative`}>
@@ -376,91 +389,95 @@ element.style.height = "";
             </div>
           </div>
  
-        <GridLayout
-
-  className="layout"
-
-layout={
-  savedLayout ||
-  charts.map((c, i) => ({
-    i: String(c.id || i),
-    x: (i % 4) * 3,
-    y: Math.floor(i / 4) * 4,
-    w: 3,
-    h: 5   // 🔥 INCREASE HEIGHT
-  }))
-}
-
-  cols={12}
-
-  rowHeight={60}
-
-  width={width - 100}   // 🔥 FIX RESPONSIVE
-
-  draggableHandle=".drag-handle"
+          <div className="grid grid-cols-4 gap-6">
  
-  // 🔥 ADD THESE
-
-  isResizable={true}
-
-  isDraggable={true}
-
-  resizeHandles={['se', 'e', 's']}
+            {/* KPI SECTION (UNCHANGED) */}
+            <div className="col-span-4 flex flex-wrap gap-3 pb-2">
+              {charts
+                .filter((c) => c.type?.toLowerCase() === "kpi")
+                .flatMap((chart) =>
+                  (chart.data || []).map((item, i) => (
+                    <div
+                      key={`${chart.id}-${item?.name}-${i}`}
+                     className={`${cardBg} px-4 py-2 rounded-xl shadow transition-all border border-transparent hover:border-gray-500 w-fit`}
+                    >
+                      <p className={`text-xs ${textSub}`}>
+                        {item?.name || "N/A"}
+                      </p>
+                      <p className={`text-lg font-bold ${textMain}`}>
+                        {Number(item?.value || item?.reach || item?.clicks || 0)}
+                      </p>
+                    </div>
+                  ))
+                )}
+            </div>
  
-  onLayoutChange={(layout) => {
-
-    localStorage.setItem("dashboardLayout", JSON.stringify(layout));
-
-  }}
->
+           
+            <div className="col-span-4">
+              <GridLayout
+                className="layout"
+                layout={charts
+                  .filter((c) => c.type?.toLowerCase() !== "kpi")
+                  .map((chart, i) => ({
+                    i: String(chart.id),
+                    x: (i % 4) * 3,
+                    y: Math.floor(i / 4) * 3,
+                    w: 3,
+                    h: 2.5
+                  }))
+                }
+                cols={12}
+                rowHeight={50}
+                width={width - 120}
+                draggableHandle=".drag-handle"
+                isResizable={true}
+                isDraggable={true}
+                resizeHandles={['se', 'e', 's']}
+              >
  
-  {charts
-
-  .filter((c) => c.type?.toLowerCase() !== "kpi")
-
-  .map((chart, index) => (
-<div
-  key={chart.id || index}
-  className={`${cardBg} p-3 rounded-xl shadow border border-transparent hover:border-blue-500`}
-  style={{ height: "100%", overflow: "hidden" }}
-
-      onClick={(e) => {
-  if (e.target.closest(".drag-handle")) return;
-  setEditIndex(index);
-  setIsOverlayOpen(true);
-}}
->
-
-      {/* 🔥 DRAG HANDLE */}
-<div className="drag-handle cursor-move text-xs mb-2 text-gray-400">
-
-        Drag
-</div>
+                {charts
+                  .filter((c) => c.type?.toLowerCase() !== "kpi")
+                  .map((chart) => (
+                    <div
+                      key={String(chart.id)}
+                      className={`${cardBg} p-4 rounded-xl shadow border border-transparent hover:border-blue-500 flex flex-col`}
+                    >
  
-      <h2 className={`text-sm mb-3 ${textMain}`}>
-                    {chart.config?.config?.title || chart.title_name || chart.name || chart.type}
-                  </h2>
+                      {/* DRAG HANDLE */}
+                      <div className="drag-handle cursor-move text-xs mb-2 text-gray-400">
+                        Drag
+                      </div>
  
+                      <h2 className={`text-sm mb-3 ${textMain}`}>
+                        {chart.config?.config?.title || chart.title_name || chart.name || chart.type}
+                      </h2>
  
-  <div style={{ width: "100%", height: "calc(100% - 40px)" }}>
-<ChartRenderer
-    type={chart.type}
-    data={Array.isArray(chart.data) ? chart.data : []}
-    config={chart.config}
-    darkMode={darkMode}
-  />
-</div>
-</div>
-
-))}
- </GridLayout>
+                      <div className="flex-1 min-h-0"
+                        onClick={() => {
+                          setEditChartId(chart.id);
+                          setIsOverlayOpen(true);
+                        }}
+                      >
+                        <ChartRenderer
+                          type={chart.type}
+                          data={Array.isArray(chart.data) ? chart.data : []}
+                          config={chart.config}
+                          darkMode={darkMode}
+                        />
+                      </div>
+                    </div>
+                  ))}
+ 
+              </GridLayout>
+            </div>
+          </div>
         </div>
  
         <ChartOverlay
  
           open={isOverlayOpen}
  
-          chart={editIndex !== null ? charts[editIndex] : null}
+          chart={charts.find(c => c.id === editChartId) || null}
  
           dashboardId={dashboardId}
  
