@@ -25,7 +25,6 @@ const UserLogs = () => {
   const role = localStorage.getItem("role")?.toLowerCase();
   const navigate = useNavigate();
 
-  // 🔥 FETCH LOGS (UNCHANGED)
   useEffect(() => {
     const fetchLogs = async () => {
       const token = localStorage.getItem("token");
@@ -63,7 +62,6 @@ const UserLogs = () => {
     fetchLogs();
   }, [navigate]);
 
-  // 🔥 FILTER LOGIC
   const filteredLogs = logs.filter((log) => {
     const searchValue = query.toLowerCase().trim();
 
@@ -110,7 +108,6 @@ const UserLogs = () => {
   const filteredTotalPages =
     Math.ceil(filteredLogs.length / itemsPerPage) || 1;
 
-  // 🔥 RESET PAGE ON FILTER CHANGE
   useEffect(() => {
     setPage(1);
   }, [query, startDate, endDate]);
@@ -186,7 +183,6 @@ const UserLogs = () => {
             </p>
           </div>
 
-          {/* 🔥 SEARCH + DATE FILTER */}
           <div className="flex flex-wrap gap-3 mb-4">
             <input
               value={query}
