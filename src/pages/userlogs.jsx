@@ -11,7 +11,7 @@ const UserLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [sortOrder, setSortOrder] = useState("desc");
   const [query, setQuery] = useState("");
   const [limit] = useState("");
 
@@ -48,7 +48,7 @@ const UserLogs = () => {
 
         const logsData = response.data.data || [];
         setLogs(logsData);
-        
+
       } catch (err) {
         if (err.response?.status === 401) {
           setError("You are not authorized to view logs");
@@ -93,14 +93,19 @@ const UserLogs = () => {
 
     return matchesSearch;
   });
+  const sortedLogs = [...filteredLogs].sort((a, b) => {
+  const dateA = new Date(a.time);
+  const dateB = new Date(b.time);
+  return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+});
 
   // 🔥 PAGINATION BASED ON FILTER
   const itemsPerPage = 10;
 
-  const paginatedLogs = filteredLogs.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage
-  );
+  const paginatedLogs = sortedLogs.slice(
+  (page - 1) * itemsPerPage,
+  page * itemsPerPage
+);
 
   const filteredTotalPages =
     Math.ceil(filteredLogs.length / itemsPerPage) || 1;
@@ -205,6 +210,17 @@ const UserLogs = () => {
                 className="bg-transparent outline-none text-sm w-40"
                 maxDate={new Date()}
               />
+            </div>
+
+            <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 bg-white">
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="bg-transparent outline-none text-sm"
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
             </div>
           </div>
 

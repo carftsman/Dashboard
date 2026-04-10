@@ -12,7 +12,7 @@ export default function Reports() {
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
   const role = localStorage.getItem("role");
-
+  const [sortOrder, setSortOrder] = useState("desc");
   // DATE RANGE STATES
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -31,7 +31,7 @@ export default function Reports() {
       const formattedData = response.data.map((item) => ({
         id: item.reportId,
         name: item.reportName || item.fileName,
-        generatedAt: item.generatedAt, 
+        generatedAt: item.generatedAt,
         fileUrl: item.fileUrl,
         dashboardName: item.dashboardName
       }));
@@ -76,6 +76,12 @@ export default function Reports() {
     }
 
     return matchesSearch;
+  })
+
+  .sort((a, b) => {
+    const dateA = new Date(a.generatedAt);
+    const dateB = new Date(b.generatedAt);
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
   });
 
   // 🔥 PAGINATION LOGIC (ADDED)
@@ -94,10 +100,10 @@ export default function Reports() {
       <AdminSidebar />
       <div className="flex min-h-screen bg-gray-100">
         <div className="flex-1 flex flex-col ml-[220px]">
-          
+
           {/* HEADER */}
           <div className="bg-white px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 shadow-sm border-b">
-            
+
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-bold text-gray-800 whitespace-normal break-words max-w-[400px] leading-tight">
                 Reports
@@ -156,14 +162,24 @@ export default function Reports() {
                     className="bg-transparent outline-none text-sm w-44 cursor-pointer"
                     maxDate={new Date()}
                   />
+                  <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 bg-white shadow-sm">
+                    <select
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value)}
+                      className="bg-transparent outline-none text-sm text-gray-700 cursor-pointer"
+                    >
+                      <option value="desc">Newest First</option>
+                      <option value="asc">Oldest First</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <ReportTable 
+              <ReportTable
                 formattedData={currentItems.map(file => ({
                   ...file,
                   createdAt: file.generatedAt
-                }))} 
+                }))}
               />
 
               {/* 🔥 PAGINATION UI (ADDED) */}
