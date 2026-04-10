@@ -99,7 +99,7 @@ const UserLogs = () => {
   return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
 });
 
-  // 🔥 PAGINATION BASED ON FILTER
+ 
   const itemsPerPage = 10;
 
   const paginatedLogs = sortedLogs.slice(
