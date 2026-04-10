@@ -52,13 +52,20 @@ export default function Login() {
   };
 
   const validatePassword = (value) => {
-    if (value.length < 8 || value.length > 12) {
-      setPasswordError("Password must be 8-12 characters only");
+    if (value.length < 12 || value.length > 16) {
+      setPasswordError("Password must be 12 to 16 characters");
       return false;
-    }
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,12}$/;
-    if (!regex.test(value)) {
-      setPasswordError("Must include Upper, Lower, Number & Special character");
+    } else if (!/[A-Z]/.test(value)) {
+      setPasswordError("Include at least one uppercase letter");
+      return false;
+    } else if (!/[a-z]/.test(value)) {
+      setPasswordError("Include at least one lowercase letter");
+      return false;
+    } else if (!/[0-9]/.test(value)) {
+      setPasswordError("Include at least one number");
+      return false;
+    } else if (!/[!@#$%^&*]/.test(value)) {
+      setPasswordError("Include at least one special character");
       return false;
     } else {
       setPasswordError("");
@@ -68,7 +75,7 @@ export default function Login() {
 
   const handlePasswordChange = (e) => {
     const value = e.target.value;
-    if (value.length <= 12) {
+    if (value.length <= 16) {
       setPassword(value);
       validatePassword(value);
     }
@@ -198,9 +205,8 @@ export default function Login() {
                   setShowPassword(true);
                   setTimeout(() => setShowPassword(false), 3000);
                 }}
-                className={`flex items-center ${
-                  password ? "cursor-pointer text-gray-500" : "cursor-not-allowed text-gray-300"
-                }`}
+                className={`flex items-center ${password ? "cursor-pointer text-gray-500" : "cursor-not-allowed text-gray-300"
+                  }`}
               >
                 {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
               </span>
