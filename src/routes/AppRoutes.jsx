@@ -14,7 +14,7 @@ import Reports from "../pages/Reports";
 import AdminDashboard from "../pages/admin/adminDashboard";
 import ManageUsers from "../pages/admin/Manageusers";
 import DataSchema from "../pages/admin/dataSchema";
-import UserLogs from "../pages/UserLogs";
+import UserLogs from "../pages/userlogs";
 import EditProfile from "../pages/EditProfile";
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
