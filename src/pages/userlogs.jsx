@@ -13,8 +13,6 @@ const UserLogs = () => {
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState("desc");
   const [query, setQuery] = useState("");
-  const [limit] = useState("");
-
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
