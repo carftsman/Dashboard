@@ -40,20 +40,20 @@ function ChangePassword() {
 
       //  API call to change password
       await api.post(
-        "/api/auth/change-password", 
-        {
-          email: email,
-          "current Password": currentPassword,
-          "new Password": newPassword,
-          "confirm Password": confirmPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, 
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  "/api/auth/change-password",
+  {
+    email: email,
+    currentPassword: currentPassword,
+    newPassword: newPassword,
+    confirmPassword: confirmPassword,
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  }
+);
 
       //  Success message
       toast.success("Password updated successfully ");

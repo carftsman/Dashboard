@@ -52,11 +52,11 @@ export default function Login() {
   };
 
   const validatePassword = (value) => {
-    if (value.length < 8 || value.length > 12) {
-      setPasswordError("Password must be 8-12 characters only");
+    if (value.length < 8 || value.length > 16) {
+      setPasswordError("Password must be 12-16 characters only");
       return false;
     }
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,12}$/;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{12,16}$/;
     if (!regex.test(value)) {
       setPasswordError("Must include Upper, Lower, Number & Special character");
       return false;
@@ -68,7 +68,7 @@ export default function Login() {
 
   const handlePasswordChange = (e) => {
     const value = e.target.value;
-    if (value.length <= 12) {
+    if (value.length <= 16) {
       setPassword(value);
       validatePassword(value);
     }

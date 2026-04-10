@@ -204,8 +204,7 @@ function DashboardSelection() {
                 key={card.dashboardId}
                 className="group relative bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-indigo-200"
               >
-                {/* Only show delete button if the user is an admin */}
-                {role === "admin" && (
+                {(role === "admin" || role === "super_admin") && (
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
                     <button
                       onClick={(e) => {
@@ -258,7 +257,7 @@ function DashboardSelection() {
               </div>
             ))}
 
-            {role === "admin" && (
+            {(role === "admin" || role === "super_admin") && (
               <div
                 onClick={() => setOpenCreateModal(true)}
                 className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 cursor-pointer hover:shadow-lg hover:-translate-y-1 hover:border-indigo-300 transition duration-300 h-[220px]"

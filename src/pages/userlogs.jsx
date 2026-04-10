@@ -4,10 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
 import axios from "axios";
 import AdminSidebar from "../components/AdminSidebar";
+
 const UserLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // ✅ NEW STATES
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const profileImage = localStorage.getItem("profileImage");
   const role = localStorage.getItem("role")?.toLowerCase();
   const navigate = useNavigate();
@@ -15,8 +21,6 @@ const UserLogs = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       const token = localStorage.getItem("token");
-
-      console.log("TOKEN:", token);
 
       if (!token) {
         setError("Session expired. Please login again.");
@@ -26,23 +30,19 @@ const UserLogs = () => {
 
       try {
         const response = await axios.get(
-          "https://dashboard-backend-cyrd.onrender.com/api/logs",
+          `https://dashboard-backend-cyrd.onrender.com/api/logs?page=${page}&limit=10`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          },
+          }
         );
 
-        console.log("API RESPONSE:", response.data);
-
-        // ✅ Extract correct data
         const logsData = response.data.data || [];
 
         setLogs(logsData);
+        setTotalPages(response.data.totalPages || 1); // ✅ NEW
       } catch (err) {
-        console.log("ERROR:", err.response?.data);
-
         if (err.response?.status === 401) {
           setError("You are not authorized to view logs");
         } else {
@@ -54,7 +54,7 @@ const UserLogs = () => {
     };
 
     fetchLogs();
-  }, [navigate]);
+  }, [navigate, page]); // ✅ depend on page
 
   const badgeClass = (action) => {
     switch (action) {
@@ -86,10 +86,7 @@ const UserLogs = () => {
     });
   };
 
-  // ✅ Loading
   if (loading) return <p className="p-5">Loading...</p>;
-
-  // ✅ Error
   if (error) return <p className="p-5 text-red-500">{error}</p>;
 
   return (
@@ -132,61 +129,85 @@ const UserLogs = () => {
 
           {/* Table */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto p-0 m-0">
-              <table className="w-full border-collapse m-0">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
                 <thead className="bg-gray-100 text-gray-600 uppercase text-[10px] md:text-xs">
                   <tr>
-                    <th className="px-3 md:px-6 py-3 text-left rounded-tl-xl">
-                      S.NO
-                    </th>
+                    <th className="px-3 md:px-6 py-3 text-left">S.NO</th>
                     <th className="px-3 md:px-6 py-3 text-left">USER</th>
+
+                    {/* ✅ NEW EMAIL COLUMN */}
+                    <th className="px-3 md:px-6 py-3 text-left">EMAIL</th>
+
                     <th className="px-3 md:px-6 py-3 text-left">ACTION</th>
                     <th className="px-3 md:px-6 py-3 text-left">DESCRIPTION</th>
-                    <th className="px-3 md:px-6 py-3 text-left rounded-tr-xl">
-                      TIME
-                    </th>
+                    <th className="px-3 md:px-6 py-3 text-left">TIME</th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-gray-200">
-                  {Array.isArray(logs) && logs.length > 0 ? (
+                  {logs.length > 0 ? (
                     logs.map((log, index) => (
-                      <tr key={log.sNo || index} className="hover:bg-gray-50">
-                        <td className="px-3 md:px-6 py-3 text-gray-500">
-                          {log.sNo}
-                        </td>
-                        <td className="px-3 md:px-6 py-3 font-medium text-gray-800">
+                      <tr key={log.sNo || index}>
+                        <td className="px-3 md:px-6 py-3">{log.sNo}</td>
+                        <td className="px-3 md:px-6 py-3 font-medium">
                           {log.user}
                         </td>
+
+                        {/* ✅ EMAIL DATA */}
+                        <td className="px-3 md:px-6 py-3 text-gray-600">
+                          {log.email || "-"}
+                        </td>
+
                         <td className="px-3 md:px-6 py-3">
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeClass(
-                              log.action,
+                              log.action
                             )}`}
                           >
                             {log.action}
                           </span>
                         </td>
-                        <td className="px-3 md:px-6 py-3 text-gray-600 break-words max-w-xs">
+                        <td className="px-3 md:px-6 py-3 text-gray-600">
                           {log.description}
                         </td>
-                        <td className="px-3 md:px-6 py-3 text-gray-400 text-xs md:text-sm">
+                        <td className="px-3 md:px-6 py-3 text-gray-400 text-xs">
                           {formatTime(log.time)}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td
-                        colSpan="5"
-                        className="text-center py-6 text-gray-500"
-                      >
+                      <td colSpan="6" className="text-center py-6">
                         No logs available
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* ✅ PAGINATION */}
+            <div className="flex justify-between items-center p-4">
+              <button
+                onClick={() => setPage((p) => p - 1)}
+                disabled={page === 1}
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Prev
+              </button>
+
+              <span className="text-sm text-gray-600">
+                Page {page} of {totalPages}
+              </span>
+
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page === totalPages}
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>
@@ -196,5 +217,3 @@ const UserLogs = () => {
 };
 
 export default UserLogs;
-
-

@@ -11,6 +11,9 @@ import api from "../api/apiConfig";
 import html2canvas from "html2canvas";
 
 import jsPDF from "jspdf";
+import GridLayout from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 
 export default function Dashboard() {
 
@@ -26,10 +29,16 @@ export default function Dashboard() {
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
-  const [editIndex, setEditIndex] = useState(null);
+  const [editChartId, setEditChartId] = useState(null);
 
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [width, setWidth] = useState(window.innerWidth);
 
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const showToast = (message, type = "success") => {
 
     setToast({ show: true, message, type });
@@ -62,21 +71,24 @@ export default function Dashboard() {
 
   const [isExporting, setIsExporting] = useState(false);
   const handleChartUpdated = async (updatedChart) => {
-  // ✅ 1. Update UI instantly (optional but good)
-  setCharts((prevCharts) =>
-    prevCharts.map((c) =>
-      c.id === updatedChart.id
-        ? { ...c, ...updatedChart }
-        : c
-    )
-  );
+    // ✅ 1. Update UI instantly (optional but good)
+    setCharts((prevCharts) =>
+      prevCharts.map((c) =>
+        c.id === updatedChart.id
+          ? { ...c, ...updatedChart }
+          : c
 
-  // ✅ 2. REFETCH FROM BACKEND (IMPORTANT)
-  await fetchDashboardData();
+      )
 
-  setIsOverlayOpen(false);
-  showToast("Chart updated successfully!");
-};
+    );
+
+    // ✅ 2. REFETCH FROM BACKEND (IMPORTANT)
+    await fetchDashboardData();
+
+    setIsOverlayOpen(false);
+    setEditChartId(null);
+    showToast("Chart updated successfully!");
+  };
 
   const handleExportPDF = async () => {
 
@@ -378,72 +390,86 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-4 gap-6">
-            <div className="col-span-4 flex gap-4 overflow-x-auto pb-2">
 
+            {/* KPI SECTION (UNCHANGED) */}
+            <div className="col-span-4 flex flex-wrap gap-3 pb-2">
               {charts
-
                 .filter((c) => c.type?.toLowerCase() === "kpi")
-
                 .flatMap((chart) =>
-
                   (chart.data || []).map((item, i) => (
                     <div
-
-                      key={`${item?.name}-${i}`}
-
-                      className={`${cardBg} p-4 rounded-xl shadow min-w-[150px] transition-all border border-transparent hover:border-gray-500`}
+                      key={`${chart.id}-${item?.name}-${i}`}
+                     className={`${cardBg} px-4 py-2 rounded-xl shadow transition-all border border-transparent hover:border-gray-500 w-fit`}
                     >
                       <p className={`text-xs ${textSub}`}>
-
                         {item?.name || "N/A"}
                       </p>
-
                       <p className={`text-lg font-bold ${textMain}`}>
-
                         {Number(item?.value || item?.reach || item?.clicks || 0)}
-                      </p></div>
-
+                      </p>
+                    </div>
                   ))
-
                 )}
             </div>
 
-            {charts
+            
+            <div className="col-span-4">
+              <GridLayout
+                className="layout"
+                layout={charts
+                  .filter((c) => c.type?.toLowerCase() !== "kpi")
+                  .map((chart, i) => ({
+                    i: String(chart.id),
+                    x: (i % 4) * 3,
+                    y: Math.floor(i / 4) * 3,
+                    w: 3,
+                    h: 2.5
+                  }))
+                }
+                cols={12}
+                rowHeight={50}
+                width={width - 120}
+                draggableHandle=".drag-handle"
+                isResizable={true}
+                isDraggable={true}
+                resizeHandles={['se', 'e', 's']}
+              >
 
-              .filter((c) => c.type?.toLowerCase() !== "kpi")
+                {charts
+                  .filter((c) => c.type?.toLowerCase() !== "kpi")
+                  .map((chart) => (
+                    <div
+                      key={String(chart.id)}
+                      className={`${cardBg} p-4 rounded-xl shadow border border-transparent hover:border-blue-500 flex flex-col`}
+                    >
 
-              .map((chart, index) => (
-                <div
+                      {/* DRAG HANDLE */}
+                      <div className="drag-handle cursor-move text-xs mb-2 text-gray-400">
+                        Drag
+                      </div>
 
-                  key={chart.id || `${chart.type}-${index}`}
+                      <h2 className={`text-sm mb-3 ${textMain}`}>
+                        {chart.config?.config?.title || chart.title_name || chart.name || chart.type}
+                      </h2>
 
-                  className={`${cardBg} p-4 rounded-xl shadow transition-all cursor-pointer border border-transparent hover:border-blue-500`}
+                      <div className="flex-1 min-h-0"
+                        onClick={() => {
+                          setEditChartId(chart.id);
+                          setIsOverlayOpen(true);
+                        }}
+                      >
+                        <ChartRenderer
+                          type={chart.type}
+                          data={Array.isArray(chart.data) ? chart.data : []}
+                          config={chart.config}
+                          darkMode={darkMode}
+                        />
+                      </div>
+                    </div>
+                  ))}
 
-                  onClick={() => {
-
-                    setEditIndex(index);
-
-                    setIsOverlayOpen(true);
-
-                  }}
-                >
-                  <h2 className={`text-sm mb-3 ${textMain}`}>
-                    {chart.config?.config?.title || chart.title_name || chart.name || chart.type}
-                  </h2>
-                  <ChartRenderer
-
-                    type={chart.type}
-
-                    data={Array.isArray(chart.data) ? chart.data : []}
-
-                    config={chart.config}
-
-                    darkMode={darkMode}
-
-                  />
-                </div>
-
-              ))}
+              </GridLayout>
+            </div>
           </div>
         </div>
 
@@ -451,7 +477,7 @@ export default function Dashboard() {
 
           open={isOverlayOpen}
 
-          chart={editIndex !== null ? charts[editIndex] : null}
+          chart={charts.find(c => c.id === editChartId) || null}
 
           dashboardId={dashboardId}
 
