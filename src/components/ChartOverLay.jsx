@@ -1,5 +1,4 @@
- 
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
  
 export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved, chart }) {
   const [showVisuals, setShowVisuals] = useState(true);
@@ -116,9 +115,9 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
   config = {
     groupBy: xAxis,
     metrics: [yAxis],
-    steps: [xAxis, yAxis] 
+    steps: [xAxis, yAxis]
   };
-
+ 
       } else if (typeUpper === "TABLE") {
         config = { columns: [xAxis, yAxis] };
       } else if (["KPI", "GAUGE", "WATERFALL"].includes(typeUpper)) {
@@ -259,4 +258,5 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
     </div>
   );
 }
+ 
  

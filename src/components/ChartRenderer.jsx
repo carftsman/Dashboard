@@ -19,6 +19,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   const axisColor = darkMode ? "#f8fafc" : "#111827";
   const tooltipBg = darkMode ? "#1e293b" : "#ffffff";
   const textColor = darkMode ? "#ffffff" : "#000000";
+  const FONT_SIZE = 10;
   // ✅ SAFETY FIX (prevents crash if bad data comes)
 if (typeof data === "object" && !Array.isArray(data)) {
   data = Object.entries(data).map(([key, value]) => ({
@@ -55,31 +56,31 @@ if (typeof data === "object" && !Array.isArray(data)) {
   }
  const buildFunnelData = (data, config) => {
   if (!Array.isArray(data)) return [];
-
+ 
   const groupKey = config?.groupBy || config?.steps?.[0];
   const metricKey = config?.metrics?.[0] || config?.steps?.[1];
-
+ 
   if (!groupKey) return [];
-
+ 
   const grouped = {};
-
+ 
   data.forEach((item) => {
     const key =
       item[groupKey] ||
       item.displayX ||
       item.name;
-
+ 
     const value =
       parseNumber(item[metricKey]) ||
       item.value ||
       0;
-
+ 
     if (!key) return;
-
+ 
     if (!grouped[key]) grouped[key] = 0;
     grouped[key] += value;
   });
-
+ 
   return Object.entries(grouped)
     .map(([key, val]) => ({
       displayX: key,
@@ -239,11 +240,16 @@ if (typeof data === "object" && !Array.isArray(data)) {
         <ResponsiveContainer width="100%" height={300}>
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid stroke={gridColor} />
-            <XAxis type="number" dataKey="x" stroke={axisColor} tick={{ fill: axisColor }} tickFormatter={formatYAxis} />
-            <YAxis type="number" dataKey="y" stroke={axisColor} tick={{ fill: axisColor }} tickFormatter={formatYAxis} />
-            {chartType === "bubble" && <ZAxis type="number" dataKey="size" range={[50, 400]} />}
-            <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
-            <Scatter data={safeData} fill={chartType === "bubble" ? "#8884d8" : "#00C49F"} />
+            <XAxis type="number" dataKey="x" stroke={axisColor} tick={{ fill: axisColor,fontSize: FONT_SIZE }} tickFormatter={formatYAxis} />
+            <YAxis type="number" dataKey="y" stroke={axisColor} tick={{ fill: axisColor, fontSize: FONT_SIZE }} tickFormatter={formatYAxis} />
+            {chartType === "bubble" && <ZAxis type="number" dataKey="size" range={[5, 60]} />}
+<Tooltip
+  contentStyle={{
+    backgroundColor: tooltipBg,
+    color: textColor,
+    fontSize: FONT_SIZE
+  }}
+/>            <Scatter data={safeData} fill={chartType === "bubble" ? "#8884d8" : "#00C49F"} />
           </ScatterChart>
         </ResponsiveContainer>
       </ScrollWrapper>
@@ -269,31 +275,31 @@ if (typeof data === "object" && !Array.isArray(data)) {
   }
  
   if (chartType === "funnel") {
-
+ 
   const funnelData = buildFunnelData(safeData, config);
-
+ 
   if (!funnelData.length) {
     return <p className="text-gray-400 text-center py-10">No data available</p>;
   }
-
+ 
   return (
     <ScrollWrapper>
       <ResponsiveContainer width="100%" height={300}>
         <FunnelChart margin={{ top: 10, right: 50, left: 50, bottom: 10 }}>
           <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
-          
+         
           <Funnel dataKey="value" data={funnelData} isAnimationActive>
             <LabelList
               position="right"
               fill={textColor}
               dataKey="displayX"
-              style={{ fontSize: '12px' }}
+              style={{ fontSize: 10 }}
             />
             {funnelData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Funnel>
-
+ 
         </FunnelChart>
       </ResponsiveContainer>
     </ScrollWrapper>
@@ -302,13 +308,13 @@ if (typeof data === "object" && !Array.isArray(data)) {
  
   if (chartType === "table") {
   const tableData = safeData; // ✅ use cleaned data
-
+ 
   const columns = tableData.length
     ? Object.keys(
         tableData.reduce((acc, obj) => ({ ...acc, ...obj }), {})
       )
     : [];
-
+ 
   return (
     <div className="overflow-auto max-h-[300px] w-full border border-gray-700 rounded custom-scrollbar">
       <table className="w-full text-xs text-left">
@@ -321,7 +327,7 @@ if (typeof data === "object" && !Array.isArray(data)) {
             ))}
           </tr>
         </thead>
-
+ 
         <tbody className={darkMode ? "text-white" : "text-black"}>
           {tableData.map((row, i) => (
             <tr key={i} className="border-b border-gray-800">
@@ -347,7 +353,7 @@ if (typeof data === "object" && !Array.isArray(data)) {
         <ResponsiveContainer width="100%" height={250}>
           <RadialBarChart innerRadius="70%" outerRadius="100%" data={[{ name: "value", value }]} startAngle={180} endAngle={0}>
             <RadialBar minAngle={15} background clockWise dataKey="value" fill="#00C49F" />
-            <text x="50%" y="60%" textAnchor="middle" dominantBaseline="middle" fill={textColor} fontSize="20">
+            <text x="50%" y="60%" textAnchor="middle" dominantBaseline="middle" fill={textColor} fontSize="10">
               {formatYAxis(value)}
             </text>
           </RadialBarChart>
@@ -404,4 +410,5 @@ if (typeof data === "object" && !Array.isArray(data)) {
  
   return <p className="text-red-400 p-4">Unsupported chart type: {chartType}</p>;
 }
+ 
  

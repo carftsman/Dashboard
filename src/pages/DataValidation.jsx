@@ -122,22 +122,22 @@ export default function DataValidation() {
  
   const handleProcess = async () => {
   if (totalCriticalErrors > 0) return;
-
+ 
   try {
     setProcessing(true);
     setProcessError("");
-
+ 
     // ✅ Step 1: process file
     const res = await processFile(fileId);
-
+ 
     if (res.status === "FAILED") {
       setProcessError(res.message || "Processing failed");
       return;
     }
-
+ 
     // ✅ Step 2: get mappings from previous page
     const mappings = location.state?.mappings;
-
+ 
     if (!mappings) {
       setProcessError("Mappings missing. Please go back and map columns.");
       return;
@@ -347,8 +347,8 @@ export default function DataValidation() {
                           )}
                         </div>
  
-                      
-                 
+                        {/* Actions */}
+                       
                       </div>
                     );
                   })}
@@ -362,5 +362,6 @@ export default function DataValidation() {
     </div>
   );
 }
+ 
  
  

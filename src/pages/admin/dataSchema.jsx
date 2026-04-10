@@ -19,8 +19,6 @@ import {
   FiMinusCircle,
   FiBarChart2
 } from "react-icons/fi";
- 
-/* ✅ ADDED */
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import VisualizationModal from "../../components/VisualizationModal";
@@ -165,8 +163,8 @@ export default function DataSchema() {
               </button>
             </div>
           </div>
+
  
-          {/* ✅ BLUR OVERLAY */}
           {showBlur && (
             <div className="fixed inset-0 backdrop-blur-sm bg-black/10 z-40 pointer-events-none"></div>
           )}
@@ -294,16 +292,16 @@ export default function DataSchema() {
               </>
             )}
           </div>
- 
-          {/* Modal */}
+
+         
           {isModalOpen && (
             <div 
               className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center px-4 z-50"
-              onClick={() => setIsModalOpen(false)} // ✅ Closes when clicking background
+              onClick={() => setIsModalOpen(false)} 
             >
               <div 
                 className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg"
-                onClick={(e) => e.stopPropagation()} // ✅ Prevents close when clicking inside form
+                onClick={(e) => e.stopPropagation()} 
               >
                 <h2 className="text-lg font-semibold mb-4">
                   {isEditMode ? "Edit Column" : "Add Column"}
@@ -383,7 +381,7 @@ export default function DataSchema() {
         isOpen={overlayOpen}
         onClose={() => setOverlayOpen(false)}
         dashboardId={id}
-        
+        onSuccess={fetchColumns}
       />
 
       <ToastContainer

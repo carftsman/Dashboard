@@ -18,7 +18,7 @@ const Sidebar = () => {
   const [dashboards, setDashboards] = useState([]);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const isMobile = window.innerWidth < 768;
-
+  const role = localStorage.getItem("role")?.toLowerCase();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -87,7 +87,7 @@ const Sidebar = () => {
             <div className="h-[1px] bg-white/10 mx-[15px] my-[5px]" />
           </div>
 
-          
+
 
           {/* MENU */}
           <div className="mt-[15px] px-3 max-h-[65vh] overflow-y-auto sidebar-scroll">
@@ -157,19 +157,22 @@ const Sidebar = () => {
             )}
 
             {/* USERS LOG */}
-            <NavLink
-              to="/user-logs"
-              className={({ isActive }) =>
-                `relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px] transition-all
-                ${isActive
-                  ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
-                  : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"
-                }`
-              }
-            >
-              <FaUserClock className="text-[15px]" />
-              <span>Users Log</span>
-            </NavLink>
+            {/* USERS LOG - ONLY FOR ANALYST */}
+            {role === "analyst" && (
+              <NavLink
+                to="/user-logs"
+                className={({ isActive }) =>
+                  `relative flex items-center gap-3 px-4 py-3 mb-[10px] rounded-[30px] text-[14px] transition-all
+      ${isActive
+                    ? "bg-gradient-to-r from-[#e2e8f0] to-[#cfd6e2] text-[#1e293b] font-semibold shadow-md translate-x-[5px]"
+                    : "text-slate-300 hover:bg-white/10 hover:translate-x-[3px]"
+                  }`
+                }
+              >
+                <FaUserClock className="text-[15px]" />
+                <span>Users Log</span>
+              </NavLink>
+            )}
           </div>
         </div>
 

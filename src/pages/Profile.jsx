@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FiMail, FiPhone, FiBriefcase, FiEdit, FiLock, FiUser } from "react-icons/fi";
 import axios from "axios";
 import { FaArrowLeft } from "react-icons/fa";
-import api from '../api/apiConfig'; 
+import api from '../api/apiConfig';
 
 function Profile() {
 
@@ -29,7 +29,7 @@ function Profile() {
         }
         const res = await api.get("/api/users/profile", {
           headers: {
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -62,23 +62,26 @@ function Profile() {
     <div className="flex bg-gray-100 min-h-screen">
 
       {/* Sidebar */}
-      {role === "admin" ? <AdminSidebar /> : <Sidebar />}
-
+      {(role === "admin" || role === "super_admin") ? (
+        <AdminSidebar />
+      ) : (
+        <Sidebar />
+      )}
       <div className="flex-1 ml-[220px]">
 
         {/* HEADER */}
         <div className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
 
-        <button
-  onClick={() => navigate(-1)}
-  className="flex items-center gap-2 text-gray-600 font-medium bg-transparent p-0 
-             hover:text-gray-600 hover:bg-transparent 
-             focus:outline-none focus:ring-0 
-             active:bg-transparent active:text-gray-600"
->
-  <FaArrowLeft />
-  Back
-</button>
+          {/* <button
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2 text-gray-600 font-medium bg-transparent p-0 
+                       hover:text-gray-600 hover:bg-transparent 
+                       focus:outline-none focus:ring-0 
+                       active:bg-transparent active:text-gray-600"
+          >
+            <FaArrowLeft />
+            Back
+          </button> */}
 
           <div className="flex-1"></div>
           <div></div>
@@ -164,17 +167,7 @@ function Profile() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="bg-gray-100 p-2 rounded-md">
-                    <FiPhone className="text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Phone Number</p>
-                    <p className="text-sm font-medium">
-                      9988776655
-                    </p>
-                  </div>
-                </div>
+               
               </div>
 
               {/* WORK */}
