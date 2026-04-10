@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { getMappingData, postManualMapping } from "../services/uploadService";
-
 const SpeakerIcon = () => (
   <svg className="w-[18px] h-[18px] text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
@@ -49,7 +48,7 @@ const MinusCircleIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
-
+ 
 const getSystemIcon = (name) => {
   const n = (name || "").toLowerCase();
   if (n.includes("campaign")) return <SpeakerIcon />;
@@ -58,7 +57,7 @@ const getSystemIcon = (name) => {
   if (n.includes("click")) return <CursorIcon />;
   return <DocumentIcon />;
 };
-
+ 
 export default function ColumnMapping() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -69,17 +68,16 @@ export default function ColumnMapping() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [mappingData, setMappingData] = useState(null);
-
   const [mappings, setMappings] = useState({});
   const [submitting, setSubmitting] = useState(false);
-
+ 
   useEffect(() => {
     if (!fileId) {
       setError("No file ID provided. Please upload a file first.");
       setLoading(false);
       return;
     }
-
+ 
     const fetchData = async () => {
       try {
         console.log("fetchData entered....", fileId);
@@ -151,10 +149,10 @@ export default function ColumnMapping() {
         setLoading(false);
       }
     };
-
+ 
     fetchData();
   }, [fileId]);
-
+ 
   const handleSelectChange = (sysColKey, value) => {
     setMappings((prev) => {
       const newMappings = { ...prev };
@@ -166,13 +164,13 @@ export default function ColumnMapping() {
       return newMappings;
     });
   };
-
+ 
   const handleReviewData = async () => {
     try {
       setSubmitting(true);
       setError("");
       setSuccess("");
-
+ 
       const sysCols = mappingData?.dashboardColumns || [];
       const totalCols = sysCols.length;
       const mappedCols = Object.keys(mappings).length;
@@ -183,26 +181,24 @@ export default function ColumnMapping() {
         setSubmitting(false);
         return;
       }
-
+ 
       const dashboardId = mappingData?.dashboardId || mappingData?.dashboardColumns?.[0]?.dashboardId || 1;
-
       const payloadMappings = Object.entries(mappings).map(([templateField, fileColumn]) => ({
         dashboardId,
         templateField,
         fileColumn,
       }));
-
       if (payloadMappings.length === 0) {
         setError("No mappings found to submit.");
         setSubmitting(false);
         return;
       }
-
+ 
       await postManualMapping({
         fileId,
         mappings: payloadMappings,
       });
-
+ 
       setSuccess("Mappings successfully saved! Redirecting to validation...");
 
 
@@ -221,12 +217,11 @@ export default function ColumnMapping() {
       setSubmitting(false);
     }
   };
-
   const sysCols = mappingData?.dashboardColumns || [];
   const fileCols = mappingData?.fileColumns || [];
   const totalCols = sysCols.length;
   const mappedCols = Object.keys(mappings).length;
-
+ 
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
       <Sidebar />
@@ -262,7 +257,7 @@ export default function ColumnMapping() {
               </span>
             </div>
           )}
-
+ 
           {!loading && error && (
             <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -271,14 +266,14 @@ export default function ColumnMapping() {
               {error}
             </div>
           )}
-
+ 
           {!loading && success && (
             <div className="bg-green-50 text-green-700 border border-green-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
               <CheckCircleIcon />
               {success}
             </div>
           )}
-
+ 
           {!loading && sysCols.length > 0 && (
             <>
           
@@ -297,7 +292,7 @@ export default function ColumnMapping() {
                     const colKey = sysCol.columnKey;
                     const isMapped = !!mappings[colKey];
                     const selectedValue = mappings[colKey] || "";
-
+ 
                     return (
                       <div
                         key={colKey}
@@ -311,7 +306,6 @@ export default function ColumnMapping() {
                             {sysCol.displayName}
                           </span>
                         </div>
-
                         <div>
                           <select
                             value={selectedValue}
@@ -362,7 +356,7 @@ export default function ColumnMapping() {
                 <span className="text-[14px] font-medium text-[#64748b]">
                   {mappedCols} of {totalCols} columns mapped
                 </span>
-
+ 
                 <button
                   onClick={handleReviewData}
                   disabled={submitting}
@@ -392,9 +386,10 @@ export default function ColumnMapping() {
               </div>
             </>
           )}
-
+ 
         </main>
       </div>
     </div>
   );
 }
+ 

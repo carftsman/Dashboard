@@ -1,8 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
+
 import ReportTable from "../components/ReportTable";
+
 import Sidebar from "../components/Sidebar";
+
 import { useEffect, useState } from "react";
+
 import AdminSidebar from "../components/AdminSidebar";
+
 import api from '../api/apiConfig';
 import { FiUser, FiCalendar, FiAlertCircle } from "react-icons/fi";
 
@@ -11,11 +16,15 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function Reports() {
+
   const navigate = useNavigate();
+
   const { dashboardName, dashboardId } = useParams();
   const [files, setFiles] = useState([]);
+
   const [search, setSearch] = useState("");
   const role = localStorage.getItem("role");
+
   const [selectedDashboard, setSelectedDashboard] = useState(null);
   const profileImage = localStorage.getItem("profileImage");
   const canUpload = role !== "ADMIN" && role !== "MANAGER" && role !== "SUPER_ADMIN";
@@ -30,34 +39,50 @@ export default function Reports() {
   const [endDate, setEndDate] = useState(null);
 
   useEffect(() => {
+
     const fetchData = async () => {
+
       try {
+
         const response = await api.get(`/api/reports?dashboardId=${dashboardId}`);
         const formattedData = response.data.map((item) => ({
+
           id: item.id,
+
           name: item.name || item.fileName,
+
           createdAt: item.createdAt,
+
           fileUrl: item.fileUrl,
           dashboardName: item.dashboardName,
         }));
         setFiles(formattedData);
       } catch (error) {
+
         console.error("API error:", error.response || error.message);
+
       }
+
     };
+
     fetchData();
+
   }, [dashboardId]);
   useEffect(() => {
   setCurrentPage(1);
 }, [search, startDate, endDate, selectedDashboard]);
 
   const filteredFiles = files.filter((item) => {
+
     const name = item.name?.toLowerCase() || "";
+
     const dashboard = item.dashboardName?.toLowerCase() || "";
+
     const searchValue = search.toLowerCase().trim();
     const matchesSearch = name.includes(searchValue) || dashboard.includes(searchValue);
     const matchesDashboard = !selectedDashboard || item.dashboardName === selectedDashboard;
     return matchesSearch && matchesDashboard;
+
   });
 
   const processedFiles = filteredFiles
@@ -105,12 +130,15 @@ export default function Reports() {
           <div className="w-full lg:w-1/3 flex-shrink-0">
             <input
               type="text"
+
               placeholder="Search reports..."
+
               value={search}
+
               onChange={(e) => setSearch(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
             />
-          </div>
+</div>
 
           {/* ACTION/PROFILE SECTION */}
           <div className="flex items-center gap-4 flex-shrink-0">
@@ -196,4 +224,6 @@ export default function Reports() {
       </div>
     </div>
   );
+
 }
+ 

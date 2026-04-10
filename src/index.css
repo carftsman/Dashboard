@@ -128,3 +128,6 @@ table th {
   }
 
 }
+.pdf-export * {
+  overflow: visible !important;
+}
