@@ -22,17 +22,16 @@ const UserLogs = () => {
   const profileImage = localStorage.getItem("profileImage");
   const role = localStorage.getItem("role")?.toLowerCase();
   const navigate = useNavigate();
-
+ 
   useEffect(() => {
     const fetchLogs = async () => {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setError("Session expired. Please login again.");
         navigate("/");
         return;
       }
-
+ 
       try {
         const response = await axios.get(
           `https://dashboard-backend-cyrd.onrender.com/api/logs`,
@@ -56,7 +55,7 @@ const UserLogs = () => {
         setLoading(false);
       }
     };
-
+ 
     fetchLogs();
   }, [navigate]);
 
@@ -126,10 +125,10 @@ const UserLogs = () => {
         return "bg-gray-100 text-gray-600";
     }
   };
-
+ 
   const formatTime = (iso) => {
     if (!iso) return "-";
-
+ 
     return new Date(iso).toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
@@ -139,10 +138,9 @@ const UserLogs = () => {
       hour12: true,
     });
   };
-
   if (loading) return <p className="p-5">Loading...</p>;
   if (error) return <p className="p-5 text-red-500">{error}</p>;
-
+ 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {(role === "admin" || role === "super_admin") ? (
@@ -150,7 +148,7 @@ const UserLogs = () => {
       ) : (
         <Sidebar />
       )}
-
+ 
       <div className="flex-1 ml-[220px] flex flex-col">
         {/* Header */}
         <div className="h-[60px] bg-white flex items-center px-5 border-b border-[#eee]">
@@ -169,7 +167,7 @@ const UserLogs = () => {
             )}
           </div>
         </div>
-
+ 
         {/* Content */}
         <div className="pt-0 px-4 md:px-8 pb-4">
           <div className="mb-4">
@@ -233,7 +231,7 @@ const UserLogs = () => {
                     <th className="px-3 md:px-6 py-3 text-left">TIME</th>
                   </tr>
                 </thead>
-
+ 
                 <tbody className="divide-y divide-gray-200">
                   {paginatedLogs.length > 0 ? (
                     paginatedLogs.map((log, index) => (

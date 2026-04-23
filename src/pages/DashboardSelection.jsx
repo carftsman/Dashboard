@@ -294,6 +294,7 @@ function DashboardSelection() {
             window.location.reload();
           }}
           dashboardId={createdDashboardId}
+          
           token={token}
         />
       </div>
