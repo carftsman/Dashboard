@@ -121,56 +121,83 @@ export default function DataValidation() {
   };
  
   const handleProcess = async () => {
-  if (totalCriticalErrors > 0) return;
+    if (totalCriticalErrors > 0) return;
  
-  try {
-    setProcessing(true);
-    setProcessError("");
+    try {
+      setProcessing(true);
+      setProcessError("");
  
-    // ✅ Step 1: process file
-    const res = await processFile(fileId);
+      // ✅ Step 1: process file
+      const res = await processFile(fileId);
  
-    if (res.status === "FAILED") {
-      setProcessError(res.message || "Processing failed");
-      return;
+      if (res.status === "FAILED") {
+        setProcessError(res.message || "Processing failed");
+        return;
+      }
+ 
+      // ✅ Step 2: get mappings from previous page
+      const mappings = location.state?.mappings;
+ 
+      if (!mappings) {
+        setProcessError("Mappings missing. Please go back and map columns.");
+        return;
+      }
+      // ✅ Step 3: navigate to dashboard with data
+      navigate("/dashboard", {
+        state: {
+          dashboardId: location.state?.dashboardId, // ✅ ADD
+          fileId,
+          mappings,
+        },
+      });
+    } catch (err) {
+      setProcessError(err?.message || "Processing error");
+    } finally {
+      setProcessing(false);
+    }
+  };
+ 
+  // ADD THIS FUNCTION ABOVE return
+  const handleActionClick = (type) => {
+    if (type === "View Mapping") {
+      navigate("/column-mapping", {
+        state: {
+          fileId,
+          dashboardId: location.state?.dashboardId,
+        },
+      });
     }
  
-    // ✅ Step 2: get mappings from previous page
-    const mappings = location.state?.mappings;
- 
-    if (!mappings) {
-      setProcessError("Mappings missing. Please go back and map columns.");
-      return;
+    if (type === "Fix Errors") {
+      navigate("/column-mapping", {
+        state: {
+          fileId,
+          dashboardId: location.state?.dashboardId,
+        },
+      });
     }
-    // ✅ Step 3: navigate to dashboard with data
-    navigate("/dashboard", {
-      state: {
-         dashboardId: location.state?.dashboardId, // ✅ ADD
-    fileId,
-    mappings,
-      },
-    });
-  } catch (err) {
-    setProcessError(err?.message || "Processing error");
-  } finally {
-    setProcessing(false);
-  }
-};
+ 
+    if (type === "Remove Duplicates") {
+      navigate("/duplicate-resolution", {
+        state: { fileId },
+      });
+    }
+  };
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 ml-0 lg:ml-[220px]">
         <main className="flex-1 p-4 sm:p-6 lg:p-12 max-w-6xl mx-auto w-full">
-         
+ 
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <div>
-              <h1 className="text-2xl sm:text-[32px] font-[800] text-[#1e293b] tracking-tight mb-2">Data Validation</h1>
+              <h2 className="text-2xl sm:text-[32px] font-[700] text-[#1e293b] tracking-tight mb-2">Data Validation</h2>
               <p className="text-sm sm:text-[15px] text-[#64748b] tracking-wide">
                 Review and verify data quality before final processing.
               </p>
             </div>
-           
+ 
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <button
                 onClick={handleReupload}
@@ -182,11 +209,10 @@ export default function DataValidation() {
               <button
                 onClick={handleProcess}
                 disabled={totalCriticalErrors > 0 || processing}
-                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all flex-1 sm:flex-none ${
-                  totalCriticalErrors > 0 || processing
-                    ? "bg-[#1e293b] text-white opacity-50 cursor-not-allowed"
-                    : "bg-[#1e293b] hover:bg-[#0f172a] text-white shadow-md active:scale-[0.98]"
-                }`}
+                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all flex-1 sm:flex-none ${totalCriticalErrors > 0 || processing
+                  ? "bg-[#1e293b] text-white opacity-50 cursor-not-allowed"
+                  : "bg-[#1e293b] hover:bg-[#0f172a] text-white shadow-md active:scale-[0.98]"
+                  }`}
               >
                 {processing ? (
                   <span className="flex items-center gap-2">
@@ -237,118 +263,152 @@ export default function DataValidation() {
               {/* Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
                 {/* Total Records */}
-                <div className="bg-white border border-[#e2e8f0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                  <span className="text-xs sm:text-[14px] font-semibold text-[#64748b] mb-2 tracking-wide">Total Records</span>
+                <div className="bg-blue-50/40 border border-blue-100 rounded-2xl p-6 shadow-sm
+hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+ 
+                  <span className="text-xs sm:text-[14px] font-semibold text-blue-600 mb-2 tracking-wide">
+                    Total Records
+                  </span>
+ 
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl font-[800] text-[#1e293b]">
+                    <span className="text-3xl sm:text-4xl font-[800] text-black-700">
                       {totalRows.toLocaleString()}
                     </span>
-                    <DatabaseIcon />
-                  </div>
-                </div>
  
+                    <div className=" bg-blue-100">
+ 
+                    </div>
+                  </div>
+ 
+                </div>
                 {/* Critical Errors */}
-                <div className="bg-white border border-[#e2e8f0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                  <span className="text-xs sm:text-[14px] font-semibold text-[#64748b] mb-2 tracking-wide">Critical Errors</span>
+                <div className="bg-red-50/40 border border-red-100 rounded-2xl p-5 sm:p-6 shadow-sm
+hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+ 
+                  <span className="text-xs sm:text-[14px] font-semibold text-red-600 mb-2 tracking-wide">
+                    Critical Errors
+                  </span>
+ 
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-3xl sm:text-4xl font-[800] ${totalCriticalErrors > 0 ? 'text-red-500' : 'text-[#1e293b]'}`}>
+                    <span className={`text-3xl sm:text-4xl font-[800] ${totalCriticalErrors > 0 ? 'text-red-700' : 'text-[#1e293b]'
+                      }`}>
                       {totalCriticalErrors.toLocaleString()}
                     </span>
-                    {totalCriticalErrors > 0 && <ErrorIcon />}
+ 
+                    {totalCriticalErrors > 0 && (
+                      <div className="p-2 rounded-lg bg-red-100">
+                        <ErrorIcon />
+                      </div>
+                    )}
                   </div>
+ 
                 </div>
  
                 {/* Minor Warnings */}
-                <div className="bg-white border border-[#e2e8f0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between sm:col-span-2 md:col-span-1">
-                  <span className="text-xs sm:text-[14px] font-semibold text-[#64748b] mb-2 tracking-wide">Minor Warnings</span>
+                <div className="bg-yellow-50/40 border border-yellow-100 rounded-2xl p-5 sm:p-6 shadow-sm
+hover:shadow-md transition-all duration-200 flex flex-col justify-between sm:col-span-2 md:col-span-1">
+ 
+                  <span className="text-xs sm:text-[14px] font-semibold text-yellow-600 mb-2 tracking-wide">
+                    Minor Warnings
+                  </span>
+ 
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl font-[800] text-[#0f172a]">
+                    <span className={`text-3xl sm:text-4xl font-[800] ${totalMinorWarnings > 0 ? 'text-yellow-700' : 'text-[#0f172a]'
+                      }`}>
                       {totalMinorWarnings.toLocaleString()}
                     </span>
+ 
                     {totalMinorWarnings > 0 && (
-                      <svg className="w-5 h-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
+                      <div className="p-2 rounded-lg bg-yellow-100">
+                        <svg className="w-5 h-5 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      </div>
                     )}
                   </div>
+ 
                 </div>
               </div>
  
               {/* Validation Checks Table (Desktop) / Cards (Mobile) */}
               <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden mb-6">
-               
-                {/* Table Header - Only visible on sm and above */}
-               <div className="hidden sm:grid grid-cols-[3fr_1.5fr_5fr] gap-4 bg-[#f8fafc] border-b border-[#e2e8f0] px-6 py-4">
-  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Validation Check</div>
-  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Status</div>
-  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Details</div>
-</div>
  
-                {/* Table Body */}
+                {/* HEADER */}
+                <div className="hidden sm:grid grid-cols-[3fr_1.5fr_4fr_1fr] gap-4 bg-[#f8fafc] border-b border-[#e2e8f0] px-6 py-4">
+                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Validation Check</div>
+                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Status</div>
+                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest">Details</div>
+                  <div className="text-[#475569] text-xs font-[800] uppercase tracking-widest text-right">Actions</div>
+                </div>
+ 
+                {/* BODY */}
                 <div className="flex flex-col">
                   {validationChecks.map((check, index) => {
                     const hasIssue = check.count > 0;
-                   
+ 
                     let statusLabel = "PASSED";
-                    let statusStyles = "bg-[#eafbf0] text-[#1aa454] border-[#bbf3d0]/30";
-                    let StatusIcon = () => <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
+                    let statusStyles = "bg-[#eafbf0] text-[#1aa454]";
+                    let StatusIcon = () => (
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    );
  
                     if (hasIssue) {
-                      if (check.isCritical && check.title === "Missing Columns") {
-                        statusLabel = "FAILED";
-                        statusStyles = "bg-[#fff1f2] text-[#e11d48] border-[#fecdd3]/30";
-                        StatusIcon = () => <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
-                      } else if (check.isCritical && check.title === "Invalid Data Types") {
+                      if (check.title === "Invalid Data Types") {
                         statusLabel = "WARNING";
-                        statusStyles = "bg-[#f1f5f9] text-[#475569] border-[#cbd5e1]/30";
-                        StatusIcon = () => <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>;
-                      } else if (check.title === "Duplicate IDs" || check.title === "Format Errors") {
+                      } else {
                         statusLabel = "FAILED";
-                        statusStyles = "bg-[#fff1f2] text-[#e11d48] border-[#fecdd3]/30";
-                        StatusIcon = () => <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
                       }
                     }
  
                     return (
                       <div
                         key={check.title}
-                        className={`flex flex-col sm:grid sm:grid-cols-[3fr_1.5fr_5fr] gap-4 px-5 sm:px-6 py-5 sm:py-6 items-start border-b border-[#f1f5f9] hover:bg-[#f8fafc]/50 transition-colors ${
-                          index === validationChecks.length - 1 ? "border-0" : ""
-                        }`}
+                        className={`flex flex-col sm:grid sm:grid-cols-[3fr_1.5fr_4fr_1fr] gap-4 px-5 sm:px-6 py-5 sm:py-6 items-start border-b ${index === validationChecks.length - 1 ? "border-0" : ""
+                          }`}
                       >
-                        {/* Check Name */}
-                        <div className="w-full">
-                          <h3 className="text-[15px] font-[800] text-[#1e293b] mb-1">{check.title}</h3>
-                          <p className="text-[13px] text-[#64748b] leading-relaxed pr-0 sm:pr-4">{check.desc}</p>
+                        {/* NAME */}
+                        <div>
+                          <h3 className="text-[15px] font-[800] text-[#1e293b] mb-1">
+                            {check.title}
+                          </h3>
+                          <p className="text-[13px] text-[#64748b]">{check.desc}</p>
                         </div>
  
-                        {/* Status */}
-                        <div className="flex pt-1 mt-2 sm:mt-0">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 pb-1.5 rounded-full text-[11px] font-[800] tracking-wider uppercase border shadow-sm ${statusStyles}`}>
+                        {/* STATUS */}
+                        <div>
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-[800] ${statusStyles}`}>
                             <StatusIcon />
                             {statusLabel}
                           </span>
                         </div>
  
-                        {/* Details */}
-                        <div className="pt-1 pr-0 sm:pr-6 mt-2 sm:mt-0 w-full">
+                        {/* DETAILS */}
+                        <div>
                           {hasIssue ? (
-                            <p className="text-sm sm:text-[14px] text-[#334155] leading-relaxed">
-                              {/* If count is present, we highlight the number in bold red/dark as seen in mockup */}
-                              <span className={statusLabel === 'FAILED' ? 'font-[700] text-[#e11d48]' : 'font-[700] text-[#1e293b]'}>
-                                {check.count} {check.title === "Duplicate IDs" ? "duplicate entries" : "rows"}
-                              </span>{" "}
-                              {check.failDetails.replace(`${check.count} rows `, '').replace(`${check.count} duplicate entries `, '').replace(`${check.count} `, '')}
+                            <p className="text-sm text-[#334155]">
+                              <span className="font-[700]">{check.count}</span>{" "}
+                              {check.failDetails}
                             </p>
                           ) : (
-                            <p className="text-sm sm:text-[14px] text-[#64748b] leading-relaxed">
+                            <p className="text-sm text-[#64748b]">
                               {check.successDetails}
                             </p>
                           )}
                         </div>
  
-                        {/* Actions */}
-                       
+                        {/* ✅ ACTIONS */}
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => handleActionClick(check.actionBtn)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+bg-blue-50 text-blue-600 border border-blue-100
+hover:bg-blue-100 hover:border-blue-200
+transition-all duration-200"
+                          >
+                            {check.actionBtn}
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -362,6 +422,4 @@ export default function DataValidation() {
     </div>
   );
 }
- 
- 
  

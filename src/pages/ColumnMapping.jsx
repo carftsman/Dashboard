@@ -221,161 +221,115 @@ export default function ColumnMapping() {
   const fileCols = mappingData?.fileColumns || [];
   const totalCols = sysCols.length;
   const mappedCols = Object.keys(mappings).length;
- 
-  return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 ml-[220px]">
-        <main className="flex-1 p-6 lg:p-12 max-w-6xl mx-auto w-full">
 
-      
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 bg-[#eef2f6] text-[#475569] hover:bg-[#e2e8f0] px-4 py-2.5 rounded-xl text-sm font-semibold mb-8 transition-colors"
-          >
-            <BackIcon />
-            Back to Upload
-          </button>
+  // ── Render ────────────────────────────────────────────────────────────────
+return (
+  <div className="flex min-h-screen bg-[#f8fafc]">
+    <Sidebar />
+    <div className="flex-1 flex flex-col min-w-0 ml-[220px]">
+      <main className="flex-1 p-6 lg:p-12 max-w-6xl mx-auto w-full">
 
-         
-          <div className="mb-8">
-            <h1 className="text-3xl font-[800] text-[#1e293b] tracking-tight mb-2">Map your columns</h1>
-            <p className="text-[15px] text-[#64748b] max-w-4xl tracking-wide leading-relaxed">
-              Match your uploaded dataset columns to the required system fields to ensure data accuracy and reporting consistency across your marketing campaigns.
-            </p>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 bg-[#eef2f6] text-[#475569] hover:bg-[#e2e8f0] px-4 py-2.5 rounded-xl text-sm font-semibold mb-8 transition-colors"
+        >
+          <BackIcon />
+          Back to Upload
+        </button>
+
+        <div className="mb-8">
+          <h1 className="text-3xl font-[800] text-[#1e293b] tracking-tight mb-2">
+            Map your columns
+          </h1>
+          <p className="text-[15px] text-[#64748b] max-w-4xl tracking-wide leading-relaxed">
+            Match your uploaded dataset columns to the required system fields.
+          </p>
+        </div>
+
+        {loading && (
+          <div className="flex justify-center py-20">
+            Loading mapping data...
           </div>
+        )}
 
-       
-          {loading && (
-            <div className="flex justify-center py-20">
-              <span className="flex items-center gap-2 text-gray-500 font-medium">
-                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                Loading mapping data...
-              </span>
-            </div>
-          )}
- 
-          {!loading && error && (
-            <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              {error}
-            </div>
-          )}
- 
-          {!loading && success && (
-            <div className="bg-green-50 text-green-700 border border-green-200 px-6 py-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium">
-              <CheckCircleIcon />
-              {success}
-            </div>
-          )}
- 
-          {!loading && sysCols.length > 0 && (
-            <>
-          
-              <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden mb-6">
+        {/* ❌ REMOVED ERROR FROM TOP */}
 
-             
-                <div className="grid grid-cols-[1fr_1fr_160px] gap-6 bg-[#4e74ca] px-8 py-4">
-                  <div className="text-white text-sm font-semibold tracking-wide">System Column</div>
-                  <div className="text-white text-sm font-semibold tracking-wide">Uploaded Column</div>
-                  <div className="text-white text-sm font-semibold tracking-wide">Mapping Status</div>
-                </div>
+        {!loading && success && (
+          <div className="bg-green-50 text-green-700 border border-green-200 px-6 py-4 rounded-xl mb-6">
+            {success}
+          </div>
+        )}
 
-     
-                <div className="flex flex-col">
-                  {sysCols.map((sysCol, index) => {
-                    const colKey = sysCol.columnKey;
-                    const isMapped = !!mappings[colKey];
-                    const selectedValue = mappings[colKey] || "";
- 
-                    return (
-                      <div
-                        key={colKey}
-                        className={`grid grid-cols-[1fr_1fr_160px] gap-6 px-8 py-5 items-center border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors ${index === sysCols.length - 1 ? "border-0" : ""
-                          }`}
-                      >
-                        
-                        <div className="flex items-center gap-3">
-                          {getSystemIcon(sysCol.displayName)}
-                          <span className="text-[14px] font-medium text-[#334155]">
-                            {sysCol.displayName}
-                          </span>
-                        </div>
-                        <div>
-                          <select
-                            value={selectedValue}
-                            onChange={(e) => handleSelectChange(colKey, e.target.value)}
-                            className={`w-full appearance-none px-4 py-2.5 rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#4e74ca]/40 focus:border-[#4e74ca] cursor-pointer bg-no-repeat ${isMapped
-                                ? "bg-white border border-[#cbd5e1] text-[#0f172a]"
-                                : "bg-[#f8fafc] border border-dashed border-[#b6c2d1] text-[#94a3b8]"
-                              }`}
-                            style={{
-                              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")',
-                              backgroundPosition: 'right 1rem center',
-                              backgroundSize: '1rem'
-                            }}
-                          >
-                            <option value="" disabled className="text-gray-400">
-                              Select Column
-                            </option>
-                            {fileCols.map((fc) => (
-                              <option key={fc} value={fc} className="text-[#0f172a]">
-                                {fc}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+        {!loading && sysCols.length > 0 && (
+          <>
+            <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden mb-6">
 
-                    
-                        <div className="flex items-center">
-                          {isMapped ? (
-                            <span className="inline-flex items-center gap-1.5 bg-[#eafbf0] text-[#1aa454] px-3 py-1 pb-1.5 rounded-full text-[11px] font-[800] tracking-wider uppercase border border-[#bbf3d0]/30 shadow-sm">
-                              <CheckCircleIcon />
-                              Mapped
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 bg-[#fff8e6] text-[#eab308] px-3 py-1 pb-1.5 rounded-full text-[11px] font-[800] tracking-wider uppercase border border-[#fef08a]/30 shadow-sm">
-                              <MinusCircleIcon />
-                              Unmapped
-                            </span>
-                          )}
-                        </div>
+              <div className="grid grid-cols-[1fr_1fr_160px] gap-6 bg-[#4e74ca] px-8 py-4">
+                <div className="text-white text-sm font-semibold">System Column</div>
+                <div className="text-white text-sm font-semibold">Uploaded Column</div>
+                <div className="text-white text-sm font-semibold">Mapping Status</div>
+              </div>
+
+              <div className="flex flex-col">
+                {sysCols.map((sysCol) => {
+                  const colKey = sysCol.columnKey;
+                  const isMapped = !!mappings[colKey];
+                  const selectedValue = mappings[colKey] || "";
+
+                  return (
+                    <div key={colKey} className="grid grid-cols-[1fr_1fr_160px] gap-6 px-8 py-5 items-center border-b">
+
+                      <div>{sysCol.displayName}</div>
+
+                      <div>
+                        <select
+                          value={selectedValue}
+                          onChange={(e) => handleSelectChange(colKey, e.target.value)}
+                          className="w-full px-4 py-2 rounded-lg border"
+                        >
+                          <option value="">Select Column</option>
+                          {fileCols.map((fc) => (
+                            <option key={fc} value={fc}>{fc}</option>
+                          ))}
+                        </select>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
 
-       
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-[14px] font-medium text-[#64748b]">
-                  {mappedCols} of {totalCols} columns mapped
-                </span>
- 
-                <button
-                  onClick={handleReviewData}
-                  disabled={submitting}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all ${submitting
-                      ? "bg-[#94a3b8] text-white cursor-not-allowed opacity-70"
-                      : "bg-[#1e293b] hover:bg-[#0f172a] text-white shadow-md active:scale-[0.98]"
-                    }`}
-                >
-                  {submitting ? "Submitting..." : "Review Data"}
-                  {!submitting && (
-                    <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  )}
-                </button>
-              </div>
+                      <div>
+                        {isMapped ? "Mapped" : "Unmapped"}
+                      </div>
 
-       
-              <div className="bg-[#f0f4ff] border border-[#e2e8f6] rounded-2xl p-5 flex items-start gap-4 shadow-sm">
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* BUTTON SECTION */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-500">
+                {mappedCols} of {totalCols} columns mapped
+              </span>
+
+              <button
+                onClick={handleReviewData}
+                disabled={submitting}
+                className="bg-black text-white px-6 py-2 rounded-lg"
+              >
+                {submitting ? "Submitting..." : "Review Data"}
+              </button>
+            </div>
+
+            {/* ✅ ERROR MOVED HERE */}
+            {error && (
+              <div className="bg-red-50 text-red-600 border border-red-200 px-6 py-4 rounded-xl mt-4 flex items-start gap-3 text-sm font-medium">
+                <svg className="w-5 h-5 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01" />
+                </svg>
+                {error}
+              </div>
+            )}
+
+            <div className="bg-[#f0f4ff] border border-[#e2e8f6] rounded-2xl p-5 flex items-start gap-4 shadow-sm mt-6">
                 <div className="mt-0.5"><InfoIcon /></div>
                 <div>
                   <h4 className="text-[14px] font-[800] text-[#1e293b] mb-1">Mapping Tip</h4>
@@ -384,12 +338,13 @@ export default function ColumnMapping() {
                   </p>
                 </div>
               </div>
-            </>
-          )}
- 
-        </main>
-      </div>
+
+          </>
+        )}
+
+      </main>
     </div>
-  );
+  </div>
+);
 }
  

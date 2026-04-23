@@ -16,7 +16,7 @@ function DashboardSelection() {
 
   const [search, setSearch] = useState("");
   const [cards, setCards] = useState([]);
-
+  const [deleteId, setDeleteId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editName, setEditName] = useState("");
@@ -48,12 +48,12 @@ function DashboardSelection() {
   }, []);
 
   useEffect(() => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  if (!token) {
-    navigate("/");
-  }
-}, [navigate]);
+    if (!token) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -209,7 +209,7 @@ function DashboardSelection() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(card.dashboardId);
+                        setDeleteId(card.dashboardId);
                       }}
                       className="bg-white p-2 rounded-full shadow-md hover:bg-red-50 hover:scale-110 transition"
                     >
@@ -298,6 +298,39 @@ function DashboardSelection() {
           token={token}
         />
       </div>
+      {deleteId && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 w-[320px] shadow-xl text-center">
+      
+      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+        Confirm Delete
+      </h3>
+
+      <p className="text-sm text-gray-500 mb-5">
+        Are you sure you want to delete this dashboard?
+      </p>
+
+      <div className="flex justify-center gap-4">
+        <button
+          onClick={() => setDeleteId(null)}
+          className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+        >
+          No
+        </button>
+
+        <button
+          onClick={() => {
+            handleDelete(deleteId);
+            setDeleteId(null);
+          }}
+          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </>
   );
 }

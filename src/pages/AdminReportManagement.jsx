@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ReportTable from "../components/ReportTable";
 import { useEffect, useState } from "react";
 import api from '../api/apiConfig';
@@ -13,7 +13,7 @@ export default function Reports() {
   const [search, setSearch] = useState("");
   const role = localStorage.getItem("role");
   const [sortOrder, setSortOrder] = useState("desc");
-  // DATE RANGE STATES
+  const [deleteId, setDeleteId] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
@@ -180,9 +180,10 @@ export default function Reports() {
                   ...file,
                   createdAt: file.generatedAt
                 }))}
+                role={role}
               />
 
-              {/* 🔥 PAGINATION UI (ADDED) */}
+            
               <div className="flex justify-between items-center mt-6">
                 <button
                   disabled={currentPage === 1}
