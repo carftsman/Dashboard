@@ -20,14 +20,15 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   const tooltipBg = darkMode ? "#1e293b" : "#ffffff";
   const textColor = darkMode ? "#ffffff" : "#000000";
   const FONT_SIZE = 10;
-  // ✅ SAFETY FIX (prevents crash if bad data comes)
-  if (typeof data === "object" && !Array.isArray(data)) {
-    data = Object.entries(data).map(([key, value]) => ({
-      name: key,
-      value: Number(value) || 0
-    }));
-  }
-  if (!data || (Array.isArray(data) && data.length === 0)) {
+  let normalizedData = data;
+
+if (data && typeof data === "object" && !Array.isArray(data))  {
+  normalizedData = Object.entries(data).map(([key, value]) => ({
+    name: key,
+    value: Number(value) || 0
+  }));
+}
+  if (!normalizedData || (Array.isArray(normalizedData) && normalizedData.length === 0)) {
     return <p className="text-gray-400 text-center py-10">No data available</p>;
   }
 
@@ -37,8 +38,8 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
 
   let safeData = [];
 
-  if (Array.isArray(data)) {
-    safeData = data.map((item, i) => {
+  if (Array.isArray(normalizedData)) {
+  safeData = normalizedData.map((item, i) => {
       const xLabel = item.displayX || item.name || item.x || item.range || item.group || `Item ${i + 1}`;
       const rawValue = item[activeMetric] ?? item.value ?? item.cumulative ?? 0;
       const yValue = parseNumber(rawValue);

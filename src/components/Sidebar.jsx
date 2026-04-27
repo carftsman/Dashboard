@@ -17,7 +17,7 @@ const Sidebar = () => {
   const [openDashboard, setOpenDashboard] = useState(false);
   const [dashboards, setDashboards] = useState([]);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const role = localStorage.getItem("role")?.toLowerCase();
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,6 +38,15 @@ const Sidebar = () => {
   useEffect(() => {
     fetchDashboards();
   }, []);
+  useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  window.addEventListener("resize", handleResize);
+
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   useEffect(() => {
     if (location.pathname.startsWith("/dashboard")) {

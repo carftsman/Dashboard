@@ -8,7 +8,6 @@ import MainDashboard from "../pages/MainDashboard";
 import UploadData from "../pages/UploadData";
 import ColumnMapping from "../pages/ColumnMapping";
 import DataValidation from "../pages/DataValidation";
-import VisualEditing from "../pages/VisualEditing";
 import Profile from "../pages/Profile";
 import Reports from "../pages/Reports";
 import AdminDashboard from "../pages/admin/adminDashboard";
@@ -20,11 +19,14 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import LoginOtp from "../pages/LoginOtp";
 import AdminReportManagement from "../pages/AdminReportManagement";
 import ChangePassword from "../pages/ChangePassword";
+<Route path="/unauthorized" element={<h2>Access Denied</h2>} />
+
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Login />} />
+      <Route path="/unauthorized" element={<h2>Access Denied</h2>} />
       <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/loginOtp" element={<LoginOtp />} />
@@ -34,16 +36,16 @@ const AppRoutes = () => {
       <Route
         path="/dashboard-selection"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "ANALYST","MANAGER","SUBUSER"]}>
             <DashboardSelection />
-          </ProtectedRoute> 
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ANALYST","SUBUSER"]}>
             <MainDashboard />
           </ProtectedRoute>
         }
@@ -52,7 +54,7 @@ const AppRoutes = () => {
       <Route
         path="/upload-data"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ANALYST","SUBUSER"]}>
             <UploadData />
           </ProtectedRoute>
         }
@@ -61,7 +63,7 @@ const AppRoutes = () => {
       <Route
         path="/column-mapping"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ANALYST","SUBUSER"]}>
             <ColumnMapping />
           </ProtectedRoute>
         }
@@ -70,25 +72,18 @@ const AppRoutes = () => {
       <Route
         path="/data-validation"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ANALYST","SUBUSER"]}>
             <DataValidation />
           </ProtectedRoute>
         }
       />
 
-      <Route
-        path="/visual-editing"
-        element={
-          <ProtectedRoute>
-            <VisualEditing />
-          </ProtectedRoute>
-        }
-      />
+      
 
       <Route
         path="/reports/:dashboardId/:dashboardName"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "ANALYST","SUBUSER","MANAGER"]}>
             <Reports />
           </ProtectedRoute>
         }
@@ -96,12 +91,12 @@ const AppRoutes = () => {
       <Route
         path="/reports/all"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
             <AdminReportManagement />
           </ProtectedRoute>
         }
       />
-      <Route path="/reports/:id" element={<Reports />} />
+      <Route path="/reports/:id" element={<Reports />} allowedRoles={["ADMIN", "SUPER_ADMIN", "ANALYST","SUBUSER","MANAGER"]}/>
 
       <Route
         path="/profile"
@@ -115,27 +110,29 @@ const AppRoutes = () => {
       <Route
         path="/user-logs"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "ANALYST"]}>
             <UserLog />
           </ProtectedRoute>
         }
       />
-      <Route path="/edit-profile" element={<EditProfile />} />
-      <Route path="/change-password" element={<ChangePassword />} />
- 
+      <Route path="/edit-profile" element={<EditProfile />} allowedRoles={["ADMIN", "SUPER_ADMIN", "ANALYST","MANAGER","SUBUSER"]}/>
+      <Route path="/change-password" element={<ChangePassword />} allowedRoles={["ADMIN", "SUPER_ADMIN", "ANALYST","MANAGER","SUBUSER"]}/>
+
       {/* Admin Routes */}
 
-      <Route path="/admin-dashboard/*" 
-       element={
-         <ProtectedRoute>
+      <Route
+        path="/admin-dashboard/*"
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
             <AdminDashboard />
-       </ProtectedRoute>
-       } />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/manage-users"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
             <ManageUsers />
           </ProtectedRoute>
         }
@@ -144,11 +141,12 @@ const AppRoutes = () => {
       <Route
         path="/dataschema/:id"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
             <DataSchema />
           </ProtectedRoute>
         }
       />
+      <Route path="/unauthorized" element={<h2>Access Denied</h2>} />
     </Routes>
   );
 };

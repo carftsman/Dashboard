@@ -34,23 +34,25 @@ function DashboardSelection() {
 
   const [profile, setProfile] = useState(null);
 
-  useEffect(() => {
-    const handleBack = () => {
-      window.history.pushState(null, "", window.location.href);
-    };
+  // useEffect(() => {
+  //   const handleBack = () => {
+  //     window.history.pushState(null, "", window.location.href);
+  //   };
 
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", handleBack);
+  //   window.history.pushState(null, "", window.location.href);
+  //   window.addEventListener("popstate", handleBack);
 
-    return () => {
-      window.removeEventListener("popstate", handleBack);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("popstate", handleBack);
+  //   };
+  // }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+console.log("dashboard screen")
 
     if (!token) {
+      console.log("no token")
       navigate("/");
     }
   }, [navigate]);

@@ -3,15 +3,17 @@ import api from "../api/apiConfig";
 // Login user
 export const loginUser = async (data) => {
   try {
-    const response = await api.post("/auth/login", data);
+    const response = await api.post("/api/auth/login", data);
 
-    // ✅ Correct token path
-    if (response.data?.data?.token) {
-      localStorage.setItem("token", response.data.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
+
+    const result = response.data;
+    console.log("LOGIN API FULL RESPONSE:", response.data);
+    if (result?.token) {
+      localStorage.setItem("token", result.token);
+      localStorage.setItem("role", result.role);
     }
 
-    return response.data;
+    return result;
   } catch (error) {
     throw error.response?.data || error;
   }
@@ -29,5 +31,7 @@ export const getProfile = async () => {
 
 // Logout user
 export const logoutUser = () => {
-  localStorage.removeItem("token");
+  ["token", "user", "role", "lastDashboardId"].forEach((key) =>
+    localStorage.removeItem(key)
+  );
 };

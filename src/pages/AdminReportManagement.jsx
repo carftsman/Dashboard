@@ -28,7 +28,7 @@ export default function Reports() {
   const fetchData = async () => {
     try {
       const response = await api.get(`/api/reports/all`);
-      const formattedData = response.data.map((item) => ({
+      const formattedData = response.data.data.map((item) => ({
         id: item.reportId,
         name: item.reportName || item.fileName,
         generatedAt: item.generatedAt,
@@ -87,7 +87,7 @@ export default function Reports() {
   // 🔥 PAGINATION LOGIC (ADDED)
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = processedFiles.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = processedFiles;
   const totalPages = Math.ceil(processedFiles.length / itemsPerPage);
 
   // 🔥 RESET PAGE ON FILTER CHANGE (ADDED)
