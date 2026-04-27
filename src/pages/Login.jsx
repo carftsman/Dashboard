@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -20,25 +22,25 @@ const sliderImages = [img1, img2, img3, img4, img5, img6];
 
 export default function Login() {
   const navigate = useNavigate();
-
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role")?.toUpperCase();
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   const role = localStorage.getItem("role")?.toUpperCase();
 
-    if (token) {
-      if (role === "ADMIN" || role === "SUPER_ADMIN") {
-        navigate("/admin-dashboard", { replace: true });
-      } else {
-        navigate("/dashboard-selection", { replace: true });
-      }
-    }
-  }, [navigate]);
+  //   if (token) {
+  //     if (role === "ADMIN" || role === "SUPER_ADMIN") {
+  //       navigate("/admin-dashboard", { replace: true });
+  //     } else {
+  //       navigate("/dashboard-selection", { replace: true });
+  //     }
+  //   }
+  // }, []);
 
   const validateEmail = (value) => {
     const regex = /^[a-zA-Z0-9._%+-]+@(dhatvibs\.com|gmail\.com)$/;
@@ -82,42 +84,27 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
+  const isEmailValid = validateEmail(email);
+  const isPasswordValid = validatePassword(password);
 
-    if (!isEmailValid || !isPasswordValid) return;
+  if (!isEmailValid || !isPasswordValid) return;
 
-    try {
-      const response = await fetch(
-        "https://dashboard-backend-cyrd.onrender.com/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+  try {
+    const profile = await login({ email, password });
 
-      const result = await response.json();
+    const role = profile?.role?.toUpperCase();
 
-      if (response.ok) {
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("role", result.role);
-
-        const role = result.role?.toUpperCase();
-
-        if (role === "ADMIN" || role === "SUPER_ADMIN") {
-          navigate("/admin-dashboard", { replace: true });
-        } else {
-          navigate("/dashboard-selection", { replace: true });
-        }
-      } else {
-        setPasswordError(result.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setPasswordError("Something went wrong. Try again.");
+    if (role === "ADMIN" || role === "SUPER_ADMIN") {
+      navigate("/admin-dashboard", { replace: true });
+    } else {
+      navigate("/dashboard-selection", { replace: true });
     }
-  };
+
+  } catch (error) {
+    console.error("Login error:", error);
+    setPasswordError("Login failed");
+  }
+};
 
   return (
     <div className="flex h-screen w-full font-sans max-[900px]:flex-col max-[600px]:h-auto">

@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         setUser(profile);
       } catch (error) {
         console.error("Profile fetch failed", error);
-        // localStorage.removeItem("token");
+        localStorage.removeItem("token");
         setUser(null);
       }
 
@@ -36,30 +36,32 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (credentials) => {
+  try {
+    const loginResponse = await loginUser(credentials);
 
+    console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
+
+    // set user from login response first
+    setUser(loginResponse);
+
+    // then try profile
     try {
-
-      const loginResponse = await loginUser(credentials);
-
-      if (loginResponse?.token) {
-        localStorage.setItem("token", loginResponse.token);
-      }
-
       const profile = await getProfile();
       setUser(profile);
-
       return profile;
-
-    } catch (error) {
-      throw error;
+    } catch (err) {
+      return loginResponse;
     }
 
-  };
+  } catch (error) {
+    throw error;
+  }
+};
 
   // Logout function
   const logout = () => {
     logoutUser();
-    localStorage.removeItem("token");
+    // localStorage.removeItem("token");
     setUser(null);
   };
 

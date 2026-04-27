@@ -1,5 +1,5 @@
- import React, { useState, useEffect } from "react";
- 
+import React, { useState, useEffect } from "react";
+
 export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved, chart }) {
   const [showVisuals, setShowVisuals] = useState(true);
   const [showData, setShowData] = useState(true);
@@ -12,9 +12,9 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
   const [loading, setLoading] = useState(false);
   const [fileId, setFileId] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
- 
+
   const token = localStorage.getItem("token");
- 
+
   // --- 1. Comprehensive Icon Mapping ---
   const getChartIcon = (type) => {
     switch (type?.toUpperCase()) {
@@ -41,12 +41,12 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       default: return "📊";
     }
   };
- 
+
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
   };
- 
+
   useEffect(() => {
     if (chart) {
       const cfg = chart.config || {};
@@ -61,7 +61,7 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       setTitle("");
     }
   }, [chart, open]);
- 
+
   const fetchChartConfigs = async () => {
     try {
       const response = await fetch("https://dashboard-backend-cyrd.onrender.com/api/chart-types/config", {
@@ -69,9 +69,9 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       });
       const data = await response.json();
       if (response.ok) setChartConfigs(data.charts || []);
-    } catch (error) {}
+    } catch (error) { }
   };
- 
+
   const fetchColumns = async () => {
     try {
       const response = await fetch(`https://dashboard-backend-cyrd.onrender.com/api/upload/builder/${dashboardId}`, {
@@ -82,28 +82,28 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
         setColumns(data.columns || []);
         setFileId(data.fileId);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
- 
+
   useEffect(() => {
     if (open) {
       fetchChartConfigs();
       fetchColumns();
     }
   }, [open]);
- 
+
   // --- 2. Complete Mapping Logic for Backend ---
   const handleSaveChart = async () => {
     if (!fileId) return showToast("File not loaded yet ", "error");
     if (!xAxis && chartType !== "KPI" && chartType !== "GAUGE") {
-        return showToast("Please drag and drop fields ❌", "error");
+      return showToast("Please drag and drop fields ❌", "error");
     }
- 
+
     try {
       setLoading(true);
       const typeUpper = chartType.toUpperCase();
       let config = {};
- 
+
       // Proper logic for all 20 chart types
       if (["LINE", "AREA", "STACKED_BAR", "STACKED_AREA", "MULTI_LINE"].includes(typeUpper)) {
         config = { xAxis: [xAxis], metrics: [yAxis], yAxis: [yAxis] };
@@ -112,12 +112,12 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       } else if (["SCATTER", "BUBBLE", "HEATMAP"].includes(typeUpper)) {
         config = { xAxis: xAxis, yAxis: yAxis, metrics: [yAxis] };
       } else if (typeUpper === "FUNNEL") {
-  config = {
-    groupBy: xAxis,
-    metrics: [yAxis],
-    steps: [xAxis, yAxis]
-  };
- 
+        config = {
+          groupBy: xAxis,
+          metrics: [yAxis],
+          steps: [xAxis, yAxis]
+        };
+
       } else if (typeUpper === "TABLE") {
         config = { columns: [xAxis, yAxis] };
       } else if (["KPI", "GAUGE", "WATERFALL"].includes(typeUpper)) {
@@ -125,16 +125,19 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       } else if (typeUpper === "HISTOGRAM") {
         config = { xAxis: xAxis };
       }
- 
+
       const payload = {
         dashboardId: Number(dashboardId),
         fileId: fileId,
         name: title || `${xAxis} by ${yAxis}`,
         type: typeUpper,
-        config: config,
+        config: {
+          ...config,
+          title: title || `${xAxis} by ${yAxis}`, // ✅ ADD THIS LINE
+        },
         replaceWidgetId: chart?.id ? Number(chart.id) : 0,
       };
- 
+
       const response = await fetch("https://dashboard-backend-cyrd.onrender.com/api/widgets/custom", {
         method: "POST",
         headers: {
@@ -143,16 +146,21 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
         },
         body: JSON.stringify(payload),
       });
- 
+
       const result = await response.json();
- 
+
       if (response.ok) {
         onChartSaved({
-  ...result.widget,
-  name: title || result.widget?.name,
-  type: chartType,
-});
-        onClose();
+          ...chart, // keep existing chart data
+          ...result.widget,
+          name: title || result.widget?.name,
+          type: chartType,
+          config: {
+            ...(chart?.config || {}),
+            ...(result.widget?.config || {}),
+            title: title, // ✅ force updated title
+          },
+        }); onClose();
       } else {
         showToast(result.message || "Failed to save chart ", "error");
       }
@@ -162,24 +170,23 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       setLoading(false);
     }
   };
- 
+
   if (!open) return null;
- 
+
   return (
     <div className="fixed inset-0 z-50 flex">
       {toast.show && (
         <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300">
-          <div className={`px-6 py-2 rounded-full shadow-lg text-sm font-medium border flex items-center gap-2 ${
-            toast.type === "success" ? "bg-green-600 border-green-400 text-white" : "bg-red-600 border-red-400 text-white"
-          }`}>
+          <div className={`px-6 py-2 rounded-full shadow-lg text-sm font-medium border flex items-center gap-2 ${toast.type === "success" ? "bg-green-600 border-green-400 text-white" : "bg-red-600 border-red-400 text-white"
+            }`}>
             {toast.message}
           </div>
         </div>
       )}
- 
+
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
       <div className="ml-auto h-full bg-[#f8fafc] text-black shadow-xl relative z-10 p-3 flex transition-all duration-300">
-       
+
         {/* Left Side: Configuration */}
         <div className={`transition-all duration-300 border-r p-2 ${showVisuals ? "w-[260px]" : "w-[40px]"} overflow-hidden`}>
           <div className="flex justify-between items-center mb-2">
@@ -211,9 +218,8 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
                         else setYAxis(data);
                       }}
                       onDragOver={(e) => e.preventDefault()}
-                      className={`border-2 border-dashed p-2 min-h-[40px] rounded mt-1 flex items-center justify-center transition-colors ${
-                        ((["xAxis", "groupBy", "steps", "columns"].includes(field)) ? xAxis : yAxis) ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : "bg-gray-50 border-gray-200 text-gray-400"
-                      }`}
+                      className={`border-2 border-dashed p-2 min-h-[40px] rounded mt-1 flex items-center justify-center transition-colors ${((["xAxis", "groupBy", "steps", "columns"].includes(field)) ? xAxis : yAxis) ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : "bg-gray-50 border-gray-200 text-gray-400"
+                        }`}
                     >
                       {((["xAxis", "groupBy", "steps", "columns"].includes(field)) ? xAxis : yAxis) || "Drop here"}
                     </div>
@@ -223,7 +229,7 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
             </div>
           )}
         </div>
- 
+
         {/* Center Side: Column List */}
         <div className={`transition-all duration-300 p-3 flex flex-col overflow-hidden ${showData ? "w-64" : "w-[40px]"}`}>
           <div className="flex justify-between items-center mb-2">
@@ -246,7 +252,7 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
             </div>
           )}
         </div>
- 
+
         {/* Header Actions */}
         <div className="absolute top-2 right-2 flex gap-2">
           <button onClick={handleSaveChart} disabled={loading} className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded font-medium transition-colors shadow-sm disabled:bg-gray-400">
@@ -258,5 +264,4 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
     </div>
   );
 }
- 
- 
+

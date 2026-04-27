@@ -164,13 +164,12 @@ export default function UploadData() {
     setSuccess("");
     setUploadProgress(0);
  
-    const progressInterval = setInterval(() => {
-      setUploadProgress((prev) => (prev < 85 ? prev + 5 : prev));
-    }, 200);
+    
  
     try {
-      const response = await uploadSalesFile(dashboardId, file);
-      clearInterval(progressInterval);
+      const response = await uploadSalesFile(dashboardId, file,
+         (progress) => setUploadProgress(progress));
+      
       setUploadProgress(100);
       setSuccess(
         "File uploaded and analysis started successfully! Your data is being processed."
@@ -183,7 +182,7 @@ export default function UploadData() {
       }, 1500);
  
     } catch (err) {
-      clearInterval(progressInterval);
+      
       setUploadProgress(0);
       const msg =
         err?.message ||

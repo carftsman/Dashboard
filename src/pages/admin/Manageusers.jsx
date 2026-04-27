@@ -4,7 +4,7 @@ import { FiSearch, FiUser, FiMail, FiEdit, FiUserPlus, FiLock, FiEye, FiEyeOff, 
 import api from "../../api/apiConfig";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../../components/AdminSidebar";
-
+import { toast } from "react-toastify";
 const ManageUsers = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -22,16 +22,15 @@ const ManageUsers = () => {
     role: "",
     password: "",
   });
-  const [toasts, setToasts] = useState([]);
+  
 
   const showAlert = (type, message) => {
-    const id = Date.now();
-    const newToast = { id, type, message };
-    setToasts((prev) => [...prev, newToast]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
-  };
+  if (type === "error") {
+    toast.error(message);
+  } else {
+    toast.success(message);
+  }
+};
 
   const fetchUsers = async () => {
     try {
@@ -49,9 +48,7 @@ const ManageUsers = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await api.get("/api/users/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/api/users/profile")
         setProfile(res.data);
       } catch (error) {
         console.error("Profile error:", error);
@@ -265,24 +262,7 @@ const ManageUsers = () => {
         </div>
 
         {/* Toasts */}
-        <div className="fixed top-5 right-5 z-50 flex flex-col gap-3">
-          {toasts.map((toast) => (
-            <div key={toast.id} className="flex items-start gap-3 px-4 py-3 rounded-xl min-w-[320px] shadow-md border border-gray-100 bg-white relative overflow-hidden">
-              <div className={`absolute left-0 top-0 h-full w-1 ${toast.type === "success" ? "bg-green-500" : toast.type === "error" ? "bg-red-500" : "bg-blue-500"}`} />
-              <div className="mt-0.5">
-                {toast.type === "success" && <FiCheckCircle className="text-green-500" size={20} />}
-                {toast.type === "error" && <FiAlertCircle className="text-red-500" size={20} />}
-                {toast.type === "info" && <FiInfo className="text-blue-500" size={20} />}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-800">{toast.type.toUpperCase()}</p>
-                <p className="text-sm text-gray-600 mt-0.5">{toast.message}</p>
-              </div>
-              <FiX size={16} className="text-gray-400 hover:text-gray-700 cursor-pointer mt-1" onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))} />
-            </div>
-          ))}
-        </div>
-
+        
         {/* Add/Edit Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center" onClick={() => setShowModal(false)}>

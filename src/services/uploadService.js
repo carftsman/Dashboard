@@ -6,7 +6,7 @@ import api from "../api/apiConfig";
  * @param {File} file - The file to upload
  * @returns {Promise<Object>} - The server response
  */
-export const uploadSalesFile = async (dashboardId, file) => {
+export const uploadSalesFile = async (dashboardId, file, onProgress) => {
   if (!dashboardId) {
     throw new Error("Dashboard ID is required for file upload.");
   }
@@ -20,10 +20,18 @@ export const uploadSalesFile = async (dashboardId, file) => {
 
   try {
     const response = await api.post("/api/upload/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
+  onUploadProgress: (progressEvent) => {
+    if (progressEvent.total) {
+      const percent = Math.round(
+        (progressEvent.loaded * 100) / progressEvent.total
+      );
+      onProgress?.(percent); // 🔥 send progress to component
+    }
+  },
+});
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
