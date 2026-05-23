@@ -14,16 +14,16 @@ import {
   FiGrid,
   FiDatabase,
 } from "react-icons/fi";
-
+ 
 const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) => {
-
+ 
   const [columns, setColumns] = useState([]);
   const [selectedWidget, setSelectedWidget] = useState(null);
   const [formData, setFormData] = useState({});
   const [chartConfigs, setChartConfigs] = useState([]);
   const [selectedFields, setSelectedFields] = useState({});
   const [pendingWidgets, setPendingWidgets] = useState([]);
-
+ 
   const iconMap = {
     BAR: <FiBarChart2 />,
     LINE: <FiTrendingUp />,
@@ -34,10 +34,10 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
     AREA: <FiTrendingUp />,
     STACKED_BAR: <FiBarChart2 />,
   };
-
+ 
   useEffect(() => {
     if (!dashboardId || !isOpen) return;
-
+ 
     const fetchData = async () => {
       try {
         await new Promise((res) => setTimeout(res, 300));
@@ -48,31 +48,31 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
         console.error("Fetch columns error:", err);
       }
     };
-
+ 
     fetchData();
   }, [dashboardId, isOpen]);
-
+ 
   useEffect(() => {
     const fetchChartConfig = async () => {
       const res = await api.get("/api/chart-types/config");
       setChartConfigs(res.data.charts || []);
     };
-
+ 
     fetchChartConfig();
   }, []);
-
+ 
   useEffect(() => {
-
+ 
     if (!chart) return;
     setSelectedFields({});
     setFormData({});
     setSelectedWidget({
       type: chart.type
     });
-
+ 
     const existingConfig =
       chart.config?.config || chart.config || {};
-
+ 
     setFormData({
       ...existingConfig,
       title:
@@ -80,11 +80,11 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
         chart.name ||
         ""
     });
-
+ 
     const fields = {};
-
+ 
     Object.keys(existingConfig).forEach((key) => {
-
+ 
       if (Array.isArray(existingConfig[key])) {
         fields[key] = existingConfig[key];
       } else if (
@@ -95,17 +95,17 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
         fields[key] = [existingConfig[key]];
       }
     });
-
+ 
     setSelectedFields(fields);
-
+ 
   }, [chart]);
-
+ 
   if (!isOpen) return null;
-
+ 
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
-
+ 
   const createWidget = () => {
     if (
   !selectedWidget ||
@@ -114,7 +114,7 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
       alert("Please complete required fields.");
       return;
     }
-
+ 
     const newWidget = {
       type: selectedWidget.type,
       name: formData.title,
@@ -122,7 +122,7 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
         ...formData,
         type: selectedWidget.type,
         title: formData.title,
-
+ 
         xAxis: formData.groupBy
           ? [formData.groupBy]
           : Array.isArray(formData.xAxis)
@@ -130,7 +130,7 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
             : formData.xAxis
               ? [formData.xAxis]
               : [],
-
+ 
         yAxis: Array.isArray(formData.metrics)
           ? formData.metrics
           : formData.metrics
@@ -142,17 +142,17 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                 : [],
       },
     };
-
+ 
     setPendingWidgets((prev) => [...prev, newWidget]);
     setFormData({});
     setSelectedFields({});
     setSelectedWidget(null);
   };
-
+ 
   const submitAllWidgets = async () => {
-
+ 
     try {
-
+ 
       const payload = {
         name: formData.title,
         type: selectedWidget.type,
@@ -160,13 +160,13 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
           ...formData,
           type: selectedWidget.type,
           title: formData.title,
-
+ 
           xAxis: formData.groupBy
             ? [formData.groupBy]
             : formData.xAxis
               ? [formData.xAxis]
               : [],
-
+ 
           yAxis: Array.isArray(formData.metrics)
             ? formData.metrics
             : formData.metrics
@@ -174,17 +174,17 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
               : [],
         },
       };
-
+ 
       // EDIT EXISTING CHART
       if (chart?.id) {
-
+ 
         await api.put(
           `/api/dashboards/${dashboardId}/widgets/${chart.id}`,
           payload
         );
-
+ 
       } else {
-
+ 
         // CREATE NEW CHART
         await api.post(
           `/api/dashboards/${dashboardId}/widgets`,
@@ -193,25 +193,25 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
           }
         );
       }
-
+ 
       if (onSuccess) {
         onSuccess();
       }
-
+ 
       setPendingWidgets([]);
       setSelectedWidget(null);
       setFormData({});
       setSelectedFields({});
-
+ 
       onClose();
-
+ 
     } catch (err) {
-
+ 
       console.error(
         "Server Error Detail:",
         err.response?.data || err.message
       );
-
+ 
       alert(
         "Error: " +
         (err.response?.data?.error ||
@@ -219,45 +219,45 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
       );
     }
   };
-
+ 
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over) return;
-
+ 
     const column = columns.find(
       (c) => String(c.id) === String(active.id)
     );
     const field = over.id;
-
+ 
     if (!column) return;
-
+ 
     setSelectedFields((prev) => {
-
-
+ 
+ 
       const singleSelectFields = [
         "groupBy",
         "xAxis",
         "yAxis",
       ];
-
+ 
       let updated = [];
-
+ 
       if (singleSelectFields.includes(field)) {
-
+ 
         updated = [column.displayName];
-
+ 
       } else {
-
+ 
         const existing = Array.isArray(prev[field])
           ? prev[field]
           : [];
-
+ 
         if (existing.includes(column.displayName))
           return prev;
-
+ 
         updated = [...existing, column.displayName];
       }
-
+ 
       setFormData((prevData) => ({
         ...prevData,
         [field]:
@@ -267,19 +267,19 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
               ? updated[0]
               : updated,
       }));
-
+ 
       return {
         ...prev,
         [field]: updated,
       };
     });
   };
-
+ 
   const DraggableItem = ({ col }) => {
     const { attributes, listeners, setNodeRef } = useDraggable({
       id: col.id,
     });
-
+ 
     return (
       <div
         ref={setNodeRef}
@@ -291,10 +291,10 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
       </div>
     );
   };
-
+ 
   const DroppableField = ({ field, children }) => {
     const { setNodeRef } = useDroppable({ id: field });
-
+ 
     return (
       <div
         ref={setNodeRef}
@@ -304,16 +304,16 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
       </div>
     );
   };
-
+ 
   const renderFields = () => {
     if (!selectedWidget) return null;
-
+ 
     const config = chartConfigs.find(
       (c) => c.type === selectedWidget.type
     );
-
+ 
     if (!config) return null;
-
+ 
     return config.requiredFields.map((field) => (
       <div key={field} className="mb-2">
         <label className="text-xs text-gray-700 font-medium">
@@ -332,12 +332,12 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                     const updated = prev[field].filter(
                       (c) => c !== col
                     );
-
+ 
                     setFormData((prevData) => ({
                       ...prevData,
                       [field]: updated,
                     }));
-
+ 
                     return { ...prev, [field]: updated };
                   });
                 }}
@@ -350,30 +350,30 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
       </div>
     ));
   };
-
+ 
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-
+ 
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-md"
           onClick={onClose}
         ></div>
-
+ 
         <div
           className={`relative bg-white p-5 rounded-2xl shadow-2xl transition-all duration-300 animate-[fadeIn_0.2s_ease]
           ${selectedWidget ? "w-full max-w-[900px]" : "w-full max-w-[500px]"}
           h-[85vh] flex flex-col`}
         >
-
+ 
           <div className={`flex gap-4 flex-1 min-h-0 ${!selectedWidget ? "justify-center" : ""}`}>
-
+ 
             {selectedWidget && (
               <div className="flex-1 flex flex-col border-r pr-3 min-h-0">
                 <h3 className="text-sm font-semibold mb-2 sticky top-0 bg-white z-10">
                   Columns
                 </h3>
-
+ 
                 <div className="flex-1 overflow-y-auto pr-2 min-h-0 scrollbar-thin scrollbar-thumb-gray-300">
                   {columns.map((col) => (
                     <DraggableItem key={col.id} col={col} />
@@ -381,14 +381,14 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                 </div>
               </div>
             )}
-
+ 
             <div className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto pr-2 min-h-0 scrollbar-thin scrollbar-thumb-gray-300">
-
+ 
                 <h3 className="text-sm font-semibold mb-3 text-center sticky top-0 bg-white z-10">
                   Visualizations
                 </h3>
-
+ 
                 <div className={`grid gap-2 ${selectedWidget ? "grid-cols-5" : "grid-cols-3"}`}>
                   {chartConfigs.map((chart) => (
                     <div
@@ -407,18 +407,18 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                       <div className="text-xs text-[#1e3a8a]">
                         {iconMap[chart.type] || <FiBarChart2 />}
                       </div>
-
+ 
                       <p className="text-[8px] mt-1 text-gray-600 text-center">
                         {chart.title}
                       </p>
                     </div>
                   ))}
                 </div>
-
+ 
                 {selectedWidget && (
                   <>
                     {renderFields()}
-
+ 
                     {selectedWidget?.type !== "KPI" && (
                       <input
                         type="text"
@@ -433,17 +433,17 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                   </>
                 )}
               </div>
-
+ 
               {selectedWidget && (
                 <div className="flex justify-between items-center pt-3 mt-3 border-t bg-white">
-
+ 
                   <button
                     onClick={createWidget}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
                   >
                     <FiPlus /> Add Widget
                   </button>
-
+ 
                   <div className="flex gap-2">
                     <button
                       onClick={onClose}
@@ -451,7 +451,7 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                     >
                       Cancel
                     </button>
-
+ 
                     <button
                       type="button"
                       onClick={(e) => {
@@ -462,11 +462,11 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                     >
                       {chart ? "Update" : "Create"}
                     </button>
-
+ 
                   </div>
                 </div>
               )}
-
+ 
             </div>
           </div>
         </div>
@@ -474,5 +474,7 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
     </DndContext>
   );
 };
-
+ 
 export default VisualizationModal;
+ 
+ 
