@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, ScatterChart, Scatter,
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   Legend, LabelList, Radar, RadialBarChart, RadarChart, RadialBar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  Treemap, Funnel, FunnelChart, ZAxis
+  Treemap, Funnel, FunnelChart, ZAxis, Label
 } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
@@ -15,6 +15,8 @@ const parseNumber = (val) => {
 };
 
 export default function ChartRenderer({ type, data, config, darkMode }) {
+  const finalConfig =
+    config?.config || config || {};
   const gridColor = darkMode ? "rgba(255, 255, 255, 0.1)" : "#e5e7eb";
   const axisColor = darkMode ? "#f8fafc" : "#111827";
   const tooltipBg = darkMode ? "#1e293b" : "#ffffff";
@@ -22,26 +24,51 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   const FONT_SIZE = 10;
   let normalizedData = data;
 
-if (data && typeof data === "object" && !Array.isArray(data))  {
-  normalizedData = Object.entries(data).map(([key, value]) => ({
-    name: key,
-    value: Number(value) || 0
-  }));
-}
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    normalizedData = Object.entries(data).map(([key, value]) => ({
+      name: key,
+      value: Number(value) || 0
+    }));
+  }
   if (!normalizedData || (Array.isArray(normalizedData) && normalizedData.length === 0)) {
     return <p className="text-gray-400 text-center py-10">No data available</p>;
   }
 
   const chartType = type?.toLowerCase();
-  const metrics = config?.metrics || ["value"];
+  const metrics = finalConfig?.metrics || ["value"];
   const activeMetric = metrics[0];
+  const xAxisKey =
+    finalConfig?.xAxis?.[0] ||
+    (Array.isArray(finalConfig?.groupBy)
+      ? finalConfig?.groupBy?.[0]
+      : finalConfig?.groupBy) ||
+    "displayX";
 
+  const yAxisKey =
+    finalConfig?.yAxis?.[0] ||
+    (Array.isArray(finalConfig?.metrics)
+      ? finalConfig?.metrics?.[0]
+      : finalConfig?.metrics) ||
+    "value";
   let safeData = [];
 
   if (Array.isArray(normalizedData)) {
-  safeData = normalizedData.map((item, i) => {
-      const xLabel = item.displayX || item.name || item.x || item.range || item.group || `Item ${i + 1}`;
-      const rawValue = item[activeMetric] ?? item.value ?? item.cumulative ?? 0;
+    safeData = normalizedData.map((item, i) => {
+      const xLabel =
+        item[xAxisKey] ||
+        item.displayX ||
+        item.name ||
+        item.x ||
+        item.range ||
+        item.group ||
+        `Item ${i + 1}`;
+
+      const rawValue =
+        item[yAxisKey] ??
+        item[activeMetric] ??
+        item.value ??
+        item.cumulative ??
+        0;
       const yValue = parseNumber(rawValue);
       const startValue = item.cumulative !== undefined ? parseNumber(item.cumulative) - yValue : 0;
 
@@ -87,7 +114,7 @@ if (data && typeof data === "object" && !Array.isArray(data))  {
         displayX: key,
         value: val
       }))
-      .sort((a, b) => b.value - a.value); // 🔥 REQUIRED for funnel
+      .sort((a, b) => b.value - a.value);
   };
   const formatYAxis = (value) => {
     if (typeof value !== 'number') return value;
@@ -107,20 +134,38 @@ if (data && typeof data === "object" && !Array.isArray(data))  {
     <XAxis
       dataKey="displayX"
       stroke={axisColor}
-      interval="preserveStartEnd"
-      minTickGap={30}
-      angle={-45}
+      interval={0}
+      minTickGap={20}
+      angle={-30}
       textAnchor="end"
-      height={80}
+      height={70}
       tick={{ fontSize: 10, fill: axisColor }}
-      tickFormatter={(value) => (value?.toString().length > 12 ? value.slice(0, 12) + "..." : value)}
-    />
+      tickFormatter={(value) =>
+        value
+      }
+    >
+      <Label
+        value={xAxisKey}
+        position="insideBottom"
+        offset={-20}
+        fill={axisColor}
+        fontSize={12}
+      />
+    </XAxis>
   );
 
   const renderYAxis = () => (
     <YAxis
       stroke={axisColor}
-      width={60}
+      width={50}
+      label={{
+        value: yAxisKey,
+        angle: -90,
+        position: "center",
+        dx: -25,
+        fill: axisColor,
+        fontSize: 12
+      }}
       tick={{ fontSize: 10, fill: axisColor }}
       tickFormatter={formatYAxis}
     />
@@ -188,11 +233,47 @@ if (data && typeof data === "object" && !Array.isArray(data))  {
             layout={isHorizontal ? "vertical" : "horizontal"}
             data={safeData}
             barCategoryGap={chartType === "histogram" ? 0 : "10%"}
-            margin={{ top: 40, right: 30, left: 10, bottom: 40 }}
-          >
+            margin={{ top: 40, right: 30, left: 10, bottom: 30 }}          >
             <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={isHorizontal} />
-            {isHorizontal ? <XAxis type="number" stroke={axisColor} tick={{ fill: axisColor }} tickFormatter={formatYAxis} /> : renderXAxis()}
-            {isHorizontal ? <YAxis type="category" dataKey="displayX" stroke={axisColor} width={80} tick={{ fontSize: 10, fill: axisColor }} /> : renderYAxis()}
+            {isHorizontal ? (
+              <XAxis
+                type="number"
+                stroke={axisColor}
+                tick={{ fill: axisColor }}
+                tickFormatter={formatYAxis}
+              >
+                <Label
+                  value={yAxisKey}
+                  position="insideBottom"
+                  offset={-20}
+                  fill={axisColor}
+                  fontSize={12}
+                />
+              </XAxis>
+            ) : (
+              renderXAxis()
+            )}
+
+            {isHorizontal ? (
+              <YAxis
+                type="category"
+                dataKey="displayX"
+                stroke={axisColor}
+                width={80}
+                tick={{ fontSize: 8, fill: axisColor }}
+              >
+                <Label
+                  value={xAxisKey}
+                  angle={-90}
+                  position="center"
+                  dx={-35}
+                  fill={axisColor}
+                  fontSize={12}
+                />
+              </YAxis>
+            ) : (
+              renderYAxis()
+            )}
             <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
             <Bar dataKey="value" fill="#00C49F" stackId={chartType === "stacked_bar" ? "a" : undefined} radius={isHorizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} />
           </BarChart>
@@ -205,8 +286,10 @@ if (data && typeof data === "object" && !Array.isArray(data))  {
     return (
       <ScrollWrapper>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={safeData} margin={{ bottom: 20 }}>
-            <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+          <LineChart
+            data={safeData}
+            margin={{ top: 20, right: 20, left: 10, bottom: 40 }}
+          >            <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
             {renderXAxis()}
             {renderYAxis()}
             <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
@@ -223,8 +306,10 @@ if (data && typeof data === "object" && !Array.isArray(data))  {
     return (
       <ScrollWrapper>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={safeData} margin={{ bottom: 20 }}>
-            <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+          <AreaChart
+            data={safeData}
+            margin={{ top: 20, right: 20, left: 10, bottom: 40 }}
+          >            <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
             {renderXAxis()}
             {renderYAxis()}
             <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
@@ -278,7 +363,7 @@ if (data && typeof data === "object" && !Array.isArray(data))  {
 
   if (chartType === "funnel") {
 
-    const funnelData = buildFunnelData(safeData, config);
+    const funnelData = buildFunnelData(safeData, finalConfig);
 
     if (!funnelData.length) {
       return <p className="text-gray-400 text-center py-10">No data available</p>;
@@ -365,44 +450,44 @@ if (data && typeof data === "object" && !Array.isArray(data))  {
   }
 
   if (chartType === "radar") {
-  return (
-    <div className="w-full overflow-x-auto overflow-y-hidden">
-      <div className="min-w-[700px] h-[350px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart
-            data={safeData}
-            margin={{ top: 20, right: 80, bottom: 20, left: 80 }} // ✅ extra space
-          >
-            <PolarGrid stroke={gridColor} />
+    return (
+      <div className="w-full overflow-x-auto overflow-y-hidden">
+        <div className="min-w-[700px] h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart
+              data={safeData}
+              margin={{ top: 20, right: 80, bottom: 20, left: 80 }} // ✅ extra space
+            >
+              <PolarGrid stroke={gridColor} />
 
-            <PolarAngleAxis
-              dataKey="displayX"
-              stroke={axisColor}
-              tick={{ fill: axisColor, fontSize: 10 }} // slightly bigger
-            />
+              <PolarAngleAxis
+                dataKey="displayX"
+                stroke={axisColor}
+                tick={{ fill: axisColor, fontSize: 10 }} // slightly bigger
+              />
 
-            <PolarRadiusAxis
-              stroke={axisColor}
-              angle={90}
-              tick={{ fill: axisColor, fontSize: 10 }}
-              tickFormatter={formatYAxis}
-            />
+              <PolarRadiusAxis
+                stroke={axisColor}
+                angle={90}
+                tick={{ fill: axisColor, fontSize: 10 }}
+                tickFormatter={formatYAxis}
+              />
 
-            <Radar
-              name={activeMetric}
-              dataKey="value"
-              stroke="#8884d8"
-              fill="#8884d8"
-              fillOpacity={0.6}
-            />
+              <Radar
+                name={activeMetric}
+                dataKey="value"
+                stroke="#8884d8"
+                fill="#8884d8"
+                fillOpacity={0.6}
+              />
 
-            <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
-          </RadarChart>
-        </ResponsiveContainer>
+              <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   if (chartType === "waterfall") {
     return (

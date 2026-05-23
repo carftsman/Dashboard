@@ -295,8 +295,18 @@ return (
                       </div>
 
                       <div>
-                        {isMapped ? "Mapped" : "Unmapped"}
-                      </div>
+  {isMapped ? (
+    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+      <CheckCircleIcon />
+      Mapped
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium">
+    
+      Unmapped
+    </span>
+  )}
+</div>
 
                     </div>
                   );

@@ -17,8 +17,7 @@ const UserLogs = () => {
   const [endDate, setEndDate] = useState(null);
 
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
+  
   const profileImage = localStorage.getItem("profileImage");
   const role = localStorage.getItem("role")?.toLowerCase();
   const navigate = useNavigate();

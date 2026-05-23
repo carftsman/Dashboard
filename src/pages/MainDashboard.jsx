@@ -88,7 +88,7 @@ export default function Dashboard() {
     );
 
 
-
+    await fetchDashboardData();
 
     setIsOverlayOpen(false);
     setEditChartId(null);
@@ -411,11 +411,16 @@ export default function Dashboard() {
 
                       {/* DRAG HANDLE */}
                       <div className="drag-handle cursor-move text-xs mb-2 text-gray-400">
-                        Drag
+                        
                       </div>
 
                       <h2 className={`text-sm mb-3 ${textMain}`}>
-                        {chart.name || chart.config?.title || "Untitled Chart"}
+                        {
+                          chart.name ||
+                          chart.config?.config?.title ||
+                          chart.config?.title ||
+                          chart.type
+                        }                     
                       </h2>
 
                       <div className="flex-1 min-h-0"

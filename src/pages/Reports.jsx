@@ -69,8 +69,8 @@ export default function Reports() {
 
   }, [dashboardId]);
   useEffect(() => {
-  setCurrentPage(1);
-}, [search, startDate, endDate, selectedDashboard]);
+    setCurrentPage(1);
+  }, [search, startDate, endDate, selectedDashboard]);
 
   const filteredFiles = files.filter((item) => {
 
@@ -138,7 +138,7 @@ export default function Reports() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
             />
-</div>
+          </div>
 
           {/* ACTION/PROFILE SECTION */}
           <div className="flex items-center gap-4 flex-shrink-0">
@@ -203,10 +203,26 @@ export default function Reports() {
                   </select>
                 </div>
 
-                {(role === "ADMIN" || role === "SUPER_ADMIN") && (
-                  <button onClick={() => navigate(`/dataschema/${dashboardId}`)} className="bg-[#18154F] text-white px-5 py-2 rounded-xl shadow hover:bg-[#23206b] transition font-medium">
-                    Edit Schema
-                  </button>
+                {(role === "ADMIN" || role === "SUPER_ADMIN" ) && (
+                  <div className="flex items-center gap-3">
+
+                    <button
+                      onClick={() => navigate(`/dataschema/${dashboardId}`)}
+                      className="bg-[#18154F] text-white px-5 py-2 rounded-xl shadow hover:bg-[#23206b] transition font-medium"
+                    >
+                      Edit Schema
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        navigate(`/dashboard-charts/${dashboardId}/${encodeURIComponent(dashboardName)}`)
+                      }
+                      className="bg-green-600 text-white px-5 py-2 rounded-xl shadow hover:bg-green-700 transition font-medium"
+                    >
+                      Edit Charts
+                    </button>
+
+                  </div>
                 )}
               </div>
             </div>
@@ -226,4 +242,3 @@ export default function Reports() {
   );
 
 }
- 
