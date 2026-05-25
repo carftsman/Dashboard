@@ -55,50 +55,97 @@ export default function ReportTable({ formattedData, role }) {
               <td className="text-center">
                 <button
                   onClick={() => {
-                    const newWindow = window.open("", "_blank");
+  const newWindow = window.open("", "_blank");
 
-                    newWindow.document.write(`
-                      <html>
-                        <head>
-                          <title>${item.name}</title>
-                          <style>
-                            body {
-                              margin: 0;
-                              overflow: hidden;
-                              font-family: Arial, sans-serif;
-                              background: #f3f4f6;
-                            }
-                            .header {
-                              padding: 16px;
-                              background: white;
-                              border-bottom: 1px solid #ddd;
-                              font-size: 18px;
-                              font-weight: bold;
-                            }
-                            .viewer {
-                              width: 100%;
-                              height: 100vh;
-                              border: none;
-                            }
-                          </style>
-                        </head>
-                        <body>
-                          <div class="header">${item.name}</div>
- 
-                          <!-- Try iframe -->
-                          <iframe
-                            class="viewer"
-                            src="${item.fileUrl}#toolbar=0&navpanes=0&scrollbar=0">
-                          </iframe>
- 
-                          <!-- Fallback (some browsers) -->
-                          
-                        </body>
-                      </html>
-                    `);
+  // loading first
+  newWindow.document.write(`
+    <html>
+      <head>
+        <title>Loading...</title>
 
-                    newWindow.document.close();
-                  }}
+        <style>
+          body{
+            margin:0;
+            height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+            gap:16px;
+            font-family:Arial,sans-serif;
+            background:#f3f4f6;
+          }
+
+          .loader{
+            width:45px;
+            height:45px;
+            border:5px solid #ddd;
+            border-top-color:#18154F;
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+          }
+
+          @keyframes spin{
+            to{
+              transform:rotate(360deg);
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <div class="loader"></div>
+        <div>Loading PDF...</div>
+      </body>
+    </html>
+  `);
+
+  newWindow.document.close();
+
+
+  setTimeout(() => {
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>${item.name}</title>
+          <style>
+            body {
+              margin: 0;
+              overflow: hidden;
+              font-family: Arial, sans-serif;
+              background: #f3f4f6;
+            }
+
+            .header {
+              padding: 16px;
+              background: white;
+              border-bottom: 1px solid #ddd;
+              font-size: 18px;
+              font-weight: bold;
+            }
+
+            .viewer {
+              width: 100%;
+              height: 100vh;
+              border: none;
+            }
+          </style>
+        </head>
+
+        <body>
+          <div class="header">${item.name}</div>
+
+          <iframe
+            class="viewer"
+            src="${item.fileUrl}#toolbar=0&navpanes=0&scrollbar=0">
+          </iframe>
+        </body>
+      </html>
+    `);
+
+    newWindow.document.close();
+  }, 800);
+}}
                   className="inline-flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-red-100 transition mx-auto"
                 >
                   <FiFileText size={16} />

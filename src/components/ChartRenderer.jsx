@@ -38,11 +38,11 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   const metrics = finalConfig?.metrics || ["value"];
   const activeMetric = metrics[0];
   const xAxisKey =
-    finalConfig?.xAxis?.[0] ||
-    (Array.isArray(finalConfig?.groupBy)
-      ? finalConfig?.groupBy?.[0]
-      : finalConfig?.groupBy) ||
-    "displayX";
+  Array.isArray(finalConfig?.groupBy)
+    ? finalConfig.groupBy[0]
+    : finalConfig?.groupBy ||
+      finalConfig?.xAxis?.[0] ||
+      "displayX";
  
   const yAxisKey =
     finalConfig?.yAxis?.[0] ||
@@ -131,28 +131,44 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   };
  
   const renderXAxis = () => (
-    <XAxis
-      dataKey="displayX"
-      stroke={axisColor}
-      interval={0}
-      minTickGap={20}
-      angle={-30}
-      textAnchor="end"
-      height={70}
-      tick={{ fontSize: 10, fill: axisColor }}
-      tickFormatter={(value) =>
-        value
-      }
-    >
-      <Label
-        value={xAxisKey}
-        position="insideBottom"
-        offset={-20}
-        fill={axisColor}
-        fontSize={12}
-      />
-    </XAxis>
-  );
+  <XAxis
+    dataKey="displayX"
+    stroke={axisColor}
+    interval={0}
+    height={100}
+    tickMargin={12}
+    tick={({ x, y, payload }) => {
+      const text =
+        payload.value?.length > 10
+          ? payload.value.substring(0, 10) + "..."
+          : payload.value;
+
+      return (
+        <g transform={`translate(${x},${y})`}>
+          <text
+            x={0}
+            y={0}
+            dy={16}
+            textAnchor="end"
+            fill={axisColor}
+            fontSize={10}
+            transform="rotate(-25)"
+          >
+            {text}
+          </text>
+        </g>
+      );
+    }}
+  >
+    <Label
+      value={xAxisKey}
+      position="insideBottom"
+      offset={-5}
+      fill={axisColor}
+      fontSize={12}
+    />
+  </XAxis>
+);
  
   const renderYAxis = () => (
     <YAxis
@@ -233,7 +249,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
             layout={isHorizontal ? "vertical" : "horizontal"}
             data={safeData}
             barCategoryGap={chartType === "histogram" ? 0 : "10%"}
-            margin={{ top: 40, right: 30, left: 10, bottom: 30 }}          >
+            margin={{ top: 20, right: 20, left: 10, bottom: 60 }}         >
             <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={isHorizontal} />
             {isHorizontal ? (
               <XAxis

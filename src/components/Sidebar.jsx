@@ -132,7 +132,7 @@ const Sidebar = () => {
                     dashboards.map((item) => (
                       <NavLink
                         key={item.id}
-                        to={`/reports/${item.id}`}
+                        to={`/reports/${encodeURIComponent(item.name)}/${item.id}`}
                         className={({ isActive }) =>
                           `flex items-center gap-3 py-2 px-3 rounded-xl transition-all duration-200 ${isActive
                             ? "bg-[#f4c542] text-black font-semibold shadow"

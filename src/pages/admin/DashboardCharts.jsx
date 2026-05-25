@@ -167,10 +167,8 @@ export default function DashboardCharts() {
  
                           <div>
                             <p className="font-medium text-gray-800">
-                              {chart.type === "KPI"
-                                ? "KPI"
-                                : config?.title || chart.name || chart.type}
-                            </p>
+  {config?.title || chart.name || chart.type}
+</p>
                           </div>
                         </div>
                       </td>

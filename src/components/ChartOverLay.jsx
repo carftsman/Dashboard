@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved, chart }) {
   const [showVisuals, setShowVisuals] = useState(true);
   const [showData, setShowData] = useState(true);
-  const [xAxis, setXAxis] = useState(null);
-  const [yAxis, setYAxis] = useState(null);
+  const [xAxis, setXAxis] = useState([]);
+  const [yAxis, setYAxis] = useState([]);
   const [chartType, setChartType] = useState("BAR");
   const [title, setTitle] = useState("");
   const [chartConfigs, setChartConfigs] = useState([]);
@@ -50,13 +50,24 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
   useEffect(() => {
     if (chart) {
       const cfg = chart.config || {};
-      setXAxis(cfg.xAxis?.[0] || cfg.groupBy || cfg.columns?.[0] || cfg.steps?.[0] || null);
-      setYAxis(cfg.yAxis?.[0] || cfg.metrics?.[0] || cfg.columns?.[1] || cfg.steps?.[1] || null);
+      setXAxis(
+        cfg.xAxis ||
+        (cfg.groupBy ? [cfg.groupBy] : []) ||
+        cfg.columns ||
+        cfg.steps ||
+        []
+      );
+
+      setYAxis(
+        cfg.yAxis ||
+        cfg.metrics ||
+        []
+      );
       setChartType(chart.type?.toUpperCase() || "BAR");
       setTitle(chart.name || "");
     } else {
-      setXAxis(null);
-      setYAxis(null);
+      setXAxis([]);
+      setYAxis([]);
       setChartType("BAR");
       setTitle("");
     }
@@ -106,16 +117,23 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
 
       // Proper logic for all 20 chart types
       if (["LINE", "AREA", "STACKED_BAR", "STACKED_AREA", "MULTI_LINE"].includes(typeUpper)) {
-        config = { xAxis: [xAxis], metrics: [yAxis], yAxis: [yAxis] };
+        config = {
+          xAxis: xAxis,
+          metrics: yAxis,
+          yAxis: yAxis
+        };
       } else if (["PIE", "DONUT", "BAR", "HORIZONTAL_BAR", "TREEMAP", "RADAR"].includes(typeUpper)) {
-        config = { groupBy: xAxis, metrics: [yAxis] };
+        config = {
+          groupBy: Array.isArray(xAxis) ? xAxis : [xAxis],
+          metrics: Array.isArray(yAxis) ? yAxis : [yAxis]
+        };
       } else if (["SCATTER", "BUBBLE", "HEATMAP"].includes(typeUpper)) {
         config = { xAxis: xAxis, yAxis: yAxis, metrics: [yAxis] };
       } else if (typeUpper === "FUNNEL") {
         config = {
           groupBy: xAxis,
-          metrics: [yAxis],
-          steps: [xAxis, yAxis]
+          metrics: yAxis,
+          steps: [...xAxis, ...yAxis]
         };
 
       } else if (typeUpper === "TABLE") {
@@ -214,14 +232,68 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
                       onDrop={(e) => {
                         e.preventDefault();
                         const data = e.dataTransfer.getData("text/plain");
-                        if (["xAxis", "groupBy", "steps", "columns"].includes(field)) setXAxis(data);
-                        else setYAxis(data);
+                        if (["xAxis", "groupBy", "steps", "columns"].includes(field)) {
+                          setXAxis((prev) =>
+                            prev.includes(data) ? prev : [...prev, data]
+                          );
+                        } else {
+                          setYAxis((prev) =>
+                            prev.includes(data) ? prev : [...prev, data]
+                          );
+                        }
                       }}
                       onDragOver={(e) => e.preventDefault()}
-                      className={`border-2 border-dashed p-2 min-h-[40px] rounded mt-1 flex items-center justify-center transition-colors ${((["xAxis", "groupBy", "steps", "columns"].includes(field)) ? xAxis : yAxis) ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : "bg-gray-50 border-gray-200 text-gray-400"
-                        }`}
+                      className={`border-2 border-dashed p-2 min-h-[40px] rounded mt-1 flex flex-wrap items-center gap-1 transition-colors                        }`}
                     >
-                      {((["xAxis", "groupBy", "steps", "columns"].includes(field)) ? xAxis : yAxis) || "Drop here"}
+                      {(
+                        Array.isArray(
+                          ["xAxis", "groupBy", "steps", "columns"].includes(field)
+                            ? xAxis
+                            : yAxis
+                        ) &&
+                        (
+                          ["xAxis", "groupBy", "steps", "columns"].includes(field)
+                            ? xAxis
+                            : yAxis
+                        ).length > 0
+                      )
+                        ? (
+                          (
+                            Array.isArray(
+                              ["xAxis", "groupBy", "steps", "columns"].includes(field)
+                                ? xAxis
+                                : yAxis
+                            )
+                              ? (
+                                ["xAxis", "groupBy", "steps", "columns"].includes(field)
+                                  ? xAxis
+                                  : yAxis
+                              )
+                              : []
+                          ).map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] mr-1 mb-1"
+                            >
+                              <span>{item}</span>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (["xAxis", "groupBy", "steps", "columns"].includes(field)) {
+                                    setXAxis((prev) => prev.filter((v) => v !== item));
+                                  } else {
+                                    setYAxis((prev) => prev.filter((v) => v !== item));
+                                  }
+                                }}
+                                className="text-red-500 hover:text-red-700 font-bold leading-none"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))
+                        )
+                        : "Drop here"}
                     </div>
                   </div>
                 ))}
