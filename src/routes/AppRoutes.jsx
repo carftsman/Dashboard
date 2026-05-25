@@ -85,7 +85,7 @@ const AppRoutes = () => {
         element={<DashboardCharts />}
       />
       <Route
-        path="/reports/:dashboardName/:dashboardId"
+        path="/reports/:dashboardId/:dashboardName"
         element={
           <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "ANALYST", "SUBUSER", "MANAGER"]}>
             <Reports />

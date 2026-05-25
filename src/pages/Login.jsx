@@ -54,17 +54,27 @@ export default function Login() {
   };
 
   const validatePassword = (value) => {
-  if (!value) {
-    return false;
-  }
+    if (value.length < 12 || value.length > 16) {
+      setPasswordError("Password must be 12 to 16 characters");
+      return false;
+    } else if (!/[A-Z]/.test(value)) {
+      setPasswordError("Include at least one uppercase letter");
+      return false;
+    } else if (!/[a-z]/.test(value)) {
+      setPasswordError("Include at least one lowercase letter");
+      return false;
+    } else if (!/[0-9]/.test(value)) {
+      setPasswordError("Include at least one number");
+      return false;
+    } else if (!/[!@#$%^&*]/.test(value)) {
+      setPasswordError("Include at least one special character");
+      return false;
+    } else {
+      setPasswordError("");
+      return true;
+    }
+  };
 
-  if (value.length < 12 || value.length > 16) {
-    return false;
-  }
-
-  setPasswordError("");
-  return true;
-};
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     if (value.length <= 16) {
@@ -75,26 +85,9 @@ export default function Login() {
 
   const handleLogin = async () => {
   const isEmailValid = validateEmail(email);
-const isPasswordValid = validatePassword(password);
+  const isPasswordValid = validatePassword(password);
 
-if (!password) {
-  setPasswordError("Please enter password");
-  return;
-}
-
-if (!email) {
-  setEmailError("Please enter email");
-  return;
-}
-
-if (!isEmailValid) {
-  return;
-}
-
-if (!isPasswordValid) {
-  setPasswordError("Incorrect password");
-  return;
-}
+  if (!isEmailValid || !isPasswordValid) return;
 
   try {
     const profile = await login({ email, password });
@@ -108,16 +101,9 @@ if (!isPasswordValid) {
     }
 
   } catch (error) {
-  console.error("Login error:", error);
-
-  const status = error?.response?.status;
-
-  if (status === 400 || status === 401) {
-    setPasswordError("Incorrect password");
-  } else {
-    setPasswordError("Something went wrong");
+    console.error("Login error:", error);
+    setPasswordError("Login failed");
   }
-}
 };
 
   return (
