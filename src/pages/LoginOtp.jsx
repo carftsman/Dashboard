@@ -52,221 +52,299 @@ const LoginOtp = () => {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  const handleResend = () => {
-    setOtp(["", "", "", "", "", ""]);
-    setTimeLeft(30);
-    setOtpStatus(null);
-    inputs.current[0]?.focus();
+  const handleResend = async () => {
+    try {
+      const response = await fetch(
+        "https://dashboard-backend-cyrd.onrender.com/api/auth/forgot-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setOtp(["", "", "", "", "", ""]);
+        setTimeLeft(30);
+        setOtpStatus(null);
+
+        setPopup({
+          type: "success",
+          message: "OTP resent successfully",
+        });
+
+        inputs.current[0]?.focus();
+      } else {
+        setPopup({
+          type: "error",
+          message: data.message || "Failed to resend OTP",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+
+      setPopup({
+        type: "error",
+        message: "Something went wrong",
+      });
+    }
   };
 
   // Submit
   const handleResetPassword = async () => {
-  const enteredOtp = otp.join("");
+    const enteredOtp = otp.join("");
 
-  if (otp.includes("")) {
-    setOtpStatus("invalid");
-    setPopup({ type: "error", message: "Invalid OTP" });
-    return;
-  }
-
-  if (!password || !confirmPassword) {
-    setPopup({ type: "error", message: "Fill all fields" });
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    setPopup({ type: "error", message: "Passwords do not match" });
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      "https://dashboard-backend-cyrd.onrender.com/api/auth/reset-password",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          otp: enteredOtp,
-          newPassword: password,
-          confirmPassword,
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-      setPopup({ type: "success", message: "Password reset successful" });
-
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
-    } else {
+    if (otp.includes("")) {
       setOtpStatus("invalid");
-      setPopup({ type: "error", message: data.message || "Reset failed" });
+      setPopup({ type: "error", message: "Invalid OTP" });
+      return;
     }
-  } catch {
-    setPopup({ type: "error", message: "Something went wrong" });
-  }
-};
+
+    if (!password || !confirmPassword) {
+      setPopup({ type: "error", message: "Fill all fields" });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setPopup({ type: "error", message: "Passwords do not match" });
+      return;
+    }
+
+    try {
+
+      // STEP 1 → VERIFY OTP
+      const verifyResponse = await fetch(
+        "https://dashboard-backend-cyrd.onrender.com/api/auth/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            otp: enteredOtp,
+          }),
+        }
+      );
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyResponse.ok) {
+        setOtpStatus("invalid");
+        setPopup({
+          type: "error",
+          message: verifyData.message || "OTP not verified",
+        });
+        return;
+      }
+
+      // STEP 2 → RESET PASSWORD
+      const resetResponse = await fetch(
+        "https://dashboard-backend-cyrd.onrender.com/api/auth/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            otp: enteredOtp,
+            newPassword: password,
+            confirmPassword,
+          }),
+        }
+      );
+
+      const resetData = await resetResponse.json();
+
+      if (resetResponse.ok) {
+        setOtpStatus("verified");
+
+        setPopup({
+          type: "success",
+          message: "Password reset successful",
+        });
+
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } else {
+        setOtpStatus("invalid");
+
+        setPopup({
+          type: "error",
+          message: resetData.message || "Reset failed",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+
+      setPopup({
+        type: "error",
+        message: "Something went wrong",
+      });
+    }
+  };
   return (
-  <div className="min-h-[100dvh] flex items-center justify-center bg-gray-100 px-3 py-6 overflow-y-auto">
-    
-    <div className="w-full max-w-sm bg-white p-5 rounded-2xl shadow-lg text-center">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-gray-100 px-3 py-6 overflow-y-auto">
 
-      {/* LOGO */}
-      <div className="flex justify-center mb-4">
-        <img src={logo} alt="logo" className="w-14 h-14 object-contain" />
-      </div>
+      <div className="w-full max-w-sm bg-white p-5 rounded-2xl shadow-lg text-center">
 
-      <h2 className="text-lg font-semibold">Verify OTP</h2>
-
-      <p className="text-xs text-gray-500 mb-5">
-        Enter the OTP sent to your registered email
-      </p>
-
-      {/* OTP */}
-      <div className="flex justify-center mb-4">
-        <div className="flex gap-2">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              maxLength="1"
-              value={digit}
-              ref={(el) => (inputs.current[index] = el)}
-              onChange={(e) => handleChange(e.target.value, index)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border text-center text-sm font-semibold outline-none
-              ${
-                otpStatus === "invalid"
-                  ? "border-red-500 text-red-500"
-                  : "border-gray-300"
-              }`}
-            />
-          ))}
+        {/* LOGO */}
+        <div className="flex justify-center mb-4">
+          <img src={logo} alt="logo" className="w-14 h-14 object-contain" />
         </div>
+
+        <h2 className="text-lg font-semibold">Verify OTP</h2>
+
+        <p className="text-xs text-gray-500 mb-5">
+          Enter the OTP sent to your registered email
+        </p>
+
+        {/* OTP */}
+        <div className="flex justify-center mb-4">
+          <div className="flex gap-2">
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength="1"
+                value={digit}
+                ref={(el) => (inputs.current[index] = el)}
+                onChange={(e) => handleChange(e.target.value, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border text-center text-sm font-semibold outline-none
+              ${otpStatus === "invalid"
+                    ? "border-red-500 text-red-500"
+                    : "border-gray-300"
+                  }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* ERROR */}
+        {otpStatus === "invalid" && (
+          <p className="text-red-500 text-xs mb-2">Invalid OTP</p>
+        )}
+
+        {/* TIMER */}
+        <p className="text-xs mb-5">
+          {timeLeft > 0 ? (
+            <span className="text-gray-400">
+              Resend OTP (00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft})
+            </span>
+          ) : (
+            <span onClick={handleResend} className="text-blue-600 cursor-pointer">
+              Resend OTP
+            </span>
+          )}
+        </p>
+
+        {/* PASSWORD */}
+        <div className="text-left mb-4 relative">
+          <label className="text-xs text-gray-500">New Password</label>
+
+          <input
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter New Password"
+            autoComplete="off"
+            style={{
+              WebkitTextSecurity: showPassword ? "none" : "disc",
+            }}
+            className="w-full border rounded-md px-3 py-2 text-sm mt-1 pr-10 outline-none"
+          />
+
+          <span
+            className={`absolute right-3 top-9 ${password
+                ? "cursor-pointer text-gray-600"
+                : "cursor-not-allowed text-gray-300"
+              }`}
+            onClick={() => {
+              if (!password) return;
+              setShowPassword(true);
+              setTimeout(() => setShowPassword(false), 3000);
+            }}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+
+        {/* CONFIRM PASSWORD */}
+        <div className="text-left mb-4 relative">
+          <label className="text-xs text-gray-500">Confirm Password</label>
+
+          <input
+            type="text"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm Password"
+            autoComplete="off"
+            style={{
+              WebkitTextSecurity: showConfirmPassword ? "none" : "disc",
+            }}
+            className="w-full border rounded-md px-3 py-2 text-sm mt-1 pr-10 outline-none"
+          />
+
+          <span
+            className={`absolute right-3 top-9 ${confirmPassword
+                ? "cursor-pointer text-gray-600"
+                : "cursor-not-allowed text-gray-300"
+              }`}
+            onClick={() => {
+              if (!confirmPassword) return;
+              setShowConfirmPassword(true);
+              setTimeout(() => setShowConfirmPassword(false), 3000);
+            }}
+          >
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+
+        {/* BUTTON */}
+        <button
+          onClick={handleResetPassword}
+          className="w-full bg-[#192A51] text-white py-3 rounded-full flex items-center justify-center gap-2"
+        >
+          Verify & Reset Password
+          <FaArrowRight />
+        </button>
+
+        {/* BACK */}
+        <p
+          onClick={() => navigate("/reset-password")}
+          className="mt-4 text-sm text-gray-700 cursor-pointer flex justify-center items-center gap-2"
+        >
+          <FaArrowLeft />
+          Back to Reset Password
+        </p>
+
       </div>
 
-      {/* ERROR */}
-      {otpStatus === "invalid" && (
-        <p className="text-red-500 text-xs mb-2">Invalid OTP</p>
+      {/* ✅ POPUP MESSAGE */}
+      {popup && (
+        <div className="fixed top-5 right-5 z-50">
+          <div
+            className={`px-4 py-3 rounded-lg shadow-lg text-sm font-medium
+          ${popup.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
+          >
+            {popup.message}
+          </div>
+        </div>
       )}
 
-      {/* TIMER */}
-      <p className="text-xs mb-5">
-        {timeLeft > 0 ? (
-          <span className="text-gray-400">
-            Resend OTP (00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft})
-          </span>
-        ) : (
-          <span onClick={handleResend} className="text-blue-600 cursor-pointer">
-            Resend OTP
-          </span>
-        )}
-      </p>
-
-      {/* PASSWORD */}
-      <div className="text-left mb-4 relative">
-        <label className="text-xs text-gray-500">New Password</label>
-
-        <input
-          type="text"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter New Password"
-          autoComplete="off"
-          style={{
-            WebkitTextSecurity: showPassword ? "none" : "disc",
-          }}
-          className="w-full border rounded-md px-3 py-2 text-sm mt-1 pr-10 outline-none"
-        />
-
-        <span
-          className={`absolute right-3 top-9 ${
-            password
-              ? "cursor-pointer text-gray-600"
-              : "cursor-not-allowed text-gray-300"
-          }`}
-          onClick={() => {
-            if (!password) return;
-            setShowPassword(true);
-            setTimeout(() => setShowPassword(false), 3000);
-          }}
-        >
-          {showPassword ? <FaEyeSlash /> : <FaEye />}
-        </span>
-      </div>
-
-      {/* CONFIRM PASSWORD */}
-      <div className="text-left mb-4 relative">
-        <label className="text-xs text-gray-500">Confirm Password</label>
-
-        <input
-          type="text"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm Password"
-          autoComplete="off"
-          style={{
-            WebkitTextSecurity: showConfirmPassword ? "none" : "disc",
-          }}
-          className="w-full border rounded-md px-3 py-2 text-sm mt-1 pr-10 outline-none"
-        />
-
-        <span
-          className={`absolute right-3 top-9 ${
-            confirmPassword
-              ? "cursor-pointer text-gray-600"
-              : "cursor-not-allowed text-gray-300"
-          }`}
-          onClick={() => {
-            if (!confirmPassword) return;
-            setShowConfirmPassword(true);
-            setTimeout(() => setShowConfirmPassword(false), 3000);
-          }}
-        >
-          {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-        </span>
-      </div>
-
-      {/* BUTTON */}
-      <button
-        onClick={handleResetPassword}
-        className="w-full bg-[#192A51] text-white py-3 rounded-full flex items-center justify-center gap-2"
-      >
-        Verify & Reset Password
-        <FaArrowRight />
-      </button>
-
-      {/* BACK */}
-      <p
-        onClick={() => navigate("/reset-password")}
-        className="mt-4 text-sm text-gray-700 cursor-pointer flex justify-center items-center gap-2"
-      >
-        <FaArrowLeft />
-        Back to Reset Password
-      </p>
-
     </div>
-
-    {/* ✅ POPUP MESSAGE */}
-    {popup && (
-      <div className="fixed top-5 right-5 z-50">
-        <div
-          className={`px-4 py-3 rounded-lg shadow-lg text-sm font-medium
-          ${popup.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
-        >
-          {popup.message}
-        </div>
-      </div>
-    )}
-
-  </div>
-);
+  );
 };
 
 export default LoginOtp;
