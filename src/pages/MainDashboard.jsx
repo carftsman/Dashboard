@@ -5,9 +5,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ChartRenderer from "../components/ChartRenderer";
 
 import ChartOverlay from "../components/ChartOverLay";
-
+import {
+  uploadReport,
+  getReportSummary,
+  updateReportSummary,
+  saveReportSummary,
+} from "../services/reportService";
 import api from "../api/apiConfig";
-import { uploadReport } from "../services/reportService";
 import html2canvas from "html2canvas";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
@@ -22,9 +26,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const [darkMode, setDarkMode] = useState(true);
-
+  
   const fileId = location.state?.fileId;
-
+  const [reportSummary, setReportSummary] = useState(
+  localStorage.getItem(`reportSummary_${fileId}`) || ""
+);
   const dashboardId = location.state?.dashboardId;
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -70,6 +76,19 @@ export default function Dashboard() {
   const [fileName, setFileName] = useState("Dashboard_Report");
 
   const [isExporting, setIsExporting] = useState(false);
+  const fetchReportSummary = async () => {
+    try {
+      const res = await getReportSummary(fileId);
+
+      setReportSummary(
+        res.reportSummary ||
+        res.data?.reportSummary ||
+        ""
+      );
+    } catch (error) {
+      console.error("Error fetching summary:", error);
+    }
+  };
   const handleChartUpdated = async (updatedChart) => {
 
     setCharts((prevCharts) =>
@@ -94,7 +113,27 @@ export default function Dashboard() {
     setEditChartId(null);
     showToast("Chart updated successfully!");
   };
+  const handleSaveReport = async () => {
+  try {
+    console.log("fileId:", fileId);
+    console.log("reportSummary:", reportSummary);
 
+    const response = await saveReportSummary({
+      dashboardId,
+      fileId,
+      reportSummary,
+    });
+
+    console.log(response);
+
+    showToast("Report saved successfully");
+  } catch (error) {
+    console.error("SAVE ERROR:", error.response?.data);
+    console.error(error);
+
+    showToast("Failed to save report", "error");
+  }
+};
   const handleExportPDF = async () => {
 
     try {
@@ -118,22 +157,50 @@ export default function Dashboard() {
         windowHeight: element.scrollHeight,
 
         onclone: (clonedDoc) => {
+  const clonedElement = clonedDoc.getElementById("dashboard-content");
 
-          const clonedElement = clonedDoc.getElementById("dashboard-content");
+  if (clonedElement) {
+    clonedElement.style.backgroundColor = darkMode
+      ? "#020617"
+      : "#f3f4f6";
 
-          if (clonedElement) {
+    clonedElement.style.color = darkMode
+      ? "#ffffff"
+      : "#000000";
 
-            clonedElement.style.backgroundColor = darkMode ? "#020617" : "#f3f4f6";
+    const toIgnore = clonedElement.querySelectorAll(
+      "[data-html2canvas-ignore]"
+    );
 
-            clonedElement.style.color = darkMode ? "#ffffff" : "#000000";
+    toIgnore.forEach((el) => {
+      el.style.display = "none";
+    });
+  }
 
-            const toIgnore = clonedElement.querySelectorAll('[data-html2canvas-ignore]');
+  // Preserve textarea line breaks in PDF
+  const textareas = clonedDoc.querySelectorAll("textarea");
 
-            toIgnore.forEach(el => el.style.display = 'none');
+  textareas.forEach((textarea) => {
+    const div = clonedDoc.createElement("div");
 
-          }
+    const styles = window.getComputedStyle(textarea);
 
-        }
+    div.style.whiteSpace = "pre-wrap";
+    div.style.wordBreak = "break-word";
+    div.style.minHeight = textarea.offsetHeight + "px";
+    div.style.padding = styles.padding;
+    div.style.border = styles.border;
+    div.style.borderRadius = styles.borderRadius;
+    div.style.backgroundColor = styles.backgroundColor;
+    div.style.color = styles.color;
+    div.style.font = styles.font;
+    div.style.lineHeight = styles.lineHeight;
+
+    div.textContent = textarea.value;
+
+    textarea.parentNode.replaceChild(div, textarea);
+  });
+}
 
       });
 
@@ -299,6 +366,9 @@ export default function Dashboard() {
     fetchDashboard();
 
     fetchDashboardData();
+    if (fileId) {
+      fetchReportSummary();
+    }
 
   }, [dashboardId, fileId, fetchDashboard, fetchDashboardData]);
 
@@ -446,8 +516,56 @@ export default function Dashboard() {
 
               </GridLayout>
             </div>
+                    </div>
+
+          {/* Report Summary Section */}
+          <div className={`${cardBg} mt-6 p-5 rounded-xl shadow border border-gray-700`}>
+            <h2 className={`text-lg font-semibold mb-3 ${textMain}`}>
+              Report Summary
+            </h2>
+
+            <textarea
+  value={reportSummary}
+  onChange={(e) => {
+    const value = e.target.value
+    setReportSummary(value);
+    localStorage.setItem(
+      `reportSummary_${fileId}`,
+      value
+    )
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  }}
+  placeholder="Write your report summary here..."
+  rows={2}
+  className={`w-full p-4 rounded-lg border resize-none overflow-hidden outline-none transition-all ${
+    darkMode
+      ? "bg-[#1e293b] border-gray-600 text-white"
+      : "bg-white border-gray-300 text-black"
+  }`}
+/>
+
+{/* PDF Export Version */}
+<div
+  className={`hidden-print whitespace-pre-wrap ${
+    darkMode ? "text-white" : "text-black"
+  }`}
+  style={{
+    whiteSpace: "pre-wrap",
+    display: "none",
+  }}
+>
+  {reportSummary}
+</div>
+            <div className="flex justify-between items-center mt-2">
+              <p className={`text-xs ${textSub}`}>
+                {reportSummary.length} characters
+              </p>
+
+              
+            </div>
           </div>
-        </div>
+        </div> {/* dashboard-content ends here */}
 
         <ChartOverlay
 
