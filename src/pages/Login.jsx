@@ -29,18 +29,18 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   const role = localStorage.getItem("role")?.toUpperCase();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role")?.toUpperCase();
 
-  //   if (token) {
-  //     if (role === "ADMIN" || role === "SUPER_ADMIN") {
-  //       navigate("/admin-dashboard", { replace: true });
-  //     } else {
-  //       navigate("/dashboard-selection", { replace: true });
-  //     }
-  //   }
-  // }, []);
+    if (token) {
+      if (role === "ADMIN" || role === "SUPER_ADMIN") {
+        navigate("/admin-dashboard", { replace: true });
+      } else {
+        navigate("/dashboard-selection", { replace: true });
+      }
+    }
+  }, []);
 
   const validateEmail = (value) => {
     const regex = /^[a-zA-Z0-9._%+-]+@(dhatvibs\.com|gmail\.com)$/;

@@ -10,29 +10,34 @@ export const AuthProvider = ({ children }) => {
 
   // Check token and load user when app starts
   useEffect(() => {
-    const loadUser = async () => {
+  const loadUser = async () => {
+    const token = localStorage.getItem("token");
 
-      const token = localStorage.getItem("token");
+    console.log("TOKEN FOUND:", token);
 
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const profile = await getProfile();
-        setUser(profile);
-      } catch (error) {
-        console.error("Profile fetch failed", error);
-        localStorage.removeItem("token");
-        setUser(null);
-      }
-
+    if (!token) {
       setLoading(false);
-    };
+      return;
+    }
 
-    loadUser();
-  }, []);
+    try {
+      const profile = await getProfile();
+
+      console.log("PROFILE SUCCESS:", profile);
+
+      setUser(profile);
+    } catch (error) {
+      console.log("PROFILE ERROR:", error);
+
+      localStorage.removeItem("token");
+      setUser(null);
+    }
+
+    setLoading(false);
+  };
+
+  loadUser();
+}, []);
 
   // Login function
   const login = async (credentials) => {
