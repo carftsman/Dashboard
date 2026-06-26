@@ -29,7 +29,7 @@ export default function Dashboard() {
   
   const fileId = location.state?.fileId;
   const [reportSummary, setReportSummary] = useState(
-  sessionStorage.getItem(`reportSummary_${fileId}`) || ""
+  localStorage.getItem(`reportSummary_${fileId}`) || ""
 );
   const dashboardId = location.state?.dashboardId;
 
@@ -529,7 +529,7 @@ export default function Dashboard() {
   onChange={(e) => {
     const value = e.target.value
     setReportSummary(value);
-    sessionStorage.setItem(
+    localStorage.setItem(
       `reportSummary_${fileId}`,
       value
     )

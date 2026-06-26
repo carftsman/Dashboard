@@ -30,8 +30,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token");
-    const role = sessionStorage.getItem("role")?.toUpperCase();
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role")?.toUpperCase();
 
     if (token) {
       if (role === "ADMIN" || role === "SUPER_ADMIN") {

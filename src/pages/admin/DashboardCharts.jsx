@@ -15,14 +15,17 @@ import {
   FiDatabase,
   FiFilter,
   FiDisc,
+  FiActivity,
+  FiTarget,
 } from "react-icons/fi";
+
 
 export default function DashboardCharts() {
   const { dashboardId, dashboardName } = useParams();
 
   const navigate = useNavigate();
 
-  const role = sessionStorage.getItem("role");
+  const role = localStorage.getItem("role");
 
   const [charts, setCharts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -167,6 +170,17 @@ export default function DashboardCharts() {
                             {chart.type === "KPI" && <FiDatabase />}
                             {chart.type === "FUNNEL" && <FiFilter />}
                             {chart.type === "DONUT" && <FiDisc />}
+                            {chart.type === "HORIZONTAL_BAR" && <FiBarChart2 />}
+                            {chart.type === "STACKED_BAR" && <FiBarChart2 />}
+                            {chart.type === "MULTI_LINE" && <FiTrendingUp />}
+                            {chart.type === "STACKED_AREA" && <FiTrendingUp />}
+                            {chart.type === "SCATTER" && <FiActivity />}
+                            {chart.type === "BUBBLE" && <FiActivity />}
+                            {chart.type === "HEATMAP" && <FiGrid />}
+                            {chart.type === "RADAR" && <FiTarget />}
+                            {chart.type === "GAUGE" && <FiTarget />}
+                            {chart.type === "HISTOGRAM" && <FiBarChart2 />}
+                            {chart.type === "WATERFALL" && <FiBarChart2 />}
                           </div>
 
                           <div>
@@ -210,6 +224,50 @@ export default function DashboardCharts() {
 
                           {chart.type === "DONUT" && (
                             <FiDisc className="text-pink-500" />
+                          )}
+
+                          {chart.type === "HORIZONTAL_BAR" && (
+                            <FiBarChart2 className="text-orange-500" />
+                          )}
+
+                          {chart.type === "STACKED_BAR" && (
+                            <FiBarChart2 className="text-orange-500" />
+                          )}
+
+                          {chart.type === "MULTI_LINE" && (
+                            <FiTrendingUp className="text-green-500" />
+                          )}
+
+                          {chart.type === "STACKED_AREA" && (
+                            <FiTrendingUp className="text-cyan-500" />
+                          )}
+
+                          {chart.type === "SCATTER" && (
+                            <FiActivity className="text-blue-500" />
+                          )}
+
+                          {chart.type === "BUBBLE" && (
+                            <FiActivity className="text-indigo-500" />
+                          )}
+
+                          {chart.type === "HEATMAP" && (
+                            <FiGrid className="text-red-500" />
+                          )}
+
+                          {chart.type === "RADAR" && (
+                            <FiTarget className="text-purple-500" />
+                          )}
+
+                          {chart.type === "GAUGE" && (
+                            <FiTarget className="text-green-500" />
+                          )}
+
+                          {chart.type === "HISTOGRAM" && (
+                            <FiBarChart2 className="text-yellow-500" />
+                          )}
+
+                          {chart.type === "WATERFALL" && (
+                            <FiBarChart2 className="text-pink-500" />
                           )}
 
                           <span className="text-sm font-medium">
@@ -258,10 +316,40 @@ export default function DashboardCharts() {
                             ))}
 
                           {/* OTHER CHARTS */}
+                          {/* SCATTER */}
+
+                          {chart.type === "SCATTER" && (
+                            <>
+                              {config?.xAxis && (
+                                <span className="px-4 py-2 rounded-[14px] bg-blue-100 text-blue-700 text-[12px] font-medium">
+                                  X-axis: {config.xAxis}
+                                </span>
+                              )}
+
+                              {config?.yAxis && (
+                                <span className="px-4 py-2 rounded-[14px] bg-green-100 text-green-700 text-[12px] font-medium">
+                                  Y-axis: {config.yAxis}
+                                </span>
+                              )}
+
+                              {config?.size && (
+                                <span className="px-4 py-2 rounded-[14px] bg-yellow-100 text-yellow-700 text-[12px] font-medium">
+                                  Size: {config.size}
+                                </span>
+                              )}
+
+                              {config?.legend && (
+                                <span className="px-4 py-2 rounded-[14px] bg-purple-100 text-purple-700 text-[12px] font-medium">
+                                  Legend: {config.legend}
+                                </span>
+                              )}
+                            </>
+                          )}
 
                           {chart.type !== "KPI" &&
                             chart.type !== "TABLE" &&
-                            chart.type !== "FUNNEL" && (
+                            chart.type !== "FUNNEL" &&
+                            chart.type !== "SCATTER" && (
                               <>
                                 {Array.isArray(config?.xAxis) &&
                                   config.xAxis.map((x, idx) => (

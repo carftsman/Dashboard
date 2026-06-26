@@ -22,15 +22,15 @@ function DashboardSelection() {
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
 
-  const token = sessionStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-  const profileImage = sessionStorage.getItem("profileImage");
+  const profileImage = localStorage.getItem("profileImage");
 
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openVizModal, setOpenVizModal] = useState(false);
   const [createdDashboardId, setCreatedDashboardId] = useState(null);
 
-  const role = sessionStorage.getItem("role")?.toLowerCase();
+  const role = localStorage.getItem("role")?.toLowerCase();
 
   const [profile, setProfile] = useState(null);
 
@@ -48,7 +48,7 @@ function DashboardSelection() {
   // }, []);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
 console.log("dashboard screen")
 
     if (!token) {

@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   // Check token and load user when app starts
   useEffect(() => {
   const loadUser = async () => {
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
     console.log("TOKEN FOUND:", token);
 
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.log("PROFILE ERROR:", error);
 
-      sessionStorage.removeItem("token");
+      localStorage.removeItem("token");
       setUser(null);
     }
 
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
   try {
     const loginResponse = await loginUser(credentials);
 
-    console.log("TOKEN AFTER LOGIN:", sessionStorage.getItem("token"));
+    console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
 
     // set user from login response first
     setUser(loginResponse);
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = () => {
     logoutUser();
-    // sessionStorage.removeItem("token");
+    // localStorage.removeItem("token");
     setUser(null);
   };
 

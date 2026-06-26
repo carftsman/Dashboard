@@ -13,7 +13,7 @@ function EditProfile() {
 
   const navigate = useNavigate();
   const [currentRole, setCurrentRole] = useState("");
-  const role = sessionStorage.getItem("role")?.toLowerCase();
+  const role = localStorage.getItem("role")?.toLowerCase();
 
   //  Form states
   const [name, setName] = useState(null);
@@ -24,15 +24,15 @@ function EditProfile() {
   //  File input reference (for upload button)
   const fileInputRef = useRef();
 
-  //  Load image from sessionStorage on mount
+  //  Load image from localStorage on mount
   useEffect(() => {
-    const img = sessionStorage.getItem("profileImage");
+    const img = localStorage.getItem("profileImage");
     if (img) setProfileImage(img);
   }, []);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = sessionStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
         const res = await api.get("/api/users/profile", {
           headers: {
@@ -56,7 +56,7 @@ function EditProfile() {
   //  SAVE PROFILE FUNCTION
   const handleSave = async () => {
     try {
-      const token = sessionStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
 
       const res = await api.put(
@@ -69,11 +69,11 @@ function EditProfile() {
 
       //  Save image locally
       if (profileImage) {
-        sessionStorage.setItem("profileImage", profileImage);
+        localStorage.setItem("profileImage", profileImage);
       }
 
-      //  Update username in sessionStorage
-      sessionStorage.setItem("userName", res.data.name);
+      //  Update username in localStorage
+      localStorage.setItem("userName", res.data.name);
 
       // Success message
       toast.success("Profile updated successfully ");
@@ -105,7 +105,7 @@ function EditProfile() {
   //  Remove profile image
   const handleRemove = () => {
     setProfileImage(null);
-    sessionStorage.removeItem("profileImage");
+    localStorage.removeItem("profileImage");
     toast.info("Profile image removed ");
   };
 
