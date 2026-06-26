@@ -9,7 +9,7 @@ import api from '../api/apiConfig';
 
 function Profile() {
 
-  const role = localStorage.getItem("role")?.toLowerCase();
+  const role = sessionStorage.getItem("role")?.toLowerCase();
 
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -21,7 +21,7 @@ function Profile() {
     //  FETCH USER PROFILE
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
 
         if (!token) {
           console.error("No token found");
@@ -39,7 +39,7 @@ function Profile() {
 
           //  STORE ROLE
           if (res.data.role) {
-            localStorage.setItem("role", res.data.role);
+            sessionStorage.setItem("role", res.data.role);
           }
         }
 
@@ -51,7 +51,7 @@ function Profile() {
     fetchProfile();
 
     // GET IMAGE FROM LOCAL STORAGE
-    const img = localStorage.getItem("profileImage");
+    const img = sessionStorage.getItem("profileImage");
     if (img) {
       setProfileImage(img);
     }

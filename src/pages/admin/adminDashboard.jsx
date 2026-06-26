@@ -13,7 +13,7 @@ function Topbar() {
   const [user, setUser] = useState(null);
  
 
-  const profileImage = localStorage.getItem("profileImage");
+  const profileImage = sessionStorage.getItem("profileImage");
  
   useEffect(() => {
     const fetchUser = async () => {

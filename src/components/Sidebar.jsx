@@ -18,7 +18,7 @@ const Sidebar = () => {
   const [dashboards, setDashboards] = useState([]);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const role = localStorage.getItem("role")?.toLowerCase();
+  const role = sessionStorage.getItem("role")?.toLowerCase();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -28,8 +28,8 @@ const Sidebar = () => {
   const handleLogout = () => setShowLogoutPopup(true);
 
   const confirmLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.clear();
+    sessionStorage.removeItem("token");
+    sessionStorage.clear();
     window.location.href = "/";
   };
 
@@ -56,7 +56,7 @@ const Sidebar = () => {
 
   const fetchDashboards = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) return;
 
       const res = await axios.get(

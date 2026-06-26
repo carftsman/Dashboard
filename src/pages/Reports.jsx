@@ -23,10 +23,10 @@ export default function Reports() {
   const [files, setFiles] = useState([]);
 
   const [search, setSearch] = useState("");
-  const role = localStorage.getItem("role");
+  const role = sessionStorage.getItem("role");
 
   const [selectedDashboard, setSelectedDashboard] = useState(null);
-  const profileImage = localStorage.getItem("profileImage");
+  const profileImage = sessionStorage.getItem("profileImage");
   const canUpload = role !== "ADMIN" && role !== "MANAGER" && role !== "SUPER_ADMIN";
 
   // STATES

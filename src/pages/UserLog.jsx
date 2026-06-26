@@ -18,13 +18,13 @@ const UserLogs = () => {
 
   const [page, setPage] = useState(1);
   
-  const profileImage = localStorage.getItem("profileImage");
-  const role = localStorage.getItem("role")?.toLowerCase();
+  const profileImage = sessionStorage.getItem("profileImage");
+  const role = sessionStorage.getItem("role")?.toLowerCase();
   const navigate = useNavigate();
  
   useEffect(() => {
     const fetchLogs = async () => {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         setError("Session expired. Please login again.");
         navigate("/");

@@ -9,8 +9,8 @@ export const loginUser = async (data) => {
     const result = response.data;
     console.log("LOGIN API FULL RESPONSE:", response.data);
     if (result?.token) {
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("role", result.role);
+      sessionStorage.setItem("token", result.token);
+      sessionStorage.setItem("role", result.role);
     }
 
     return result;
@@ -32,6 +32,6 @@ export const getProfile = async () => {
 // Logout user
 export const logoutUser = () => {
   ["token", "user", "role", "lastDashboardId"].forEach((key) =>
-    localStorage.removeItem(key)
+    sessionStorage.removeItem(key)
   );
 };
