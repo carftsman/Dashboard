@@ -144,8 +144,6 @@ export default function DashboardCharts() {
                       ...(config?.metrics || []),
                     ];
                   }
-
-                  // Remove duplicates
                   selectedData = [...new Set(selectedData)];
 
                   return (

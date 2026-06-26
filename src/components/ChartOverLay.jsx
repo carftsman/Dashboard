@@ -12,7 +12,8 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
   const [loading, setLoading] = useState(false);
   const [fileId, setFileId] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-
+  const [size, setSize] = useState([]);
+  const [legend, setLegend] = useState([]);
   const token = localStorage.getItem("token");
 
   // --- 1. Comprehensive Icon Mapping ---
@@ -65,6 +66,8 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
       );
       setChartType(chart.type?.toUpperCase() || "BAR");
       setTitle(chart.name || "");
+      setSize(cfg.size || []);
+      setLegend(cfg.legend || []);
     } else {
       setXAxis([]);
       setYAxis([]);
@@ -142,6 +145,13 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
         config = { metrics: [yAxis || xAxis] };
       } else if (typeUpper === "HISTOGRAM") {
         config = { xAxis: xAxis };
+      } else if (typeUpper === "SCATTER") {
+        config = {
+          xAxis,
+          yAxis,
+          size,
+          legend,
+        };
       }
 
       const payload = {
@@ -297,6 +307,7 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
                     </div>
                   </div>
                 ))}
+                
               </div>
             </div>
           )}

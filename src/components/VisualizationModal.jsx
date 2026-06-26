@@ -118,16 +118,16 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
     const newWidget = {
       type: selectedWidget.type,
       name:
-  formData.title ||
-  chart?.name ||
-  selectedWidget.type,
+        formData.title ||
+        chart?.name ||
+        selectedWidget.type,
       config: {
         ...formData,
         type: selectedWidget.type,
         title:
-  formData.title ||
-  chart?.name ||
-  selectedWidget.type,
+          formData.title ||
+          chart?.name ||
+          selectedWidget.type,
 
         xAxis: formData.groupBy
           ? [formData.groupBy]
@@ -161,17 +161,17 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
 
       const payload = {
         name:
-  formData.title ||
-  chart?.name ||
-  selectedWidget.type,
+          formData.title ||
+          chart?.name ||
+          selectedWidget.type,
         type: selectedWidget.type,
         config: {
           ...formData,
           type: selectedWidget.type,
           title:
-  formData.title ||
-  chart?.name ||
-  selectedWidget.type,
+            formData.title ||
+            chart?.name ||
+            selectedWidget.type,
 
           xAxis: formData.groupBy
             ? [formData.groupBy]
@@ -250,6 +250,8 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
         "groupBy",
         "xAxis",
         "yAxis",
+        "size",
+        "legend",
       ];
 
       let updated = [];
@@ -430,6 +432,42 @@ const VisualizationModal = ({ isOpen, onClose, dashboardId, onSuccess, chart }) 
                 {selectedWidget && (
                   <>
                     {renderFields()}
+                    
+                    {selectedWidget.type === "SCATTER" && (
+                      <>
+                        <div className="mb-2">
+                          <label className="text-xs text-gray-700 font-medium">
+                            size (optional)
+                          </label>
+                          <DroppableField field="size">
+                            {(selectedFields.size || []).map((col) => (
+                              <span
+                                key={col}
+                                className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 text-[10px] rounded-full"
+                              >
+                                {col}
+                              </span>
+                            ))}
+                          </DroppableField>
+                        </div>
+
+                        <div className="mb-2">
+                          <label className="text-xs text-gray-700 font-medium">
+                            legend (optional)
+                          </label>
+                          <DroppableField field="legend">
+                            {(selectedFields.legend || []).map((col) => (
+                              <span
+                                key={col}
+                                className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-[10px] rounded-full"
+                              >
+                                {col}
+                              </span>
+                            ))}
+                          </DroppableField>
+                        </div>
+                      </>
+                    )}
 
                     <input
                       type="text"

@@ -5,15 +5,15 @@ import {
   Legend, LabelList, Radar, RadialBarChart, RadarChart, RadialBar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   Treemap, Funnel, FunnelChart, ZAxis, Label
 } from "recharts";
- 
+
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
- 
+
 const parseNumber = (val) => {
   if (val === null || val === undefined) return 0;
   const num = Number(String(val).replace(/,/g, ""));
   return isNaN(num) ? 0 : num;
 };
- 
+
 export default function ChartRenderer({ type, data, config, darkMode }) {
   const finalConfig =
     config?.config || config || {};
@@ -23,7 +23,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   const textColor = darkMode ? "#ffffff" : "#000000";
   const FONT_SIZE = 10;
   let normalizedData = data;
- 
+
   if (data && typeof data === "object" && !Array.isArray(data)) {
     normalizedData = Object.entries(data).map(([key, value]) => ({
       name: key,
@@ -33,17 +33,17 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   if (!normalizedData || (Array.isArray(normalizedData) && normalizedData.length === 0)) {
     return <p className="text-gray-400 text-center py-10">No data available</p>;
   }
- 
+
   const chartType = type?.toLowerCase();
   const metrics = finalConfig?.metrics || ["value"];
   const activeMetric = metrics[0];
   const xAxisKey =
-  Array.isArray(finalConfig?.groupBy)
-    ? finalConfig.groupBy[0]
-    : finalConfig?.groupBy ||
+    Array.isArray(finalConfig?.groupBy)
+      ? finalConfig.groupBy[0]
+      : finalConfig?.groupBy ||
       finalConfig?.xAxis?.[0] ||
       "displayX";
- 
+
   const yAxisKey =
     finalConfig?.yAxis?.[0] ||
     (Array.isArray(finalConfig?.metrics)
@@ -51,7 +51,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       : finalConfig?.metrics) ||
     "value";
   let safeData = [];
- 
+
   if (Array.isArray(normalizedData)) {
     safeData = normalizedData.map((item, i) => {
       const xLabel =
@@ -62,7 +62,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
         item.range ||
         item.group ||
         `Item ${i + 1}`;
- 
+
       const rawValue =
         item[yAxisKey] ??
         item[activeMetric] ??
@@ -71,11 +71,13 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
         0;
       const yValue = parseNumber(rawValue);
       const startValue = item.cumulative !== undefined ? parseNumber(item.cumulative) - yValue : 0;
- 
+
       return {
         ...item,
         displayX: xLabel,
-        displayY: item.y || yValue,
+        displayY: item[yAxisKey] || yValue,
+        x: parseNumber(item[xAxisKey]),
+        y: parseNumber(item[yAxisKey]),
         value: yValue,
         start: startValue,
         [activeMetric]: yValue
@@ -84,31 +86,31 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
   }
   const buildFunnelData = (data, config) => {
     if (!Array.isArray(data)) return [];
- 
+
     const groupKey = config?.groupBy || config?.steps?.[0];
     const metricKey = config?.metrics?.[0] || config?.steps?.[1];
- 
+
     if (!groupKey) return [];
- 
+
     const grouped = {};
- 
+
     data.forEach((item) => {
       const key =
         item[groupKey] ||
         item.displayX ||
         item.name;
- 
+
       const value =
         parseNumber(item[metricKey]) ||
         item.value ||
         0;
- 
+
       if (!key) return;
- 
+
       if (!grouped[key]) grouped[key] = 0;
       grouped[key] += value;
     });
- 
+
     return Object.entries(grouped)
       .map(([key, val]) => ({
         displayX: key,
@@ -123,53 +125,53 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
     if (absValue >= 1000) return (value / 1000).toFixed(1).replace(/\.0$/, '') + "K";
     return value;
   };
- 
+
   const getHeatmapColor = (value) => {
     const max = Math.max(...safeData.map(d => d.value), 1);
     const ratio = value / max;
     return `rgba(0, 196, 159, ${0.2 + ratio * 0.8})`;
   };
- 
-  const renderXAxis = () => (
-  <XAxis
-    dataKey="displayX"
-    stroke={axisColor}
-    interval={0}
-    height={100}
-    tickMargin={12}
-    tick={({ x, y, payload }) => {
-      const text =
-        payload.value?.length > 10
-          ? payload.value.substring(0, 10) + "..."
-          : payload.value;
 
-      return (
-        <g transform={`translate(${x},${y})`}>
-          <text
-            x={0}
-            y={0}
-            dy={16}
-            textAnchor="end"
-            fill={axisColor}
-            fontSize={10}
-            transform="rotate(-25)"
-          >
-            {text}
-          </text>
-        </g>
-      );
-    }}
-  >
-    <Label
-      value={xAxisKey}
-      position="insideBottom"
-      offset={-5}
-      fill={axisColor}
-      fontSize={12}
-    />
-  </XAxis>
-);
- 
+  const renderXAxis = () => (
+    <XAxis
+      dataKey="displayX"
+      stroke={axisColor}
+      interval={0}
+      height={100}
+      tickMargin={12}
+      tick={({ x, y, payload }) => {
+        const text =
+          payload.value?.length > 10
+            ? payload.value.substring(0, 10) + "..."
+            : payload.value;
+
+        return (
+          <g transform={`translate(${x},${y})`}>
+            <text
+              x={0}
+              y={0}
+              dy={16}
+              textAnchor="end"
+              fill={axisColor}
+              fontSize={10}
+              transform="rotate(-25)"
+            >
+              {text}
+            </text>
+          </g>
+        );
+      }}
+    >
+      <Label
+        value={xAxisKey}
+        position="insideBottom"
+        offset={-5}
+        fill={axisColor}
+        fontSize={12}
+      />
+    </XAxis>
+  );
+
   const renderYAxis = () => (
     <YAxis
       stroke={axisColor}
@@ -186,13 +188,13 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       tickFormatter={formatYAxis}
     />
   );
- 
+
   const ScrollWrapper = ({ children }) => (
     <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar">
       {children}
     </div>
   );
- 
+
   if (chartType === "heatmap") {
     return (
       <ScrollWrapper>
@@ -213,7 +215,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "pie" || chartType === "donut") {
     return (
       <ScrollWrapper>
@@ -239,7 +241,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (["bar", "stacked_bar", "horizontal_bar", "histogram"].includes(chartType)) {
     const isHorizontal = chartType === "horizontal_bar";
     return (
@@ -269,7 +271,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
             ) : (
               renderXAxis()
             )}
- 
+
             {isHorizontal ? (
               <YAxis
                 type="category"
@@ -284,20 +286,34 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
                   position="center"
                   dx={-35}
                   fill={axisColor}
-                  fontSize={12}
+                  fontSize={10}
                 />
               </YAxis>
             ) : (
               renderYAxis()
             )}
             <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
-            <Bar dataKey="value" fill="#00C49F" stackId={chartType === "stacked_bar" ? "a" : undefined} radius={isHorizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} />
-          </BarChart>
+            <Legend
+              wrapperStyle={{
+                paddingTop: 5,
+                
+              }}
+            />
+            {metrics.map((metric, i) => (
+              <Bar
+                key={metric}
+                dataKey={metric}
+                name={metric}
+                fill={COLORS[i % COLORS.length]}
+                stackId={chartType === "stacked_bar" ? "a" : undefined}
+                radius={isHorizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]}
+              />
+            ))}          </BarChart>
         </ResponsiveContainer>
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "line" || chartType === "multi_line") {
     return (
       <ScrollWrapper>
@@ -317,7 +333,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "area" || chartType === "stacked_area") {
     return (
       <ScrollWrapper>
@@ -335,16 +351,44 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "scatter" || chartType === "bubble") {
     return (
       <ScrollWrapper>
         <ResponsiveContainer width="100%" height={300}>
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid stroke={gridColor} />
-            <XAxis type="number" dataKey="x" stroke={axisColor} tick={{ fill: axisColor, fontSize: FONT_SIZE }} tickFormatter={formatYAxis} />
-            <YAxis type="number" dataKey="y" stroke={axisColor} tick={{ fill: axisColor, fontSize: FONT_SIZE }} tickFormatter={formatYAxis} />
-            {chartType === "bubble" && <ZAxis type="number" dataKey="size" range={[5, 60]} />}
+            <XAxis
+              type="number"
+              dataKey="x"
+              stroke={axisColor}
+              tick={{ fill: axisColor, fontSize: FONT_SIZE }}
+              tickFormatter={formatYAxis}
+            >
+              <Label
+                value={xAxisKey}
+                position="insideBottom"
+                offset={-5}
+                fill={axisColor}
+                fontSize={10}
+              />
+            </XAxis>
+
+            <YAxis
+              type="number"
+              dataKey="y"
+              stroke={axisColor}
+              tick={{ fill: axisColor, fontSize: FONT_SIZE }}
+              tickFormatter={formatYAxis}
+            >
+              <Label
+                value={yAxisKey}
+                angle={-90}
+                position="insideLeft"
+                fill={axisColor}
+                fontSize={10}
+              />
+            </YAxis>            {chartType === "bubble" && <ZAxis type="number" dataKey="size" range={[5, 60]} />}
             <Tooltip
               contentStyle={{
                 backgroundColor: tooltipBg,
@@ -358,7 +402,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "treemap") {
     return (
       <ScrollWrapper>
@@ -376,21 +420,21 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "funnel") {
- 
+
     const funnelData = buildFunnelData(safeData, finalConfig);
- 
+
     if (!funnelData.length) {
       return <p className="text-gray-400 text-center py-10">No data available</p>;
     }
- 
+
     return (
       <ScrollWrapper>
         <ResponsiveContainer width="100%" height={300}>
           <FunnelChart margin={{ top: 10, right: 50, left: 50, bottom: 10 }}>
             <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
- 
+
             <Funnel dataKey="value" data={funnelData} isAnimationActive>
               <LabelList
                 position="right"
@@ -402,22 +446,22 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Funnel>
- 
+
           </FunnelChart>
         </ResponsiveContainer>
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "table") {
     const tableData = safeData; // ✅ use cleaned data
- 
+
     const columns = tableData.length
       ? Object.keys(
         tableData.reduce((acc, obj) => ({ ...acc, ...obj }), {})
       )
       : [];
- 
+
     return (
       <div className="overflow-auto max-h-[300px] w-full border border-gray-700 rounded custom-scrollbar">
         <table className="w-full text-xs text-left">
@@ -430,7 +474,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
               ))}
             </tr>
           </thead>
- 
+
           <tbody className={darkMode ? "text-white" : "text-black"}>
             {tableData.map((row, i) => (
               <tr key={i} className="border-b border-gray-800">
@@ -448,7 +492,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </div>
     );
   }
- 
+
   if (chartType === "gauge") {
     const value = safeData?.[0]?.value || 0;
     return (
@@ -464,7 +508,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "radar") {
     return (
       <div className="w-full overflow-x-auto overflow-y-hidden">
@@ -475,20 +519,20 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
               margin={{ top: 20, right: 80, bottom: 20, left: 80 }} // ✅ extra space
             >
               <PolarGrid stroke={gridColor} />
- 
+
               <PolarAngleAxis
                 dataKey="displayX"
                 stroke={axisColor}
                 tick={{ fill: axisColor, fontSize: 10 }} // slightly bigger
               />
- 
+
               <PolarRadiusAxis
                 stroke={axisColor}
                 angle={90}
                 tick={{ fill: axisColor, fontSize: 10 }}
                 tickFormatter={formatYAxis}
               />
- 
+
               <Radar
                 name={activeMetric}
                 dataKey="value"
@@ -496,7 +540,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
                 fill="#8884d8"
                 fillOpacity={0.6}
               />
- 
+
               <Tooltip contentStyle={{ backgroundColor: tooltipBg, color: textColor }} />
             </RadarChart>
           </ResponsiveContainer>
@@ -504,7 +548,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </div>
     );
   }
- 
+
   if (chartType === "waterfall") {
     return (
       <ScrollWrapper>
@@ -521,7 +565,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   if (chartType === "kpi") {
     return (
       <ScrollWrapper>
@@ -534,9 +578,8 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
       </ScrollWrapper>
     );
   }
- 
+
   return <p className="text-red-400 p-4">Unsupported chart type: {chartType}</p>;
 }
- 
- 
- 
+
+
