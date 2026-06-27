@@ -11,7 +11,7 @@ export default function Reports() {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
-  const role = localStorage.getItem("role");
+  const role = sessionStorage.getItem("role");
   const [sortOrder, setSortOrder] = useState("desc");
   const [deleteId, setDeleteId] = useState(null);
   const [startDate, setStartDate] = useState(null);

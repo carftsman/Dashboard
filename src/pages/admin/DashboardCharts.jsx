@@ -25,7 +25,7 @@ export default function DashboardCharts() {
 
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
+  const role = sessionStorage.getItem("role");
 
   const [charts, setCharts] = useState([]);
   const [loading, setLoading] = useState(true);

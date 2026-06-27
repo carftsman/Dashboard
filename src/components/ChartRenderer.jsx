@@ -286,7 +286,7 @@ export default function ChartRenderer({ type, data, config, darkMode }) {
                   position="center"
                   dx={-35}
                   fill={axisColor}
-                  fontSize={10}
+                  fontSize={12}
                 />
               </YAxis>
             ) : (

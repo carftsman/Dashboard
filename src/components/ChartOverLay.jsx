@@ -14,7 +14,7 @@ export default function ChartOverlay({ open, onClose, dashboardId, onChartSaved,
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
   const [size, setSize] = useState([]);
   const [legend, setLegend] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   // --- 1. Comprehensive Icon Mapping ---
   const getChartIcon = (type) => {

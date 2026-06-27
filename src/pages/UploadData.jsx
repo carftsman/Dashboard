@@ -58,16 +58,16 @@ export default function UploadData() {
   const navigate = useNavigate();
  
   // ─── UPDATED DASHBOARD ID LOGIC ───
-  // We initialize the ID from state or localStorage
+  // We initialize the ID from state or sessionStorage
   const [dashboardId, setDashboardId] = useState(
-    location.state?.dashboardId || localStorage.getItem("lastDashboardId")
+    location.state?.dashboardId || sessionStorage.getItem("lastDashboardId")
   );
 
-  // If a new ID comes in via navigation state, we update our state and save to localStorage
+  // If a new ID comes in via navigation state, we update our state and save to sessionStorage
   useEffect(() => {
     if (location.state?.dashboardId) {
       setDashboardId(location.state.dashboardId);
-      localStorage.setItem("lastDashboardId", location.state.dashboardId);
+      sessionStorage.setItem("lastDashboardId", location.state.dashboardId);
     }
   }, [location.state?.dashboardId]);
   // ──────────────────────────────────

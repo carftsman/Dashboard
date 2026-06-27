@@ -14,7 +14,7 @@ const ManageUsers = () => {
  
   const [showPassword, setShowPassword] = useState(false);
   const [profile, setProfile] = useState(null);
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState({
     name: "",

@@ -19,7 +19,7 @@ function ChangePassword() {
   const navigate = useNavigate();
 
  
-  const role = localStorage.getItem("role")?.toLowerCase();
+  const role = sessionStorage.getItem("role")?.toLowerCase();
 
  
   const [currentPassword, setCurrentPassword] = useState("");
@@ -34,9 +34,9 @@ function ChangePassword() {
   //  Function to handle password change
   const handleChangePassword = async () => {
     try {
-      //  Get token & email from localStorage
-      const token = localStorage.getItem("token");
-      const email = localStorage.getItem("email");
+      //  Get token & email from sessionStorage
+      const token = sessionStorage.getItem("token");
+      const email = sessionStorage.getItem("email");
 
       //  API call to change password
       await api.post(
