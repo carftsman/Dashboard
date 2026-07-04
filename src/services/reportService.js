@@ -12,6 +12,22 @@ export const uploadReport = async (formData) => {
   }
 };
 
+export const uploadHtmlReport = async ({ html, name, dashboardId, fileId, reportSummary }) => {
+  try {
+    const response = await api.post("/api/reports/upload-html", {
+      html,
+      name,
+      dashboardId,
+      fileId,
+      reportSummary,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 export const getReportSummary = async (fileId) => {
   const response = await api.get(`/api/summary/${fileId}`);
   return response.data;
